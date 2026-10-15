@@ -1,3 +1,4 @@
+import { SkillSetService } from '../skillSetService';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { AgentHierarchyService } from '../agentHierarchyService';
 import { VirtualFileSystem } from '../virtualFs';
@@ -166,4 +167,138 @@ describe('AgentHierarchyService - Dynamic Project Decomposition & Parallel Taski
       expect(service.getActiveParallelSubAgents().length).toBe(0);
     });
   });
+
+  describe('Autonomous Parallel Swarms (Feature-Slicing, Guardians, Self-Healing, Doc/Env Sync)', () => {
+    it('Feature-Slicing Swarm: spawns 4 decoupled subagents with zero lock collisions and executes concurrently', async () => {
+      const plan = service.decomposeFeatureSlicingSwarm('Billing & Invoicing', mockProject, {
+        featureSlug: 'billing-invoicing',
+      });
+
+      expect(plan.type).toBe('feature-slicing');
+      expect(plan.tasks).toHaveLength(4);
+
+      // Verify all 4 roles are represented
+      const roles = plan.tasks.map(t => t.subAgentRole);
+      expect(roles).toContain('DatabaseSchemaSpecialist');
+      expect(roles).toContain('APIEndpointBuilder');
+      expect(roles).toContain('ReactComponentBuilder');
+      expect(roles).toContain('UnitTestWriter');
+
+      // Verify zero inter-task dependencies for maximum parallel concurrency
+      for (const task of plan.tasks) {
+        expect(task.dependencies).toEqual([]);
+      }
+
+      // Verify no file overlap to guarantee zero file reservation lock collisions
+      const allPaths = plan.tasks.flatMap(t => t.allowedFilePaths);
+      const uniquePaths = new Set(allPaths);
+      expect(uniquePaths.size).toBe(allPaths.length);
+
+      // Execute entire swarm plan in parallel
+      const reports = await service.executeSwarmPlan(plan.swarmId, { concurrency: 4, stepDelayMs: 5 });
+      expect(reports).toHaveLength(4);
+      expect(reports.every(r => r.testResults === 'passed')).toBe(true);
+
+      const updatedPlan = service.getSwarmPlan(plan.swarmId);
+      expect(updatedPlan?.status).toBe('completed');
+    });
+
+    it('Continuous Background Guardians: manages lifecycle and reports telemetry', () => {
+      const plan = service.spawnBackgroundGuardiansSwarm();
+      expect(plan.type).toBe('background-guardians');
+      expect(plan.tasks).toHaveLength(3);
+
+      const roles = plan.tasks.map(t => t.subAgentRole);
+      expect(roles).toContain('TypeLintSentry');
+      expect(roles).toContain('SecretLeakSniffer');
+      expect(roles).toContain('PerfLeakWatcher');
+
+      // All guardians must be read-only watchers
+      expect(plan.tasks.every(t => t.permissionLevel === 'read')).toBe(true);
+
+      // Start guardians
+      const activeStatus = service.startBackgroundGuardians(1000);
+      expect(activeStatus.isActive).toBe(true);
+      expect(activeStatus.secretSniffer.clean).toBe(true);
+      expect(activeStatus.typeSentry.errorCount).toBe(0);
+      expect(activeStatus.perfWatcher.leaksFound).toBe(0);
+
+      const telemetry = service.getGuardianStatus();
+      expect(telemetry.isActive).toBe(true);
+
+      // Stop guardians
+      const stoppedStatus = service.stopBackgroundGuardians();
+      expect(stoppedStatus.isActive).toBe(false);
+    });
+
+    it('Self-Healing Swarm: orchestrates diagnosis followed by surgical patch synthesis', async () => {
+      const targetFile = 'src/services/billingBridge.ts';
+      const testFile = 'src/services/__tests__/billingBridge.test.ts';
+      const errorLog = 'TypeError: Cannot read properties of undefined (reading calculateTax)';
+
+      const plan = service.spawnSelfHealingSwarm(errorLog, targetFile, testFile);
+      expect(plan.type).toBe('self-healing');
+      expect(plan.tasks).toHaveLength(2);
+
+      const [diagTask, patchTask] = plan.tasks;
+      expect(diagTask.subAgentRole).toBe('TestRunnerDiagnostician');
+      expect(diagTask.permissionLevel).toBe('read');
+      expect(diagTask.dependencies).toEqual([]);
+
+      expect(patchTask.subAgentRole).toBe('PatchSynthesizer');
+      expect(patchTask.permissionLevel).toBe('write');
+      expect(patchTask.dependencies).toEqual([diagTask.taskId]);
+
+      // Execute self-healing swarm
+      const reports = await service.executeSwarmPlan(plan.swarmId, { concurrency: 2, stepDelayMs: 5 });
+      expect(reports).toHaveLength(2);
+      expect(reports.every(r => r.testResults === 'passed')).toBe(true);
+    });
+
+    it('Documentation & Environment Sync Swarm: updates docs and templates concurrently', async () => {
+      const changedFiles = ['src/api/auth.routes.ts', 'src/models/user.model.ts'];
+      const plan = service.spawnDocEnvSyncSwarm(changedFiles);
+
+      expect(plan.type).toBe('doc-env-sync');
+      expect(plan.tasks).toHaveLength(2);
+
+      const [docTask, envTask] = plan.tasks;
+      expect(docTask.subAgentRole).toBe('DocSyncAgent');
+      expect(docTask.allowedFilePaths).toContain('README.md');
+
+      expect(envTask.subAgentRole).toBe('EnvSyncAgent');
+      expect(envTask.allowedFilePaths).toContain('.env.example');
+
+      // Both tasks are independent and execute in parallel
+      expect(docTask.dependencies).toEqual([]);
+      expect(envTask.dependencies).toEqual([]);
+
+      const reports = await service.executeSwarmPlan(plan.swarmId, { concurrency: 2, stepDelayMs: 5 });
+      expect(reports).toHaveLength(2);
+      expect(reports.every(r => r.testResults === 'passed')).toBe(true);
+    });
+
+    it('Skills Service: registers all 4 swarm slash commands with 33 total skills', () => {
+      SkillSetService.resetToDefaults();
+      const skills = SkillSetService.listSkills();
+      expect(skills.length).toBeGreaterThanOrEqual(33);
+
+      const featureSkill = SkillSetService.findMatchingSkill('/swarm-feature');
+      expect(featureSkill).toBeDefined();
+      expect(featureSkill?.name).toBe('swarm-feature-slicing');
+
+      const guardSkill = SkillSetService.findMatchingSkill('/swarm-guard');
+      expect(guardSkill).toBeDefined();
+      expect(guardSkill?.name).toBe('swarm-background-guardians');
+
+      const healSkill = SkillSetService.findMatchingSkill('/swarm-heal');
+      expect(healSkill).toBeDefined();
+      expect(healSkill?.name).toBe('swarm-self-healing');
+
+      const syncSkill = SkillSetService.findMatchingSkill('/swarm-sync');
+      expect(syncSkill).toBeDefined();
+      expect(syncSkill?.name).toBe('swarm-doc-env-sync');
+    });
+  });
+
 });

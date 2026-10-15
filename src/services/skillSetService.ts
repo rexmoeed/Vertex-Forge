@@ -1,6 +1,6 @@
 import { SkillDefinition } from '../types/kos';
 
-const SKILLS_STORAGE_KEY = 'nova_skill_sets_v4';
+const SKILLS_STORAGE_KEY = 'vertex_skill_sets_v5';
 
 export class SkillSetService {
   private static skills: SkillDefinition[] = [];
@@ -15,7 +15,7 @@ export class SkillSetService {
         const stored = localStorage.getItem(SKILLS_STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length >= 29) {
+          if (Array.isArray(parsed) && parsed.length >= 33) {
             this.skills = parsed;
             return;
           }
@@ -674,6 +674,91 @@ export class SkillSetService {
         enabled: true,
         scope: 'global',
         author: 'Vertex Forge Core',
+        createdAt: baseTime,
+      },
+      {
+        id: 'skill-swarm-feature-slicing',
+        name: 'swarm-feature-slicing',
+        description: 'Concurrently builds Backend API, Database Schema, Reactive UI, and Test Suite with zero file lock collisions.',
+        triggers: [
+          { type: 'slash_command', pattern: '/swarm-feature' },
+          { type: 'slash_command', pattern: '/feature-slice' },
+          { type: 'intent', pattern: 'parallel feature build' },
+          { type: 'intent', pattern: 'slice feature' },
+        ],
+        instructions: `Coordinate the 4-tier parallel feature slicing swarm:
+1. DatabaseSchemaSpecialist produces isolated models and migration SQL.
+2. APIEndpointBuilder constructs concurrent REST/RPC routes and request validators.
+3. ReactComponentBuilder delivers responsive UI views and reactive state orchestration.
+4. UnitTestWriter validates contracts with comprehensive Vitest coverage.
+All tasks run in parallel with strictly segregated file reservations to prevent merge deadlocks.`,
+        allowedTools: ['create_file', 'edit_file', 'read_file', 'run_terminal'],
+        enabled: true,
+        scope: 'global',
+        version: '1.0.0',
+        author: 'Vertex Forge Swarm Core',
+        createdAt: baseTime,
+      },
+      {
+        id: 'skill-swarm-background-guardians',
+        name: 'swarm-background-guardians',
+        description: 'Silent parallel watchdogs: TypeLintSentry, SecretLeakSniffer, and PerfLeakWatcher for continuous project health.',
+        triggers: [
+          { type: 'slash_command', pattern: '/swarm-guard' },
+          { type: 'slash_command', pattern: '/guardians' },
+          { type: 'intent', pattern: 'start background guardians' },
+          { type: 'intent', pattern: 'continuous sentry' },
+        ],
+        instructions: `Maintain continuous background surveillance with zero interference:
+1. TypeLintSentry continuously monitors AST syntax, strict types, and module boundaries.
+2. SecretLeakSniffer intercepts API tokens, secrets, private keys, and environment leakage.
+3. PerfLeakWatcher detects unclosed event listeners, runaway loops, and memory bloat.`,
+        allowedTools: ['read_file', 'run_terminal'],
+        enabled: true,
+        scope: 'global',
+        version: '1.0.0',
+        author: 'Vertex Forge Swarm Core',
+        createdAt: baseTime,
+      },
+      {
+        id: 'skill-swarm-self-healing',
+        name: 'swarm-self-healing',
+        description: 'Devin-style autonomous diagnostic root cause isolation and surgical patch synthesis for failing tests or errors.',
+        triggers: [
+          { type: 'slash_command', pattern: '/swarm-heal' },
+          { type: 'slash_command', pattern: '/self-heal' },
+          { type: 'intent', pattern: 'auto heal tests' },
+          { type: 'intent', pattern: 'fix failing tests' },
+        ],
+        instructions: `Execute autonomous two-phase self-healing:
+1. TestRunnerDiagnostician analyzes failing test runner output and stack traces to isolate the exact defect.
+2. PatchSynthesizer formulates and applies minimal surgical AST diffs to resolve root cause without altering existing invariants.
+3. Re-executes the test runner to guarantee 100% green verification.`,
+        allowedTools: ['edit_file', 'read_file', 'run_terminal'],
+        enabled: true,
+        scope: 'global',
+        version: '1.0.0',
+        author: 'Vertex Forge Swarm Core',
+        createdAt: baseTime,
+      },
+      {
+        id: 'skill-swarm-doc-env-sync',
+        name: 'swarm-doc-env-sync',
+        description: 'Concurrently synchronizes architectural documentation, TSDoc/OpenAPI specs, and .env.example templates.',
+        triggers: [
+          { type: 'slash_command', pattern: '/swarm-sync' },
+          { type: 'slash_command', pattern: '/sync-docs' },
+          { type: 'slash_command', pattern: '/sync-env' },
+          { type: 'intent', pattern: 'sync environment and docs' },
+        ],
+        instructions: `Concurrently sync technical assets across the workspace:
+1. DocSyncAgent audits updated interfaces and syncs README.md, TSDoc comments, and OpenAPI specifications.
+2. EnvSyncAgent audits all process.env invocations across the codebase and maintains .env.example with documented placeholders.`,
+        allowedTools: ['edit_file', 'create_file', 'read_file'],
+        enabled: true,
+        scope: 'global',
+        version: '1.0.0',
+        author: 'Vertex Forge Swarm Core',
         createdAt: baseTime,
       },
     ];

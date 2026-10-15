@@ -59,7 +59,15 @@ export type SubAgentRole =
   | 'DeploymentAssistant'
   // Research
   | 'SymbolSearchAgent'
-  | 'DependencyTracer';
+  | 'DependencyTracer'
+  // Swarm & Autonomous Specialists
+  | 'TypeLintSentry'
+  | 'SecretLeakSniffer'
+  | 'PerfLeakWatcher'
+  | 'TestRunnerDiagnostician'
+  | 'PatchSynthesizer'
+  | 'DocSyncAgent'
+  | 'EnvSyncAgent';
 
 export type AgentExecutionState =
   | 'idle'
@@ -205,4 +213,25 @@ export interface ParallelProgressInfo {
   activeParallelCount: number;
   percent: number;
   activeSubAgents: ParallelSubAgentActiveInfo[];
+}
+
+export type SwarmType =
+  | 'feature-slicing'
+  | 'background-guardians'
+  | 'self-healing'
+  | 'doc-env-sync';
+export interface SwarmExecutionPlan {
+  swarmId: string;
+  type: SwarmType;
+  title: string;
+  tasks: SubAgentTaskContract[];
+  status: AgentExecutionState;
+  createdAt: number;
+}
+
+export interface GuardianStatus {
+  isActive: boolean;
+  typeSentry: { lastCheck: number; errorCount: number };
+  secretSniffer: { lastCheck: number; clean: boolean; detectedCount: number };
+  perfWatcher: { lastCheck: number; leaksFound: number };
 }
