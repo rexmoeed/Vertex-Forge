@@ -1,8 +1,8 @@
 /**
- * Drag and Drop typed contracts for Explorer-to-Editor interactions in NovaIDE
+ * Drag and Drop typed contracts for Explorer-to-Editor interactions in Vertex Forge
  */
 
-export const FILE_DRAG_MIME = 'application/x-novaide-file';
+export const FILE_DRAG_MIME = 'application/x-vertexforge-file';
 
 export interface FileDragPayload {
   path: string;

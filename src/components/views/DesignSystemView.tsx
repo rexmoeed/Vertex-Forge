@@ -91,7 +91,7 @@ export const DesignSystemView: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">NovaIDE Design System Engine</h2>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Vertex Forge Design System Engine</h2>
               <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30">
                 WCAG 2.1 AA Compliant
               </span>
@@ -273,7 +273,7 @@ export const DesignSystemView: React.FC = () => {
 
                       <div className="flex items-center justify-between text-[10px] font-mono px-0.5">
                         <span style={{ color: def.colors.text }} className="font-bold">
-                          const ide = 'Nova';
+                          const ide = 'Vertex Forge';
                         </span>
                         <span style={{ color: def.colors.accent }} className="font-semibold">
                           Aa

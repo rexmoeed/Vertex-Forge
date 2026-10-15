@@ -710,7 +710,7 @@ export const SecurityAuditorPanel: React.FC = () => {
             <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-4 flex flex-col gap-2">
               <span className="font-bold text-sm text-white">Automated Static Analyzers & Detection Rules</span>
               <p className="text-xs text-slate-400 leading-relaxed">
-                The NovaIDE Security Auditor combines real package-manager audit commands with static syntax-tree inspectors across 12 critical security domains:
+                The Vertex Forge Security Auditor combines real package-manager audit commands with static syntax-tree inspectors across 12 critical security domains:
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">

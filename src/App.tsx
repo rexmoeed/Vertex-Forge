@@ -92,7 +92,7 @@ function IDEWorkbench() {
 
   // Auto-launch walkthrough tour for first-time users
   useEffect(() => {
-    const hasSeenTour = localStorage.getItem('nova_ide_walkthrough_seen_v1');
+    const hasSeenTour = localStorage.getItem('vertex_forge_walkthrough_seen_v1');
     if (!hasSeenTour) {
       const timer = setTimeout(() => {
         setIsWalkthroughOpen(true);
@@ -104,8 +104,8 @@ function IDEWorkbench() {
   // Global event listener to open walkthrough tour on demand
   useEffect(() => {
     const handleOpenTour = () => setIsWalkthroughOpen(true);
-    window.addEventListener('nova:open-walkthrough', handleOpenTour);
-    return () => window.removeEventListener('nova:open-walkthrough', handleOpenTour);
+    window.addEventListener('vertex:open-walkthrough', handleOpenTour);
+    return () => window.removeEventListener('vertex:open-walkthrough', handleOpenTour);
   }, []);
 
   // Initialize Global Command Registry
@@ -281,6 +281,7 @@ function IDEWorkbench() {
         onOpenNewProject={() => setIsProjectWizardOpen(true)}
         onOpenComposer={() => setIsComposerOpen(true)}
         onOpenCursorRules={() => setIsCursorRulesOpen(true)}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
       />
 
       {/* 3. MAIN WORKBENCH PANELS LAYOUT */}
@@ -506,11 +507,11 @@ function IDEWorkbench() {
         isOpen={isWalkthroughOpen}
         onClose={() => {
           setIsWalkthroughOpen(false);
-          localStorage.setItem('nova_ide_walkthrough_seen_v1', 'true');
+          localStorage.setItem('vertex_forge_walkthrough_seen_v1', 'true');
         }}
         onOpenProjectWizard={() => {
           setIsWalkthroughOpen(false);
-          localStorage.setItem('nova_ide_walkthrough_seen_v1', 'true');
+          localStorage.setItem('vertex_forge_walkthrough_seen_v1', 'true');
           setIsProjectWizardOpen(true);
         }}
       />

@@ -56,7 +56,7 @@ export interface GroundedAIResponse {
 }
 
 export class CodebaseIntelligenceEngine {
-  private static readonly MEMORY_STORAGE_KEY = 'nova_project_memory_v2';
+  private static readonly MEMORY_STORAGE_KEY = 'vertex_project_memory_v2';
 
   // 1. Intent Classifier
   public static classifyIntent(userPrompt: string): {

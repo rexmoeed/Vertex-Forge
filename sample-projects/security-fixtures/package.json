@@ -1,7 +1,7 @@
 {
   "name": "vulnerable-fixture-app",
   "version": "1.0.0",
-  "description": "Deliberately vulnerable test fixture for NovaIDE Security Auditor",
+  "description": "Deliberately vulnerable test fixture for Vertex Forge Security Auditor",
   "scripts": {
     "start": "node server.js"
   },

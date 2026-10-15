@@ -1,6 +1,6 @@
 import { ProjectReleaseVersion } from '../types/kos';
 
-const VERSION_STORAGE_KEY = 'nova_version_releases_v1';
+const VERSION_STORAGE_KEY = 'vertex_version_releases_v1';
 
 export class VersioningService {
   private static releases: ProjectReleaseVersion[] = [];

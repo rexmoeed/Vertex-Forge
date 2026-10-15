@@ -750,7 +750,7 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
             <Sparkles className="w-7 h-7 animate-pulse" style={{ color: 'var(--ide-accent)' }} />
           </div>
           <h2 className="text-sm font-bold tracking-tight" style={{ color: 'var(--ide-text)' }}>
-            NovaIDE Autonomous Studio
+            Vertex Forge Autonomous Studio
           </h2>
           <p className="text-xs mt-1 max-w-sm" style={{ color: 'var(--ide-text-muted)' }}>
             Select any file from the explorer on the left or use quick shortcuts below

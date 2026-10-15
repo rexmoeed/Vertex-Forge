@@ -1,6 +1,6 @@
 import { SecretScanFinding, TamperManifestEntry } from '../types/kos';
 
-const MANIFEST_STORAGE_KEY = 'nova_tamper_manifest_v1';
+const MANIFEST_STORAGE_KEY = 'vertex_tamper_manifest_v1';
 
 export class SecretScannerService {
   private static manifest: Map<string, TamperManifestEntry> = new Map();

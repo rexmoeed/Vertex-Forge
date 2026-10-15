@@ -177,7 +177,7 @@ function setupAutoUpdater() {
   autoUpdater.on('update-available', (info) => {
     console.log(`[Vertex Forge AutoUpdater] Update available: v${info.version}`);
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('nova:update-available', {
+      mainWindow.webContents.send('vertex:update-available', {
         version: info.version,
         releaseDate: info.releaseDate,
       });
@@ -194,7 +194,7 @@ function setupAutoUpdater() {
 
   autoUpdater.on('download-progress', (progressObj) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('nova:update-progress', {
+      mainWindow.webContents.send('vertex:update-progress', {
         percent: Math.round(progressObj.percent),
         bytesPerSecond: progressObj.bytesPerSecond,
       });

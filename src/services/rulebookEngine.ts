@@ -1,7 +1,7 @@
 import { RulebookRule, RulebookViolation, GateSeverity } from '../types/kos';
 
-const RULEBOOK_STORAGE_KEY = 'nova_rulebook_rules_v1';
-const VIOLATIONS_STORAGE_KEY = 'nova_rulebook_violations_v1';
+const RULEBOOK_STORAGE_KEY = 'vertex_rulebook_rules_v1';
+const VIOLATIONS_STORAGE_KEY = 'vertex_rulebook_violations_v1';
 
 export class RulebookEngine {
   private static rules: RulebookRule[] = [];

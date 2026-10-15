@@ -5,7 +5,7 @@ import { ArchitecturePlanner } from '../architecturePlanner';
 import { ScaffoldingEngine } from '../scaffoldingEngine';
 import { ScaffoldingContext } from '../../types/scaffolding';
 
-describe('NovaIDE New Project Engine & Scaffolding Test Suite', () => {
+describe('Vertex Forge New Project Engine & Scaffolding Test Suite', () => {
   // 1. Project Name Validation
   describe('Project Name Validation', () => {
     it('approves standard kebab-case and alphanumeric project names', () => {

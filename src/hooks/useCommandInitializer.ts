@@ -725,7 +725,7 @@ export function useCommandInitializer({
         category: 'Help',
         description: 'First-time user walkthrough of panels, workflows, and shortcuts',
         execute: () => {
-          window.dispatchEvent(new CustomEvent('nova:open-walkthrough'));
+          window.dispatchEvent(new CustomEvent('vertex:open-walkthrough'));
         },
       },
       {

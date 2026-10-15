@@ -84,7 +84,7 @@ export class CursorService {
     const changes: ProposedFileChange[] = [];
 
     // Check if real .cursorrules exists
-    const cursorRulesContent = vfs.readFile('.cursorrules') || vfs.readFile('.novarules') || '';
+    const cursorRulesContent = vfs.readFile('.cursorrules') || vfs.readFile('.vertexrules') || '';
 
     // Check if backend AI is available
     try {
@@ -131,7 +131,7 @@ export class CursorService {
         riskLevel: 'low',
       });
 
-      const authContext = `import React, { createContext, useContext, useState } from 'react';\nimport { UserProfile, AuthSession } from '../types/auth';\n\nconst AuthContext = createContext<AuthSession | undefined>(undefined);\n\nexport const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {\n  const [user, setUser] = useState<UserProfile | null>({\n    id: 'usr-1',\n    name: 'Lead Engineer',\n    email: 'developer@nova.ide',\n    role: 'developer',\n    createdAt: new Date().toISOString(),\n  });\n\n  const login = async () => {\n    setUser({ id: 'usr-1', name: 'Lead Engineer', email: 'developer@nova.ide', role: 'developer', createdAt: new Date().toISOString() });\n    return true;\n  };\n\n  const logout = () => setUser(null);\n\n  return (\n    <AuthContext.Provider value={{ user, token: 'session-jwt-token', isAuthenticated: !!user, login, logout }}>\n      {children}\n    </AuthContext.Provider>\n  );\n};\n\nexport const useAuth = () => {\n  const ctx = useContext(AuthContext);\n  if (!ctx) throw new Error('useAuth must be used within AuthProvider');\n  return ctx;\n};\n`;
+      const authContext = `import React, { createContext, useContext, useState } from 'react';\nimport { UserProfile, AuthSession } from '../types/auth';\n\nconst AuthContext = createContext<AuthSession | undefined>(undefined);\n\nexport const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {\n  const [user, setUser] = useState<UserProfile | null>({\n    id: 'usr-1',\n    name: 'Lead Engineer',\n    email: 'developer@vertexforge.ide',\n    role: 'developer',\n    createdAt: new Date().toISOString(),\n  });\n\n  const login = async () => {\n    setUser({ id: 'usr-1', name: 'Lead Engineer', email: 'developer@vertexforge.ide', role: 'developer', createdAt: new Date().toISOString() });\n    return true;\n  };\n\n  const logout = () => setUser(null);\n\n  return (\n    <AuthContext.Provider value={{ user, token: 'session-jwt-token', isAuthenticated: !!user, login, logout }}>\n      {children}\n    </AuthContext.Provider>\n  );\n};\n\nexport const useAuth = () => {\n  const ctx = useContext(AuthContext);\n  if (!ctx) throw new Error('useAuth must be used within AuthProvider');\n  return ctx;\n};\n`;
       changes.push({
         id: `chg-${Date.now()}-2`,
         filePath: 'src/context/AuthContext.tsx',
@@ -283,7 +283,7 @@ export class CursorService {
    */
   public static getDefaultCursorRules(): string {
     return `# Project Cursor Rules (.cursorrules)
-# Guided Autonomous Engineering Standards for NovaIDE
+# Guided Autonomous Engineering Standards for Vertex Forge
 
 [architecture]
 - Framework: React 19 + TypeScript (Strict Type Safety)

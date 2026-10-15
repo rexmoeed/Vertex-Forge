@@ -1,7 +1,7 @@
 import { BusinessEntity, BusinessTrackerItem, TrackerStatus } from '../types/kos';
 
-const BUSINESSES_STORAGE_KEY = 'nova_businesses_v1';
-const TRACKER_STORAGE_KEY = 'nova_business_trackers_v1';
+const BUSINESSES_STORAGE_KEY = 'vertex_businesses_v1';
+const TRACKER_STORAGE_KEY = 'vertex_business_trackers_v1';
 
 export class BusinessTrackerService {
   private static businesses: BusinessEntity[] = [];
@@ -29,7 +29,7 @@ export class BusinessTrackerService {
           color: '#6366f1',
           monthlyBudgetUsd: 150.0,
           spentBudgetUsd: 18.45,
-          workspacePaths: ['/workspace', 'e:/Vertex Forge/Vertex-Forge-main', 'e:/Nova IDE/Nova-IDE-main'],
+          workspacePaths: ['/workspace', 'e:/Vertex Forge/Vertex-Forge-main', 'e:/Vertex Forge/Vertex-Forge-main'],
           rulesCount: 5,
           secretsCount: 2,
         },

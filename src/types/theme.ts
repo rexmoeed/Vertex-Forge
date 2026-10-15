@@ -1,5 +1,5 @@
 /**
- * NovaIDE Theme System & Design Token Types
+ * Vertex Forge Theme System & Design Token Types
  * Architecture for runtime theme switching, system detection, and accessibility
  */
 

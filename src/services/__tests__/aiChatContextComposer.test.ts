@@ -26,7 +26,7 @@ describe('AI Chat Context Composer & Multimodal Attachments', () => {
               '  const [count, setCount] = React.useState(0);',
               '  return (',
               '    <div className="app">',
-              '      <h1>Nova IDE</h1>',
+              '      <h1>Vertex Forge</h1>',
               '      <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>',
               '    </div>',
               '  );',
@@ -63,7 +63,7 @@ describe('AI Chat Context Composer & Multimodal Attachments', () => {
     expect(fileItem.type).toBe('file');
     expect(fileItem.title).toBe('App.tsx');
     expect(fileItem.detail).toContain('10 lines');
-    expect(fileItem.contentSnippet).toContain('Nova IDE');
+    expect(fileItem.contentSnippet).toContain('Vertex Forge');
   });
 
   it('2. Extracts code line references accurately for specified ranges', () => {

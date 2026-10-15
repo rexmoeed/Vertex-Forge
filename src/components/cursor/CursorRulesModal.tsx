@@ -25,7 +25,7 @@ export const CursorRulesModal: React.FC<CursorRulesModalProps> = ({ isOpen, onCl
 
   useEffect(() => {
     if (isOpen) {
-      const existing = vfs.readFile('.cursorrules') || vfs.readFile('.novarules');
+      const existing = vfs.readFile('.cursorrules') || vfs.readFile('.vertexrules');
       if (existing) {
         setRulesContent(existing);
       } else {

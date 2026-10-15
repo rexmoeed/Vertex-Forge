@@ -1447,7 +1447,7 @@ export class SecurityAuditEngine {
     const fixturePkg = {
       name: 'vulnerable-fixture-app',
       version: '1.0.0',
-      description: 'Deliberately vulnerable test fixture for NovaIDE Security Auditor',
+      description: 'Deliberately vulnerable test fixture for Vertex Forge Security Auditor',
       scripts: {
         start: 'node server.js',
       },
@@ -1612,7 +1612,7 @@ app.whenReady().then(createWindow);
 
   static getLimitationsDisclaimer(): string {
     return (
-      'NovaIDE Security Auditor provides static analysis, rule-based AST heuristics, and known vulnerability database matching. ' +
+      'Vertex Forge Security Auditor provides static analysis, rule-based AST heuristics, and known vulnerability database matching. ' +
       'It cannot replace end-to-end dynamic penetration testing, runtime memory analysis, or manual architectural threat modeling. ' +
       'Clean audit reports reflect zero matches on configured rule analyzers and do not constitute a warranty of absolute security.'
     );

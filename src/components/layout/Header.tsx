@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts, onOpenNewProjec
             N
           </div>
           <span className="font-bold text-sm tracking-tight text-white flex items-center gap-1">
-            Nova<span className="text-indigo-400">IDE</span>
+            Vertex<span className="text-emerald-400">Forge</span>
             <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 rounded">
               Desktop v2.4
             </span>

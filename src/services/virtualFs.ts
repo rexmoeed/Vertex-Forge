@@ -33,7 +33,7 @@ export class VirtualFileSystem {
         id: 'commit-init',
         hash: 'a1b2c3d',
         message: 'Initial project baseline structure',
-        author: 'NovaIDE Autonomous Orchestrator',
+        author: 'Vertex Forge Autonomous Orchestrator',
         timestamp: new Date(Date.now() - 3600000).toISOString(),
         filesChanged: Array.from(this.originalFiles.keys()),
       },
@@ -249,7 +249,7 @@ export class VirtualFileSystem {
       id: `commit-${Date.now()}`,
       hash,
       message,
-      author: 'NovaIDE Developer',
+      author: 'Vertex Forge Developer',
       timestamp: new Date().toISOString(),
       filesChanged: changedPaths,
     };

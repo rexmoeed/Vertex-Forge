@@ -19,7 +19,7 @@ interface ThemeContextType {
   resetAppearance: () => void;
 }
 
-const STORAGE_KEY = 'nova_ide_theme_preferences_v2';
+const STORAGE_KEY = 'vertex_forge_theme_preferences_v2';
 
 const DEFAULT_PREFERENCES: ThemePreferences = {
   themeId: 'antigravity',

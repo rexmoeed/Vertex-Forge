@@ -3,7 +3,7 @@ import { ThemeRegistryService, THEME_REGISTRY } from '../themeRegistry';
 import { PanelRegistry } from '../panelRegistry';
 import { PANEL_CONSTRAINTS, DEFAULT_LAYOUT_CONFIG } from '../../types/layout';
 
-describe('NovaIDE Architecture: Theme Engine & Registry', () => {
+describe('Vertex Forge Architecture: Theme Engine & Registry', () => {
   it('registers all required professional themes with valid tokens', () => {
     const themes = ThemeRegistryService.getAllThemes();
     expect(themes.length).toBeGreaterThanOrEqual(14);
@@ -124,7 +124,7 @@ describe('NovaIDE Architecture: Theme Engine & Registry', () => {
   });
 });
 
-describe('NovaIDE Architecture: Panel Registry & Constraints', () => {
+describe('Vertex Forge Architecture: Panel Registry & Constraints', () => {
   it('registers all standard IDE panels with locations', () => {
     const allPanels = PanelRegistry.getAll();
     expect(allPanels.length).toBeGreaterThanOrEqual(8);
@@ -197,14 +197,14 @@ describe('NovaIDE Architecture: Panel Registry & Constraints', () => {
   });
 });
 
-describe('NovaIDE Architecture: Auto-Save Engine & Storage Contract', () => {
+describe('Vertex Forge Architecture: Auto-Save Engine & Storage Contract', () => {
   it('validates auto-save local storage keys and default configuration', () => {
-    const AUTOSAVE_STORAGE_KEY = 'novaide_autosave';
-    const AUTOSAVE_DELAY_STORAGE_KEY = 'novaide_autosave_delay';
+    const AUTOSAVE_STORAGE_KEY = 'vertexforge_autosave';
+    const AUTOSAVE_DELAY_STORAGE_KEY = 'vertexforge_autosave_delay';
     const DEFAULT_AUTOSAVE_DELAY_MS = 800;
 
-    expect(AUTOSAVE_STORAGE_KEY).toBe('novaide_autosave');
-    expect(AUTOSAVE_DELAY_STORAGE_KEY).toBe('novaide_autosave_delay');
+    expect(AUTOSAVE_STORAGE_KEY).toBe('vertexforge_autosave');
+    expect(AUTOSAVE_DELAY_STORAGE_KEY).toBe('vertexforge_autosave_delay');
     expect(DEFAULT_AUTOSAVE_DELAY_MS).toBe(800);
   });
 

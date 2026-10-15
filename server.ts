@@ -443,8 +443,8 @@ app.post('/api/ai/provider/chat', async (req: Request, res: Response) => {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (key) headers['Authorization'] = `Bearer ${key}`;
     if (providerId === 'openrouter') {
-      headers['HTTP-Referer'] = 'https://novaide.studio';
-      headers['X-Title'] = 'Nova IDE';
+      headers['HTTP-Referer'] = 'https://vertexforge.studio';
+      headers['X-Title'] = 'Vertex Forge';
     }
 
     const completionRes = await fetch(targetUrl, {

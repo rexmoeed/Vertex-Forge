@@ -156,7 +156,7 @@ export class SecurityAuditService {
     }
 
     const dateStr = new Date(report.timestamp).toLocaleString();
-    let md = `# NovaIDE Security & Dependency Audit Report\n\n`;
+    let md = `# Vertex Forge Security & Dependency Audit Report\n\n`;
     md += `**Timestamp:** ${dateStr}  \n`;
     md += `**Project Path:** \`${report.projectPath}\`  \n`;
     md += `**Security Health Score:** **${report.securityScore} / 100**  \n`;

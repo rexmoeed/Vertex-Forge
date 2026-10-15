@@ -10,11 +10,11 @@ import {
   ModelCapability,
 } from '../types/aiProvider';
 
-const STORAGE_KEY_PROVIDERS = 'nova_ai_providers_v2';
-const STORAGE_KEY_ASSIGNMENTS = 'nova_ai_role_assignments_v2';
-const STORAGE_KEY_AGENT_OVERRIDES = 'nova_ai_agent_overrides_v2';
-const STORAGE_KEY_USAGE = 'nova_ai_usage_history_v2';
-const STORAGE_KEY_PRIVACY = 'nova_ai_privacy_settings_v2';
+const STORAGE_KEY_PROVIDERS = 'vertex_ai_providers_v2';
+const STORAGE_KEY_ASSIGNMENTS = 'vertex_ai_role_assignments_v2';
+const STORAGE_KEY_AGENT_OVERRIDES = 'vertex_ai_agent_overrides_v2';
+const STORAGE_KEY_USAGE = 'vertex_ai_usage_history_v2';
+const STORAGE_KEY_PRIVACY = 'vertex_ai_privacy_settings_v2';
 
 const inMemoryStore: Record<string, string> = {};
 
@@ -1241,7 +1241,7 @@ export class AIProviderService {
         providerId: 'gemini',
         modelId: 'gemini-3.8-flash',
         agentRole: 'Architect',
-        project: 'NovaIDE',
+        project: 'Vertex Forge',
         inputTokens: 1420,
         outputTokens: 480,
         estimatedCostUsd: 0.00033,
@@ -1255,7 +1255,7 @@ export class AIProviderService {
         providerId: 'gemini',
         modelId: 'gemini-3.8-flash',
         agentRole: 'Frontend',
-        project: 'NovaIDE',
+        project: 'Vertex Forge',
         inputTokens: 3100,
         outputTokens: 1250,
         estimatedCostUsd: 0.00081,
@@ -1318,7 +1318,7 @@ export class AIProviderService {
       if (fileName.startsWith('.env') || fileName.endsWith('.pem') || fileName.endsWith('.key') || fileName === 'id_rsa') {
         return {
           isSafe: false,
-          sanitized: `[SECURITY GUARD: ${filePath} contains sensitive environmental secrets and was excluded from model context according to NovaIDE Privacy Policy]`,
+          sanitized: `[SECURITY GUARD: ${filePath} contains sensitive environmental secrets and was excluded from model context according to Vertex Forge Privacy Policy]`,
           reason: 'Protected environment credential file',
         };
       }

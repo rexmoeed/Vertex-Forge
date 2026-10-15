@@ -1,6 +1,6 @@
 import { CouncilSession, CouncilMember, CouncilVote } from '../types/kos';
 
-const COUNCIL_SESSIONS_KEY = 'nova_council_sessions_v1';
+const COUNCIL_SESSIONS_KEY = 'vertex_council_sessions_v1';
 
 export class MultiAiCouncilService {
   private static sessions: CouncilSession[] = [];

@@ -110,7 +110,7 @@ export const ARCHETYPES: ProjectArchetype[] = [
             name: 'App.tsx',
             path: 'src/App.tsx',
             type: 'file',
-            content: `import React, { useState } from 'react';\nimport { Sparkles, Layers, ArrowRight } from 'lucide-react';\n\nexport default function App() {\n  const [count, setCount] = useState(0);\n\n  return (\n    <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6">\n      <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col gap-4 text-center">\n        <div className="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto">\n          <Sparkles className="w-6 h-6" />\n        </div>\n        <h1 className="text-xl font-bold tracking-tight">${projectName}</h1>\n        <p className="text-xs text-slate-400">Scaffolded with React 19, TypeScript & Tailwind CSS in NovaIDE.</p>\n        <button\n          onClick={() => setCount(c => c + 1)}\n          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow transition-colors"\n        >\n          Clicked: {count} times\n        </button>\n      </div>\n    </main>\n  );\n}\n`,
+            content: `import React, { useState } from 'react';\nimport { Sparkles, Layers, ArrowRight } from 'lucide-react';\n\nexport default function App() {\n  const [count, setCount] = useState(0);\n\n  return (\n    <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6">\n      <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col gap-4 text-center">\n        <div className="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto">\n          <Sparkles className="w-6 h-6" />\n        </div>\n        <h1 className="text-xl font-bold tracking-tight">${projectName}</h1>\n        <p className="text-xs text-slate-400">Scaffolded with React 19, TypeScript & Tailwind CSS in Vertex Forge.</p>\n        <button\n          onClick={() => setCount(c => c + 1)}\n          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow transition-colors"\n        >\n          Clicked: {count} times\n        </button>\n      </div>\n    </main>\n  );\n}\n`,
           },
           {
             id: 'index-css',
@@ -133,7 +133,7 @@ export const ARCHETYPES: ProjectArchetype[] = [
         name: 'README.md',
         path: 'README.md',
         type: 'file',
-        content: `# ${projectName}\n\nBuilt with NovaIDE Desktop.\n\n## Getting Started\n\`\`\`bash\npnpm install\npnpm dev\n\`\`\`\n`,
+        content: `# ${projectName}\n\nBuilt with Vertex Forge Desktop.\n\n## Getting Started\n\`\`\`bash\npnpm install\npnpm dev\n\`\`\`\n`,
       },
     ],
   },
@@ -219,7 +219,7 @@ export const ARCHETYPES: ProjectArchetype[] = [
             name: 'layout.tsx',
             path: 'app/layout.tsx',
             type: 'file',
-            content: `export const metadata = {\n  title: '${projectName}',\n  description: 'Built with Next.js App Router in NovaIDE',\n};\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang="en" className="dark bg-slate-950 text-slate-100">\n      <body>{children}</body>\n    </html>\n  );\n}\n`,
+            content: `export const metadata = {\n  title: '${projectName}',\n  description: 'Built with Next.js App Router in Vertex Forge',\n};\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang="en" className="dark bg-slate-950 text-slate-100">\n      <body>{children}</body>\n    </html>\n  );\n}\n`,
           },
           {
             id: 'app-page',

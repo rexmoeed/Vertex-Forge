@@ -83,7 +83,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-white">NovaIDE Keyboard Shortcuts</h2>
+                <h2 className="text-sm font-bold text-white">Vertex Forge Keyboard Shortcuts</h2>
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono">
                   {shortcuts.length} keys
                 </span>

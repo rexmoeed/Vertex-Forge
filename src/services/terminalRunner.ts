@@ -47,7 +47,7 @@ export class TerminalRunner {
       return {
         lines: [
           cmdLine,
-          this.out('NovaIDE Sandboxed Execution Terminal (v2.4.0)'),
+          this.out('Vertex Forge Sandboxed Execution Terminal (v2.4.0)'),
           this.out('Available commands:'),
           this.out('  npm test                  - Run unit, integration, and assertion tests'),
           this.out('  npm run lint              - Run static code analysis and ESLint diagnostics'),

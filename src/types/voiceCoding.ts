@@ -1,5 +1,5 @@
 /**
- * Voice Coding typed contracts for NovaIDE
+ * Voice Coding typed contracts for Vertex Forge
  */
 
 export type SpeechRecognitionState =

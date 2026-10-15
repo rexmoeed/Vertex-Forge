@@ -1,6 +1,6 @@
 import { BackgroundJob } from '../types/kos';
 
-const JOBS_STORAGE_KEY = 'nova_background_jobs_v1';
+const JOBS_STORAGE_KEY = 'vertex_background_jobs_v1';
 
 export class BackgroundJobScheduler {
   private static jobs: BackgroundJob[] = [];

@@ -1,6 +1,6 @@
 import { KnowledgeGraph, KnowledgeNode, KnowledgeEdge } from '../types/kos';
 
-const GRAPH_STORAGE_KEY = 'nova_knowledge_graph_v1';
+const GRAPH_STORAGE_KEY = 'vertex_knowledge_graph_v1';
 
 export class KnowledgeGraphService {
   private static graph: KnowledgeGraph = {

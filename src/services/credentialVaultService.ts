@@ -1,7 +1,7 @@
 import { VaultSecret, VaultAuditEntry, SecretType, SecretAccessPolicy } from '../types/kos';
 
-const VAULT_STORAGE_KEY = 'nova_credential_vault_v1';
-const VAULT_AUDIT_KEY = 'nova_vault_audit_log_v1';
+const VAULT_STORAGE_KEY = 'vertex_credential_vault_v1';
+const VAULT_AUDIT_KEY = 'vertex_vault_audit_log_v1';
 
 export class CredentialVaultService {
   private static secrets: VaultSecret[] = [];

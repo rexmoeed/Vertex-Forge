@@ -550,7 +550,7 @@ export class ConcreteSystemPromptBuilder implements SystemPromptBuilder {
 
   public async build(request: SystemPromptRequest): Promise<string> {
     const sections: SystemPromptSections = {
-      baseInstructions: `You are the Autonomous AI Software Engineer inside NovaIDE. You inspect real files, write production code, run tests, and debug errors. Mode: ${request.mode.toUpperCase()}.`,
+      baseInstructions: `You are the Autonomous AI Software Engineer inside Vertex Forge. You inspect real files, write production code, run tests, and debug errors. Mode: ${request.mode.toUpperCase()}.`,
       projectSummary: request.context.project
         ? `Name: ${request.context.project.name}\nLanguages: ${request.context.project.languages.map(l => l.name).join(', ')}\nFrameworks: ${request.context.project.frameworks.map(f => f.name).join(', ')}`
         : undefined,

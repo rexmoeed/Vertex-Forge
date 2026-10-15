@@ -1,6 +1,6 @@
 import { RecentProject, ProjectProfile } from '../types/project';
 
-const RECENT_PROJECTS_KEY = 'nova_ide_recent_projects_v2';
+const RECENT_PROJECTS_KEY = 'vertex_ide_recent_projects_v2';
 
 export const INITIAL_RECENT_PROJECTS: RecentProject[] = [];
 

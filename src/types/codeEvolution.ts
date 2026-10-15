@@ -1,5 +1,5 @@
 /**
- * Code Evolution Map typed contracts for NovaIDE
+ * Code Evolution Map typed contracts for Vertex Forge
  */
 
 export interface EvolutionCommit {

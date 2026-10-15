@@ -33,7 +33,7 @@ interface LayoutContextType {
   focusPanel: (target: PanelFocusTarget) => void;
 }
 
-const STORAGE_KEY = 'nova_ide_layout_config_v2';
+const STORAGE_KEY = 'vertex_forge_layout_config_v2';
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
 

@@ -193,7 +193,7 @@ export class DebuggerEngine {
       },
     ];
 
-    // Load any custom config from .nova/launch.json or .vscode/launch.json
+    // Load any custom config from .vertex/launch.json or .vscode/launch.json
     this.loadPersistedConfigurations();
   }
 
@@ -218,14 +218,14 @@ export class DebuggerEngine {
     }
 
     const payload = JSON.stringify({ version: '0.2.0', configurations: this.configurations }, null, 2);
-    this.vfs.writeFile('.nova/launch.json', payload);
+    this.vfs.writeFile('.vertex/launch.json', payload);
     try {
-      await DesktopBridge.writeFile('.nova/launch.json', payload);
+      await DesktopBridge.writeFile('.vertex/launch.json', payload);
     } catch {}
   }
 
   public loadPersistedConfigurations() {
-    const content = this.vfs.readFile('.nova/launch.json') || this.vfs.readFile('.vscode/launch.json');
+    const content = this.vfs.readFile('.vertex/launch.json') || this.vfs.readFile('.vscode/launch.json');
     if (content) {
       try {
         const parsed = JSON.parse(content);

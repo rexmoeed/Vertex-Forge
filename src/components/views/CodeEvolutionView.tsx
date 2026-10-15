@@ -247,7 +247,7 @@ export const CodeEvolutionView: React.FC = () => {
                     <span className="text-slate-400 block mb-2 font-sans font-bold">Porcelain Diff Chunk:</span>
                     <pre className="text-emerald-400 bg-slate-950 p-2.5 rounded overflow-x-auto text-[11px]">
 {`@@ -120,4 +120,8 @@
-+ export const FILE_DRAG_MIME = 'application/x-novaide-file';
++ export const FILE_DRAG_MIME = 'application/x-vertexforge-file';
 + export interface FileDragPayload { path: string; workspaceId: string; }
 - const oldHandler = () => null;
 + const canonicalHandler = () => editorFileService.openFile();`}

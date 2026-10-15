@@ -1,6 +1,6 @@
 /**
  * Concrete Implementation Interfaces — Project Intelligence, Universal AI Runtime, Tools, and System Prompt
- * Architectural Contracts for NovaIDE
+ * Architectural Contracts for Vertex Forge
  */
 
 // ==========================================

@@ -1,6 +1,6 @@
 import { LocalAiNode } from '../types/kos';
 
-const NODES_STORAGE_KEY = 'nova_local_nodes_v1';
+const NODES_STORAGE_KEY = 'vertex_local_nodes_v1';
 
 export class LocalAiNodeService {
   private static nodes: LocalAiNode[] = [];

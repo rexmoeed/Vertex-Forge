@@ -254,7 +254,7 @@ export const ProjectIntelligenceModal: React.FC<ProjectIntelligenceModalProps> =
           {activeTab === 'evidence' && (
             <div className="space-y-4">
               <p className="text-slate-400">
-                NovaIDE strictly classifies project facts into <strong>VERIFIED</strong> (grounded in source code, manifests, and terminal output), <strong>INFERRED</strong> (pattern-derived), and <strong>UNKNOWN</strong>.
+                Vertex Forge strictly classifies project facts into <strong>VERIFIED</strong> (grounded in source code, manifests, and terminal output), <strong>INFERRED</strong> (pattern-derived), and <strong>UNKNOWN</strong>.
               </p>
 
               <div className="space-y-2.5">

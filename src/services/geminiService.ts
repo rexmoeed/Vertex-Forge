@@ -47,9 +47,9 @@ export class GeminiService {
   public static getApiKey(): string {
     try {
       if (typeof localStorage !== 'undefined') {
-        const customKey = localStorage.getItem('nova_gemini_api_key');
+        const customKey = localStorage.getItem('vertex_gemini_api_key');
         if (customKey) return customKey;
-        const providersRaw = localStorage.getItem('nova_ai_providers_v2');
+        const providersRaw = localStorage.getItem('vertex_ai_providers_v2');
         if (providersRaw) {
           const list = JSON.parse(providersRaw);
           const gemini = list.find((p: any) => p.id === 'gemini');
@@ -64,7 +64,7 @@ export class GeminiService {
     try {
       const cleanKey = apiKey.trim();
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('nova_gemini_api_key', cleanKey);
+        localStorage.setItem('vertex_gemini_api_key', cleanKey);
       }
       const res = await fetch('/api/ai/config', {
         method: 'POST',

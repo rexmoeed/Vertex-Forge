@@ -1,5 +1,5 @@
 {
-  "name": "NovaIDE - Autonomous AI Software Engineering Studio",
+  "name": "Vertex Forge - Autonomous AI Software Engineering Studio",
   "description": "Production-grade AI software development IDE with autonomous coding agents, intelligent stack selection, interactive multi-tab code editor, terminal, automated testing, and self-healing debugging.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

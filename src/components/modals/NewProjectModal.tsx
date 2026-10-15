@@ -21,7 +21,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({ isOpen, onClos
     e.preventDefault();
     if (!name.trim()) return;
     setIsSubmitting(true);
-    await createNewProject(name.trim(), description.trim() || 'A new software project planned with NovaIDE.', archetype);
+    await createNewProject(name.trim(), description.trim() || 'A new software project planned with Vertex Forge.', archetype);
     setIsSubmitting(false);
     onClose();
   };
@@ -59,7 +59,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({ isOpen, onClos
               required
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g., NovaPay Invoicing Platform"
+              placeholder="e.g., VertexPay Invoicing Platform"
               className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
             />
           </div>

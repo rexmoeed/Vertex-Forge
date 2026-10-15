@@ -19,7 +19,7 @@ if (typeof globalThis.localStorage === 'undefined') {
   } as any;
 }
 
-describe('NovaIDE AI Provider Hub & Intelligent Engine Test Suite', () => {
+describe('Vertex Forge AI Provider Hub & Intelligent Engine Test Suite', () => {
   beforeEach(() => {
     localStorage.clear();
   });

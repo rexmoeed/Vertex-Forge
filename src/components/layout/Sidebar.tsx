@@ -103,7 +103,7 @@ export const Sidebar: React.FC = () => {
   const [extensionFilter, setExtensionFilter] = useState<'all' | 'installed' | 'recommended'>('all');
   const [installedExtensions, setInstalledExtensions] = useState<Record<string, { installed: boolean; enabled: boolean }>>(() => {
     try {
-      const saved = localStorage.getItem('nova_installed_extensions');
+      const saved = localStorage.getItem('vertex_installed_extensions');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
@@ -128,7 +128,7 @@ export const Sidebar: React.FC = () => {
         [id]: { installed: !current.installed, enabled: !current.installed },
       };
       try {
-        localStorage.setItem('nova_installed_extensions', JSON.stringify(next));
+        localStorage.setItem('vertex_installed_extensions', JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -142,7 +142,7 @@ export const Sidebar: React.FC = () => {
         [id]: { ...current, enabled: !current.enabled },
       };
       try {
-        localStorage.setItem('nova_installed_extensions', JSON.stringify(next));
+        localStorage.setItem('vertex_installed_extensions', JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -217,7 +217,7 @@ export const Sidebar: React.FC = () => {
       }));
     }
     return [
-      { hash: 'HEAD', msg: 'Initial project baseline structure', time: 'Baseline', author: 'NovaIDE' }
+      { hash: 'HEAD', msg: 'Initial project baseline structure', time: 'Baseline', author: 'Vertex Forge' }
     ];
   }, [vfs]);
 
@@ -887,7 +887,7 @@ export const Sidebar: React.FC = () => {
                 downloads: '31.2M',
                 icon: 'ES',
                 iconBg: 'bg-indigo-600/20 text-indigo-400',
-                desc: 'Integrates ESLint into Nova IDE with live error underlining and quick-fix actions.',
+                desc: 'Integrates ESLint into Vertex Forge with live error underlining and quick-fix actions.',
                 recommended: true,
               },
               {
@@ -929,7 +929,7 @@ export const Sidebar: React.FC = () => {
               {
                 id: 'mcp-agent',
                 name: 'Model Context Protocol (MCP) Hub',
-                publisher: 'Nova & Antigravity',
+                publisher: 'Vertex Forge & Antigravity',
                 version: 'v1.4.0',
                 rating: '5.0',
                 downloads: '2.4M',

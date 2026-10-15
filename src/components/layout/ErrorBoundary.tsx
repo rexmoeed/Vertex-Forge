@@ -24,7 +24,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[NovaIDE ErrorBoundary caught error]:', error, errorInfo);
+    console.error('[Vertex Forge ErrorBoundary caught error]:', error, errorInfo);
     this.setState({ errorInfo });
   }
 
@@ -34,9 +34,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleResetState = () => {
     try {
-      localStorage.removeItem('novaide_autosave');
-      localStorage.removeItem('nova_ide_layout_config_v2');
-      localStorage.removeItem('nova_ide_theme_preferences_v2');
+      localStorage.removeItem('vertexforge_autosave');
+      localStorage.removeItem('vertex_forge_layout_config_v2');
+      localStorage.removeItem('vertex_forge_theme_preferences_v2');
     } catch {}
     window.location.reload();
   };
@@ -50,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="w-7 h-7" />
             </div>
             <h2 className="text-lg font-bold text-white mb-2">
-              {this.props.fallbackTitle || 'NovaIDE Workbench UI Protected'}
+              {this.props.fallbackTitle || 'Vertex Forge Workbench UI Protected'}
             </h2>
             <p className="text-xs text-slate-400 mb-4 leading-relaxed">
               An unexpected component issue was caught safely to prevent a white screen. You can reload the workbench or restore standard defaults.

@@ -59,7 +59,7 @@ export const OpenFolderModal: React.FC<OpenFolderModalProps> = ({
   // Load recent projects from localStorage
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('nova_recent_workspaces_v2');
+      const stored = localStorage.getItem('vertex_recent_workspaces_v2');
       if (stored) {
         setRecentProjects(JSON.parse(stored).slice(0, 5));
       }

@@ -29,8 +29,8 @@ export interface TerminalSettings {
 }
 
 export class TerminalService {
-  private static readonly SESSIONS_KEY = 'nova_terminal_sessions_v2';
-  private static readonly SETTINGS_KEY = 'nova_terminal_settings_v2';
+  private static readonly SESSIONS_KEY = 'vertex_terminal_sessions_v2';
+  private static readonly SETTINGS_KEY = 'vertex_terminal_settings_v2';
 
   public static getHostPlatform(): 'linux' | 'darwin' | 'win32' {
     if (typeof navigator !== 'undefined') {
@@ -228,7 +228,7 @@ export class TerminalService {
     } catch (err: any) {
       session.logs.push({
         type: 'stderr',
-        text: `[Process Execution Failed]: Could not reach backend server at /api/process/execute (${err?.message || 'Network Error'}). Ensure NovaIDE server is active.`,
+        text: `[Process Execution Failed]: Could not reach backend server at /api/process/execute (${err?.message || 'Network Error'}). Ensure Vertex Forge server is active.`,
         timestamp: new Date().toLocaleTimeString(),
         exitCode: 1,
       });

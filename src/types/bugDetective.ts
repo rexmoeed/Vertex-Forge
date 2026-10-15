@@ -1,5 +1,5 @@
 /**
- * Bug Detective Cross-Layer Debugging Engine typed contracts for NovaIDE
+ * Bug Detective Cross-Layer Debugging Engine typed contracts for Vertex Forge
  */
 
 import { EditorSelection, VerificationResult } from './projectIntelligence';

@@ -1,6 +1,6 @@
 import { ApprovalQueueItem, ApprovalStatus, ApprovalRiskLevel } from '../types/kos';
 
-const APPROVALS_STORAGE_KEY = 'nova_approval_queue_v1';
+const APPROVALS_STORAGE_KEY = 'vertex_approval_queue_v1';
 
 export class ApprovalQueueService {
   private static queue: ApprovalQueueItem[] = [];

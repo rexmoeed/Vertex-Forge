@@ -89,11 +89,11 @@ describe('KOS Parity Governance & Operations Engine', () => {
     });
 
     it('registers protected files and flags unauthorized tamper changes', () => {
-      SecretScannerService.registerProtectedFile('.nova/rulebook.yaml', 'rules: strict');
-      const verifyGood = SecretScannerService.verifyFile('.nova/rulebook.yaml', 'rules: strict');
+      SecretScannerService.registerProtectedFile('.vertex/rulebook.yaml', 'rules: strict');
+      const verifyGood = SecretScannerService.verifyFile('.vertex/rulebook.yaml', 'rules: strict');
       expect(verifyGood.ok).toBe(true);
 
-      const verifyTampered = SecretScannerService.verifyFile('.nova/rulebook.yaml', 'rules: modified_by_agent');
+      const verifyTampered = SecretScannerService.verifyFile('.vertex/rulebook.yaml', 'rules: modified_by_agent');
       expect(verifyTampered.ok).toBe(false);
       expect(verifyTampered.entry?.tampered).toBe(true);
     });

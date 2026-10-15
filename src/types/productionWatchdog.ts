@@ -1,5 +1,5 @@
 /**
- * Production Watchdog typed contracts for NovaIDE
+ * Production Watchdog typed contracts for Vertex Forge
  */
 
 export interface StackFrame {

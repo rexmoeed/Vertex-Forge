@@ -30,7 +30,7 @@ export function createTask(title: string, priority: number): Task {
     name: 'App.tsx',
     path: 'src/App.tsx',
     type: 'file',
-    content: `import React from 'react';\nexport function App() { return <div>Nova App</div>; }`,
+    content: `import React from 'react';\nexport function App() { return <div>Vertex App</div>; }`,
   },
 ];
 
@@ -71,12 +71,12 @@ describe('Autonomous AI Software Engineer - Tool Registry & Safety', () => {
   it('patches target code blocks safely without overwriting whole file', async () => {
     const res = await registry.executeTool('patch_file', {
       filePath: 'src/App.tsx',
-      targetString: '<div>Nova App</div>',
-      replacementString: '<main><h1>Autonomous Nova IDE</h1></main>',
+      targetString: '<div>Vertex App</div>',
+      replacementString: '<main><h1>Autonomous Vertex Forge</h1></main>',
     });
 
     expect(res.success).toBe(true);
-    expect(vfs.readFile('src/App.tsx')).toContain('<h1>Autonomous Nova IDE</h1>');
+    expect(vfs.readFile('src/App.tsx')).toContain('<h1>Autonomous Vertex Forge</h1>');
   });
 
   it('fails gracefully when patch target string is not found', async () => {

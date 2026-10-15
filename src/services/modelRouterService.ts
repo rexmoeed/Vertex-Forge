@@ -1,6 +1,6 @@
 import { TaskModelRoute, TaskRoutingCategory } from '../types/kos';
 
-const ROUTING_STORAGE_KEY = 'nova_model_routing_v1';
+const ROUTING_STORAGE_KEY = 'vertex_model_routing_v1';
 
 export class ModelRouterService {
   private static routes: Record<TaskRoutingCategory, TaskModelRoute> = {

@@ -1,6 +1,6 @@
 import { PersistentMemoryEntry, MemoryType, MemoryScope } from '../types/kos';
 
-const MEMORY_STORAGE_KEY = 'nova_persistent_memories_v1';
+const MEMORY_STORAGE_KEY = 'vertex_persistent_memories_v1';
 
 export class PersistentMemoryService {
   private static memories: PersistentMemoryEntry[] = [];
@@ -39,7 +39,7 @@ export class PersistentMemoryService {
           scope: 'business',
           scopeId: 'biz-core',
           title: 'Design Language',
-          content: 'Nova IDE uses Antigravity Obsidian theme tokens and pure CSS variables without Tailwind utility clashes.',
+          content: 'Vertex Forge uses Antigravity Obsidian theme tokens and pure CSS variables without Tailwind utility clashes.',
           source: 'Architecture Doc',
           confidence: 0.95,
           approved: true,

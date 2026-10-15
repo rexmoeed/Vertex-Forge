@@ -265,11 +265,11 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Auto-Save Management State & Persistence
   const [autoSave, setAutoSave] = useState<boolean>(() => {
-    const stored = localStorage.getItem('novaide_autosave');
+    const stored = localStorage.getItem('vertexforge_autosave');
     return stored !== null ? stored === 'true' : true;
   });
   const [autoSaveDelay, setAutoSaveDelay] = useState<number>(() => {
-    const stored = localStorage.getItem('novaide_autosave_delay');
+    const stored = localStorage.getItem('vertexforge_autosave_delay');
     return stored ? parseInt(stored, 10) : 1000;
   });
   const [isAutoSaving, setIsAutoSaving] = useState<boolean>(false);
@@ -293,11 +293,11 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('novaide_autosave', String(autoSave));
+    localStorage.setItem('vertexforge_autosave', String(autoSave));
   }, [autoSave]);
 
   useEffect(() => {
-    localStorage.setItem('novaide_autosave_delay', String(autoSaveDelay));
+    localStorage.setItem('vertexforge_autosave_delay', String(autoSaveDelay));
   }, [autoSaveDelay]);
 
   // Terminal & Diagnostics
@@ -305,7 +305,7 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     {
       id: 'init-1',
       type: 'system',
-      text: 'NovaIDE Desktop AI Engineering Studio initialized.',
+      text: 'Vertex Forge Desktop AI Engineering Studio initialized.',
       timestamp: new Date().toLocaleTimeString(),
     },
     {
@@ -333,7 +333,7 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: 'log-0',
       timestamp: new Date().toLocaleTimeString(),
       agent: 'Architect',
-      action: 'NovaIDE workspace security boundary initialized',
+      action: 'Vertex Forge workspace security boundary initialized',
       status: 'info',
     },
   ]);
@@ -892,15 +892,15 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : (newVfs.readFile('package.json') !== null ? 'package.json'
           : (findFirstFile(convertedNodes) || 'README.md')))));
 
-      if (folderPath && folderPath !== '.' && !folderPath.toLowerCase().includes('nova-ide-main')) {
-        localStorage.setItem('novaide_last_workspace', folderPath);
+      if (folderPath && folderPath !== '.' && !folderPath.toLowerCase().includes('vertex-forge-main')) {
+        localStorage.setItem('vertexforge_last_workspace', folderPath);
       }
 
       // Check for persisted tabs and hot-exit buffers
       let restoredTabs: OpenTab[] = [];
       let restoredActiveFile = entryFile;
       try {
-        const savedTabsRaw = localStorage.getItem(`novaide_tabs_${detected.id}`);
+        const savedTabsRaw = localStorage.getItem(`vertexforge_tabs_${detected.id}`);
         if (savedTabsRaw) {
           const parsed = JSON.parse(savedTabsRaw);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -911,7 +911,7 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       // Hot exit restoration for dirty buffers
       try {
-        const hotExitRaw = localStorage.getItem(`novaide_hot_exit_${detected.id}`);
+        const hotExitRaw = localStorage.getItem(`vertexforge_hot_exit_${detected.id}`);
         if (hotExitRaw) {
           const dirtyList = JSON.parse(hotExitRaw);
           if (Array.isArray(dirtyList)) {
@@ -930,7 +930,7 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } catch (e) {}
 
       if (restoredTabs.length > 0) {
-        const savedActiveId = localStorage.getItem(`novaide_active_tab_${detected.id}`);
+        const savedActiveId = localStorage.getItem(`vertexforge_active_tab_${detected.id}`);
         const activeTab = restoredTabs.find(t => t.id === savedActiveId) || restoredTabs[0];
         setOpenTabs(restoredTabs);
         setActiveTabId(activeTab.id);
@@ -1001,16 +1001,16 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     let isMounted = true;
     const initHostWorkspace = async () => {
-      const lastWorkspace = localStorage.getItem('novaide_last_workspace');
+      const lastWorkspace = localStorage.getItem('vertexforge_last_workspace');
       const isSelfRepo =
         !lastWorkspace ||
         lastWorkspace === '.' ||
         lastWorkspace === './' ||
-        lastWorkspace.endsWith('Nova-IDE-main') ||
-        lastWorkspace.endsWith('Nova-IDE-main/') ||
-        lastWorkspace.endsWith('Nova-IDE-main\\') ||
-        lastWorkspace.endsWith('NovaIDE') ||
-        lastWorkspace.toLowerCase().includes('nova-ide-main') ||
+        lastWorkspace.endsWith('Vertex-Forge-main') ||
+        lastWorkspace.endsWith('Vertex-Forge-main/') ||
+        lastWorkspace.endsWith('Vertex-Forge-main\\') ||
+        lastWorkspace.endsWith('VertexForge') ||
+        lastWorkspace.toLowerCase().includes('vertex-forge-main') ||
         lastWorkspace.endsWith('Vertex-Forge-main') ||
         lastWorkspace.endsWith('Vertex-Forge-main/') ||
         lastWorkspace.endsWith('Vertex-Forge-main\\') ||
@@ -1056,7 +1056,7 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (activeProject?.id && openTabs.length > 0) {
       try {
-        localStorage.setItem(`novaide_tabs_${activeProject.id}`, JSON.stringify(openTabs));
+        localStorage.setItem(`vertexforge_tabs_${activeProject.id}`, JSON.stringify(openTabs));
       } catch (e) {}
     }
   }, [openTabs, activeProject?.id]);
@@ -1065,7 +1065,7 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (activeProject?.id && activeTabId) {
       try {
-        localStorage.setItem(`novaide_active_tab_${activeProject.id}`, activeTabId);
+        localStorage.setItem(`vertexforge_active_tab_${activeProject.id}`, activeTabId);
       } catch (e) {}
     }
   }, [activeTabId, activeProject?.id]);
@@ -1080,11 +1080,11 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           content: vfs.readFile(t.filePath) || '',
         }));
         try {
-          localStorage.setItem(`novaide_hot_exit_${activeProject.id}`, JSON.stringify(dirtyData));
+          localStorage.setItem(`vertexforge_hot_exit_${activeProject.id}`, JSON.stringify(dirtyData));
         } catch (e) {}
       } else {
         try {
-          localStorage.removeItem(`novaide_hot_exit_${activeProject.id}`);
+          localStorage.removeItem(`vertexforge_hot_exit_${activeProject.id}`);
         } catch (e) {}
       }
     }

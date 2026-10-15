@@ -75,7 +75,7 @@ describe('Multi-Language Debugger & DAP Architecture', () => {
       expect(debuggerEngine.getActiveConfigName()).toBe('Debug Sample Program (sampleDebugTarget.ts)');
     });
 
-    it('persists and loads configurations to .nova/launch.json in VFS', async () => {
+    it('persists and loads configurations to .vertex/launch.json in VFS', async () => {
       const customConfig = {
         name: 'Custom Node Runner',
         type: 'node' as const,
@@ -88,7 +88,7 @@ describe('Multi-Language Debugger & DAP Architecture', () => {
       await debuggerEngine.saveConfiguration(customConfig);
 
       // Verify persisted in VFS
-      const savedJson = vfs.readFile('.nova/launch.json');
+      const savedJson = vfs.readFile('.vertex/launch.json');
       expect(savedJson).toBeDefined();
       const parsed = JSON.parse(savedJson!);
       expect(parsed.configurations.some((c: any) => c.name === 'Custom Node Runner')).toBe(true);

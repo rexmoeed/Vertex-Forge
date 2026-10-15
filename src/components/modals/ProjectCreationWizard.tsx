@@ -59,7 +59,7 @@ export const ProjectCreationWizard: React.FC<ProjectCreationWizardProps> = ({ is
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   // Form State (Step 1)
-  const [projectName, setProjectName] = useState('nova-commerce-app');
+  const [projectName, setProjectName] = useState('vertex-commerce-app');
   const [projectDescription, setProjectDescription] = useState('Modern e-commerce platform with reactive product catalog, shopping cart, and mock API services.');
   const [category, setCategory] = useState<ProjectTypeCategory>('web');
   const [parentDir, setParentDir] = useState(
@@ -271,7 +271,7 @@ export const ProjectCreationWizard: React.FC<ProjectCreationWizardProps> = ({ is
     }
   };
 
-  // Open generated project immediately in NovaIDE
+  // Open generated project immediately in Vertex Forge
   const handleOpenCreatedProject = async () => {
     if (!executionResult || !executionResult.projectPath) return;
     onClose();

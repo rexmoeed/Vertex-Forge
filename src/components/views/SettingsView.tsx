@@ -136,7 +136,7 @@ export const SettingsView: React.FC = () => {
             <Settings className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white">NovaIDE Studio Settings</h2>
+            <h2 className="text-base font-bold text-white">Vertex Forge Studio Settings</h2>
             <p className="text-xs text-slate-400">
               Configure appearance, professional themes, panel layout stability, model parameters, and security rules.
             </p>
@@ -812,7 +812,7 @@ export const SettingsView: React.FC = () => {
                 </div>
                 <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-lg text-slate-400 text-[11px] flex items-center justify-between">
                   <span>Auto-Save state is remembered across reloads via browser local storage.</span>
-                  <span className="text-emerald-400 font-mono text-[10px]">novaide_autosave: {String(autoSave)}</span>
+                  <span className="text-emerald-400 font-mono text-[10px]">vertexforge_autosave: {String(autoSave)}</span>
                 </div>
               </div>
 
