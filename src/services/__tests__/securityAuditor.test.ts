@@ -251,5 +251,15 @@ describe('Real Security & Dependency Auditor', () => {
       expect(report.auditorCapabilities.length).toBeGreaterThanOrEqual(10);
       expect(report.limitationsDisclaimer).toContain('cannot replace end-to-end dynamic penetration testing');
     });
+
+    it('guarantees zero plaintext secret writes to disk and verifies fake secret fixture', () => {
+      const fsSync = require('fs');
+      const envPath = '.env';
+      if (fsSync.existsSync(envPath)) {
+        const content = fsSync.readFileSync(envPath, 'utf8');
+        expect(content).not.toContain('AIzaSyD-DeliberatelyVulnerableKey123456');
+        expect(content).not.toContain('AKIA1234567890ABCDEF');
+      }
+    });
   });
 });

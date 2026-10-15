@@ -84,24 +84,14 @@ app.post('/api/ai/config', async (req: Request, res: Response) => {
     if (typeof newKey === 'string' && newKey.trim()) {
       const cleanKey = newKey.trim();
       process.env.GEMINI_API_KEY = cleanKey;
+      currentApiKey = cleanKey;
       initGenAIClient(cleanKey);
 
-      // Persist to .env file in workspace root
-      const envPath = path.resolve(process.cwd(), '.env');
-      let envContent = '';
-      if (fs.existsSync(envPath)) {
-        envContent = fs.readFileSync(envPath, 'utf8');
-        if (/GEMINI_API_KEY=.*/.test(envContent)) {
-          envContent = envContent.replace(/GEMINI_API_KEY=.*/, `GEMINI_API_KEY="${cleanKey}"`);
-        } else {
-          envContent += `\nGEMINI_API_KEY="${cleanKey}"\n`;
-        }
-      } else {
-        envContent = `GEMINI_API_KEY="${cleanKey}"\nPORT=3000\n`;
-      }
-      fs.writeFileSync(envPath, envContent, 'utf8');
-
-      return res.json({ success: true, hasApiKey: true, message: 'API key successfully configured and saved to .env.' });
+      return res.json({
+        success: true,
+        hasApiKey: true,
+        message: 'API key successfully configured in secure runtime memory store (zero plaintext disk persistence).',
+      });
     }
     return res.status(400).json({ success: false, message: 'Invalid or empty API key provided.' });
   } catch (err: any) {
