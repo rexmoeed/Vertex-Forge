@@ -1,25 +1,24 @@
 <div align="center">
 
-# 🌌 Nova IDE
+# ⚡ Vertex Forge
 ### The Complete Cursor-Class AI-First Integrated Development Environment & Autonomous Engineering Studio
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.0+-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Electron](https://img.shields.io/badge/Electron-34+-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Tests](https://img.shields.io/badge/Tests-164%2F164%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-220%2F220%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Type Check](https://img.shields.io/badge/tsc-0%20Errors-brightgreen)](https://www.typescriptlang.org/)
-[![Auto Update](https://img.shields.io/badge/Auto--Update-GitHub%20Releases-blue?logo=github&logoColor=white)](https://github.com/rexmoeed/NovaIDE)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-*A state-of-the-art, fully autonomous, zero-mock developer workstation uniting real filesystem manipulation, interactive WebSocket PTY terminals, multi-provider BYOK AI orchestration, parallel hierarchical agent swarms, background auto-updates, and enterprise governance gates.*
+*A state-of-the-art, fully autonomous, zero-mock developer workstation uniting real filesystem manipulation, interactive WebSocket PTY terminals, multi-provider BYOK AI orchestration, parallel hierarchical agent swarms, 29 specialized engineering skills, and enterprise governance gates.*
 
 ---
 
 [Key Highlights](#-key-architectural-highlights) • 
 [Multi-Agent Swarm](#-hierarchical-multi-agent-parallel-execution-engine) • 
 [Feature Matrix](#-comprehensive-feature-matrix) • 
-[Windows App & Auto-Update](#-desktop-packaging--windows-installers) • 
+[Windows App & Packaging](#-desktop-packaging--windows-installers) • 
 [KOS-Parity Governance](#-section-17e-kos-parity-governance-suite) • 
 [Getting Started](#-getting-started) • 
 [Shortcuts](#-keyboard-shortcuts)
@@ -32,18 +31,18 @@
 
 - **Zero-Native Dialog Experience**: Chrome-native popups (`showOpenFilePicker`, `showDirectoryPicker`, `window.alert`, `window.confirm`, `window.prompt`) have been permanently replaced by a custom-themed in-app workspace browser with drive navigation, path breadcrumbs, bookmark history, and folder creation.
 - **Hierarchical Multi-Agent Parallel Swarm**: Decomposes complex software requirements into ordered Directed Acyclic Graph (DAG) task trees executed concurrently across 10 specialized Team Leads with Reader-Writer Lock (`RWLock`) file reservation.
-- **Windows Installable & Auto-Updating**: Pre-packaged as a Windows Setup Installer (`NovaIDE Setup 1.0.0.exe`) and portable single-file executable (`NovaIDE 1.0.0.exe`) with seamless background auto-updating via GitHub Releases and cryptographic SHA-512 verification.
-- **BYOK Multi-Provider Hub**: Direct first-class support for **Anthropic (Claude 3.5 Sonnet / Opus / 3.7)**, **Google Gemini (2.5 Pro / 2.0 Flash)**, **OpenAI (GPT-4o / o1 / o3-mini)**, **OpenRouter (460+ models)**, and **Local LAN Endpoints (Ollama, LM Studio, vLLM)** with live API key testing and real token cost tracking.
+- **Windows Installable & Portable Packages**: Pre-packaged as a Windows Setup Installer (`Vertex Forge Setup 1.0.0.exe`) and portable single-file executable with cryptographic verification.
+- **BYOK Multi-Provider Hub**: Direct first-class support for **Anthropic (Claude 3.5 Sonnet / Opus / 3.7)**, **Google Gemini (2.5 Pro / 2.0 Flash)**, **OpenAI (GPT-4o / o1 / o3-mini)**, **OpenRouter (460+ models including Hermes 3)**, and **Local LAN Endpoints (Ollama, LM Studio, vLLM)** with live API key testing and real token cost tracking.
 - **Real WebSocket PTY Terminals**: Multi-tab terminal driven by background `node-pty` processes streaming raw xterm.js sessions with full interactive shell support (PowerShell, CMD, Git Bash, WSL).
-- **Single Source of Truth Theming**: 60+ curated themes (Nova Dark, VS Code Modern, Dracula, Catppuccin, Monokai, Tokyo Night, Gruvbox) synchronized instantly across CSS variables, Monaco Editor syntax, and xterm ANSI palettes with pre-paint zero-flash injection.
-- **Zero-Loss Session Retention & Hot-Exit**: Reopening Nova instantly restores open files, cursor coordinates, scroll offsets, terminal working directories, active chat contexts, and dirty buffer recovery.
+- **Single Source of Truth Theming**: 60+ curated themes (Vertex Forge Dark, VS Code Modern, Dracula, Catppuccin, Monokai, Tokyo Night, Gruvbox) synchronized instantly across CSS variables, Monaco Editor syntax, and xterm ANSI palettes with pre-paint zero-flash injection.
+- **Zero-Loss Session Retention & Hot-Exit**: Reopening Vertex Forge instantly restores open files, cursor coordinates, scroll offsets, terminal working directories, active chat contexts, and dirty buffer recovery.
 - **Enterprise KOS-Parity Governance**: Complete implementation of all 17 advanced governance capabilities: AES-256 Credential Vault, Rulebook Hard Gates, Secret Scanning, Multi-AI Council, and Unified Operator Console.
 
 ---
 
 ## 🤖 Hierarchical Multi-Agent Parallel Execution Engine
 
-Nova IDE features a production-grade autonomous agent hierarchy capable of decomposing arbitrary project requests into a phased, parallelized execution pipeline:
+Vertex Forge features a production-grade autonomous agent hierarchy capable of decomposing arbitrary project requests into a phased, parallelized execution pipeline:
 
 ```mermaid
 graph TD

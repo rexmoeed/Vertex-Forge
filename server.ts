@@ -193,8 +193,8 @@ app.post('/api/ai/provider/test', async (req: Request, res: Response) => {
         const authKeyRes = await fetch('https://openrouter.ai/api/v1/auth/key', {
           headers: {
             'Authorization': `Bearer ${key}`,
-            'HTTP-Referer': 'https://novaide.studio',
-            'X-Title': 'Nova IDE',
+            'HTTP-Referer': 'https://vertexforge.dev',
+            'X-Title': 'Vertex Forge',
           },
         });
 
@@ -259,8 +259,8 @@ app.post('/api/ai/provider/test', async (req: Request, res: Response) => {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (key) headers['Authorization'] = `Bearer ${key}`;
     if (providerId === 'openrouter') {
-      headers['HTTP-Referer'] = 'https://novaide.studio';
-      headers['X-Title'] = 'Nova IDE';
+      headers['HTTP-Referer'] = 'https://vertexforge.dev';
+      headers['X-Title'] = 'Vertex Forge';
     }
 
     const testRes = await fetch(targetUrl, {
@@ -322,8 +322,8 @@ app.get('/api/ai/provider/models', async (req: Request, res: Response) => {
       }
 
       const headers: Record<string, string> = {
-        'HTTP-Referer': 'https://novaide.studio',
-        'X-Title': 'Nova IDE',
+        'HTTP-Referer': 'https://vertexforge.dev',
+        'X-Title': 'Vertex Forge',
       };
       if (key) headers['Authorization'] = `Bearer ${key}`;
 
@@ -519,7 +519,7 @@ app.post('/api/ai/plan', async (req: Request, res: Response) => {
   }
 
   try {
-    const prompt = `You are a Principal Software Architect and Autonomous Orchestrator in NovaIDE.
+    const prompt = `You are a Principal Software Architect and Autonomous Orchestrator in Vertex Forge.
 The user wants to build or modify: "${goal}"
 Current Stack: ${currentStack || 'Auto-detect'}
 Existing Files: ${filesSummary || 'New Project'}
@@ -583,7 +583,7 @@ app.post('/api/ai/generate-code', async (req: Request, res: Response) => {
   }
 
   try {
-    const prompt = `You are a Senior ${agentRole || 'Full-Stack Developer'} in NovaIDE.
+    const prompt = `You are a Senior ${agentRole || 'Full-Stack Developer'} in Vertex Forge.
 Task: ${taskTitle}
 Details: ${taskDetails || 'Implement complete, production-ready, clean code.'}
 Target File: ${filePath}
@@ -643,7 +643,7 @@ app.post('/api/ai/chat', async (req: Request, res: Response) => {
 
   try {
     const conversationHistory = (messages || []).map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
-    const systemPrompt = `You are NovaIDE's specialized ${agentRole} agent.
+    const systemPrompt = `You are Vertex Forge's specialized ${agentRole} agent.
 You assist developers in writing high-performance, maintainable software.
 Current Active File: ${activeFile || 'None'}
 Project Summary: ${projectSummary || 'Web / Mobile / Full-Stack workspace'}
@@ -722,7 +722,7 @@ app.post('/api/ai/debug', async (req: Request, res: Response) => {
   }
 
   try {
-    const prompt = `You are the Debugging & Self-Correction Specialist in NovaIDE.
+    const prompt = `You are the Debugging & Self-Correction Specialist in Vertex Forge.
 A test or build just failed with the following error:
 
 ERROR / STACK TRACE:
@@ -784,7 +784,7 @@ app.post('/api/ai/code-review', async (req: Request, res: Response) => {
   }
 
   try {
-    const prompt = `You are the Code Reviewer and Security Auditor in NovaIDE.
+    const prompt = `You are the Code Reviewer and Security Auditor in Vertex Forge.
 Review the following project files for:
 1. Security vulnerabilities (prompt injection, secret leaks, injection risks)
 2. Performance bottlenecks
@@ -1292,7 +1292,7 @@ function verifyHttpReadiness(url: string, timeoutMs: number = 2500): Promise<{ o
         port: parsed.port || 80,
         path: parsed.pathname || '/',
         timeout: timeoutMs,
-        headers: { 'User-Agent': 'NovaIDE-HealthChecker/1.0' },
+        headers: { 'User-Agent': 'VertexForge-HealthChecker/1.0' },
       }, (res) => {
         const latencyMs = Date.now() - startTime;
         // Drain response
@@ -1668,7 +1668,7 @@ async function callGitHubApi(endpoint: string, options: any = {}) {
   const token = sessionGitHubToken || process.env.GITHUB_TOKEN;
   const headers: Record<string, string> = {
     'Accept': 'application/vnd.github.v3+json',
-    'User-Agent': 'NovaIDE-GitIntegration',
+    'User-Agent': 'VertexForge-GitIntegration',
     ...(options.headers || {}),
   };
   if (token) {
@@ -3248,19 +3248,19 @@ async function startServer() {
   }
 
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`[NovaIDE] Server listening on http://0.0.0.0:${PORT}`);
-    console.log(`[NovaIDE] Local access: http://localhost:${PORT}`);
+    console.log(`[VertexForge] Server listening on http://0.0.0.0:${PORT}`);
+    console.log(`[VertexForge] Local access: http://localhost:${PORT}`);
   });
 
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      console.error(`\n⚠️  [NovaIDE] Port ${PORT} is already in use by another running process!`);
-      console.error(`   A previous instance of NovaIDE is still active.`);
+      console.error(`\n⚠️  [VertexForge] Port ${PORT} is already in use by another running process!`);
+      console.error(`   A previous instance of Vertex Forge is still active.`);
       console.error(`   To free port ${PORT} on Windows, run this in PowerShell:`);
       console.error(`   Get-Process -Id (Get-NetTCPConnection -LocalPort ${PORT}).OwningProcess | Stop-Process -Force\n`);
       process.exit(1);
     } else {
-      console.error('[NovaIDE] Server error:', err);
+      console.error('[VertexForge] Server error:', err);
       process.exit(1);
     }
   });

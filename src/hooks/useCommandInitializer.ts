@@ -740,7 +740,7 @@ export function useCommandInitializer({
         id: 'help.updates',
         title: 'Check for Updates...',
         category: 'Help',
-        description: 'Check GitHub Releases for new Nova IDE updates',
+        description: 'Check GitHub Releases for new Vertex Forge updates',
         execute: async () => {
           if (window.desktopAPI?.checkForUpdates) {
             const res = await window.desktopAPI.checkForUpdates();
@@ -749,7 +749,7 @@ export function useCommandInitializer({
             } else if (res.status === 'success') {
               alert('Update check complete. Running latest version or downloading update.');
             } else {
-              alert('Update status: ' + (res.message || 'NovaIDE is up to date.'));
+              alert('Update status: ' + (res.message || 'Vertex Forge is up to date.'));
             }
           } else {
             alert('Desktop updater active in Electron desktop application.');
@@ -758,11 +758,11 @@ export function useCommandInitializer({
       },
       {
         id: 'help.about',
-        title: 'About NovaIDE Desktop',
+        title: 'About Vertex Forge Desktop',
         category: 'Help',
         description: 'Version and environment architecture details',
         execute: () => {
-          alert('NovaIDE v1.0.0\nAutonomous AI Software Engineering Studio\nElectron + React 19 + TypeScript + Monaco Editor + Multi-Agent Parallel Swarms');
+          alert('Vertex Forge v1.0.0\nAutonomous AI Software Engineering Studio\nElectron + React 19 + TypeScript + Monaco Editor + Multi-Agent Parallel Swarms');
         },
       },
     ];

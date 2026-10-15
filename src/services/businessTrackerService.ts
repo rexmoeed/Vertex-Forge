@@ -24,12 +24,12 @@ export class BusinessTrackerService {
       this.businesses = [
         {
           id: 'biz-1',
-          name: 'Nova IDE Core',
+          name: 'Vertex Forge Core',
           description: 'Primary IDE desktop editor, terminal runtime, and UI workbench',
           color: '#6366f1',
           monthlyBudgetUsd: 150.0,
           spentBudgetUsd: 18.45,
-          workspacePaths: ['/workspace', 'e:/Nova IDE/Nova-IDE-main'],
+          workspacePaths: ['/workspace', 'e:/Vertex Forge/Vertex-Forge-main', 'e:/Nova IDE/Nova-IDE-main'],
           rulesCount: 5,
           secretsCount: 2,
         },

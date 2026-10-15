@@ -87,12 +87,12 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({ onOpenNewProject, onOp
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-indigo-500/25">
-              N
+              V
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-                  Nova<span className="text-indigo-400">IDE</span>
+                  Vertex<span className="text-indigo-400">Forge</span>
                   <span className="text-xs font-mono font-medium px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
                     Production Studio
                   </span>
@@ -268,7 +268,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({ onOpenNewProject, onOp
               <FolderOpen className="w-6 h-6 text-slate-600" />
               <p className="text-xs font-medium">No recent workspaces yet</p>
               <p className="text-[11px] text-slate-500">
-                Click <span className="text-indigo-400 font-semibold cursor-pointer hover:underline" onClick={() => openLocalFolder()}>Open Folder</span> above to load your active project into NovaIDE.
+                Click <span className="text-indigo-400 font-semibold cursor-pointer hover:underline" onClick={() => openLocalFolder()}>Open Folder</span> above to load your active project into Vertex Forge.
               </p>
             </div>
           )}

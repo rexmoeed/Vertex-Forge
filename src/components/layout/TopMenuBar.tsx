@@ -155,10 +155,10 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
               setIsModelDropdownOpen(false);
             }}
             className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-white/5 hover:bg-white/10 text-white/90 border border-white/10 transition-colors cursor-pointer"
-            title={`Workspace: ${activeProject.name || 'Nova-IDE-main'}`}
+            title={`Workspace: ${activeProject.name || 'Vertex-Forge-main'}`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--ide-accent,#00ff88)] animate-pulse" />
-            <span className="truncate max-w-[110px] font-mono text-[11px]">{activeProject.name || 'Nova-IDE-main'}</span>
+            <span className="truncate max-w-[110px] font-mono text-[11px]">{activeProject.name || 'Vertex-Forge-main'}</span>
             <ChevronDown className="w-3 h-3 text-white/50 shrink-0" />
           </button>
 
@@ -313,7 +313,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
           <div className="flex items-center gap-2 truncate">
             <Search className="w-3.5 h-3.5 text-[var(--ide-accent,#00ff88)] shrink-0" />
             <span className="truncate text-white/70 group-hover:text-white font-sans text-[11px]">
-              {currentFileName ? `${activeProject.name || 'Nova-IDE-main'} › ${currentFileName}` : 'Ask AI or search files & commands...'}
+              {currentFileName ? `${activeProject.name || 'Vertex-Forge-main'} › ${currentFileName}` : 'Ask AI or search files & commands...'}
             </span>
           </div>
           <kbd className="px-1.5 py-0.2 text-[10px] font-mono bg-white/10 text-white/80 border border-white/10 rounded shrink-0">
@@ -326,7 +326,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
       <div className="flex items-center gap-2 text-xs shrink-0">
         {/* Workspace Title */}
         <span className="font-mono text-[11px] text-white/80 hover:text-white transition cursor-pointer hidden md:inline">
-          {activeProject?.name || 'Nova-IDE-main'}
+          {activeProject?.name || 'Vertex-Forge-main'}
         </span>
 
         {/* Active AI Model Pill */}
@@ -403,7 +403,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
           </button>
           <button
             onClick={() => {
-              if (confirm('Close Nova IDE workspace?')) {
+              if (confirm('Close Vertex Forge workspace?')) {
                 window.close();
               }
             }}

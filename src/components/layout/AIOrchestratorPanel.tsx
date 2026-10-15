@@ -54,6 +54,7 @@ import { CursorMode } from '../../context/IDEContext';
 import { GeminiService } from '../../services/geminiService';
 import { AIProviderService } from '../../services/aiProviderService';
 import { UniversalSystemPromptBuilder } from '../../services/universalSystemPrompt';
+import { SkillSetService } from '../../services/skillSetService';
 import { CodebaseIntelligenceEngine, GroundedAIResponse, DataFlowTrace, ProjectMemoryEntry } from '../../services/codebaseIntelligence';
 import { InspectionStep } from '../../types/desktop';
 
@@ -143,6 +144,8 @@ export const AIOrchestratorPanel: React.FC = () => {
   const [lineEndInput, setLineEndInput] = useState<number>(30);
   const [imageModalUrl, setImageModalUrl] = useState<string | null>(null);
   const [showAtMenu, setShowAtMenu] = useState(false);
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [slashFilter, setSlashFilter] = useState('');
   const [expandedTerminalMessageId, setExpandedTerminalMessageId] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -661,16 +664,31 @@ export const AIOrchestratorPanel: React.FC = () => {
             ref={textareaRef}
             value={chatInput}
             onChange={e => {
-              setChatInput(e.target.value);
-              if (e.target.value.endsWith('@')) {
+              const val = e.target.value;
+              setChatInput(val);
+              if (val.endsWith('@')) {
                 setShowAtMenu(true);
-              } else if (!e.target.value.includes('@')) {
+                setShowSlashMenu(false);
+              } else if (!val.includes('@')) {
                 setShowAtMenu(false);
+              }
+
+              if (val.endsWith('/') || (val.startsWith('/') && !val.includes(' '))) {
+                setShowSlashMenu(true);
+                setShowAtMenu(false);
+                setSlashFilter(val.startsWith('/') ? val.slice(1).toLowerCase() : '');
+              } else {
+                setShowSlashMenu(false);
               }
             }}
             onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (e.key === 'Escape') {
+                setShowSlashMenu(false);
+                setShowAtMenu(false);
+              } else if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
+                setShowSlashMenu(false);
+                setShowAtMenu(false);
                 handleSendQuery();
               }
             }}
@@ -882,6 +900,64 @@ export const AIOrchestratorPanel: React.FC = () => {
           </div>
         )}
 
+        {/* Floating '/' Slash Command Skills Autocomplete Menu */}
+        {showSlashMenu && (
+          <div className="absolute top-full left-3 mt-1 w-80 bg-[#141416] border border-indigo-500/30 rounded-xl shadow-2xl overflow-hidden z-40 animate-in fade-in duration-100 max-h-72 flex flex-col">
+            <div className="p-2 border-b border-white/10 text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center justify-between bg-black/50">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Specialized Coding Skills (/)</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSlashMenu(false)}
+                className="text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="p-1 space-y-0.5 text-xs overflow-y-auto">
+              {SkillSetService.listSkills()
+                .filter(s => s.enabled)
+                .filter(s => {
+                  if (!slashFilter) return true;
+                  const q = slashFilter.toLowerCase().trim();
+                  return (
+                    s.name.toLowerCase().includes(q) ||
+                    s.description.toLowerCase().includes(q) ||
+                    s.triggers.some(t => t.pattern.toLowerCase().includes(q))
+                  );
+                })
+                .map(skill => (
+                  <button
+                    key={skill.id}
+                    type="button"
+                    onClick={() => {
+                      const trigger = skill.triggers.find(t => t.type === 'slash_command')?.pattern || `/${skill.name}`;
+                      setChatInput(`${trigger} `);
+                      setShowSlashMenu(false);
+                      textareaRef.current?.focus();
+                    }}
+                    className="w-full flex items-start gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-200 hover:bg-indigo-600/20 hover:text-white text-left transition cursor-pointer group"
+                  >
+                    <Code2 className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5 group-hover:text-cyan-300" />
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-bold text-xs text-indigo-300 group-hover:text-cyan-300">
+                          {skill.triggers.find(t => t.type === 'slash_command')?.pattern || `/${skill.name}`}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-sans">({skill.name})</span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 leading-tight line-clamp-1 group-hover:text-slate-200">
+                        {skill.description}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
+
         {/* Floating '@' Mention Autocomplete Menu */}
         {showAtMenu && (
           <div className="absolute top-full left-3 mt-1 w-64 bg-[#141416] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-40 animate-in fade-in duration-100">
@@ -992,7 +1068,7 @@ export const AIOrchestratorPanel: React.FC = () => {
               <Bot className="w-5 h-5 text-indigo-400" />
             </div>
             <h3 className="text-xs font-semibold text-slate-200 mb-1">
-              Nova Agent Ready
+              Vertex Forge Agent Ready
             </h3>
             <p className="text-[11px] text-slate-500 max-w-[240px] mb-4">
               Ask questions, generate features, or inspect code across your project.
@@ -1754,3 +1830,4 @@ export const AIOrchestratorPanel: React.FC = () => {
     </aside>
   );
 };
+

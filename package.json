@@ -1,9 +1,9 @@
 {
-  "name": "nova-ide",
+  "name": "vertex-forge",
   "private": true,
   "version": "1.0.0",
-  "description": "NovaIDE - Autonomous AI Software Engineering Studio",
-  "author": "Nova IDE Team",
+  "description": "Vertex Forge - Autonomous AI Software Engineering Studio",
+  "author": "Vertex Forge Team",
   "type": "module",
   "main": "dist-electron/main.cjs",
   "scripts": {
@@ -20,8 +20,8 @@
     "electron:build:dir": "npm run build && npm run build:electron && electron-builder --win --dir"
   },
   "build": {
-    "appId": "com.nova.ide",
-    "productName": "NovaIDE",
+    "appId": "com.vertexforge.ide",
+    "productName": "Vertex Forge",
     "directories": {
       "output": "release"
     },
@@ -41,7 +41,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "NovaIDE"
+      "shortcutName": "Vertex Forge"
     },
     "win": {
       "target": [

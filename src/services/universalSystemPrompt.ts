@@ -10,6 +10,7 @@ import { ProjectProfile } from '../types/project';
 import { CodebaseIntelligenceEngine, GroundedAIResponse } from './codebaseIntelligence';
 import { DesktopBridge } from './desktopBridge';
 import { AIProviderService } from './aiProviderService';
+import { SkillSetService } from './skillSetService';
 import { ProviderId, ModelInfo } from '../types/aiProvider';
 
 export type EvidenceCategory = 'VERIFIED' | 'INFERRED' | 'UNKNOWN';
@@ -279,10 +280,10 @@ export class UniversalSystemPromptBuilder {
 
     // 1. Identity & Operating Boundary
     sections.push(
-`# NovaIDE Autonomous Engineering Agent
+`# Vertex Forge Autonomous Engineering Agent
 Role: ${role}
 
-You are an expert AI software engineering partner operating directly inside NovaIDE desktop environment.
+You are an expert AI software engineering partner operating directly inside Vertex Forge desktop environment.
 You have real-time access to the user's workspace, filesystem, terminal, test runners, and source control via authorized tools.
 
 ## Operating Principles:
@@ -358,6 +359,19 @@ ${gc.diffSnippet ? `• Recent Diff:\n\`\`\`diff\n${gc.diffSnippet.slice(0, 1500
       sections.push(
 `# Project-Specific Instructions & Guidelines
 ${opts.projectInstructions.join('\n\n')}`
+      );
+    }
+
+    // 8. Specialized Coding Skill Activation
+    const matchedSkill = SkillSetService.findMatchingSkill(opts.userPrompt);
+    if (matchedSkill) {
+      sections.push(
+`# Active Specialized Coding Skill: /${matchedSkill.name} (v${matchedSkill.version})
+• Objective: ${matchedSkill.description}
+• Core Execution Directives:
+${matchedSkill.instructions}
+• Skill Allowlisted Tools: ${matchedSkill.allowedTools.join(', ')}
+You MUST adhere strictly to these specialized coding directives.`
       );
     }
 

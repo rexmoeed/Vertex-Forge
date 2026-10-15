@@ -51,7 +51,7 @@ export const WalkthroughTourModal: React.FC<WalkthroughTourModalProps> = ({
   const steps: TourStep[] = [
     {
       id: 'welcome',
-      badge: 'Welcome to Nova IDE',
+      badge: 'Welcome to Vertex Forge',
       title: 'Autonomous AI Software Engineering Studio',
       tagline: 'A complete developer workstation unifying real filesystem execution, multi-agent swarms, and AI coding.',
       icon: Sparkles,

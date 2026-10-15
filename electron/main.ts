@@ -31,11 +31,11 @@ function checkServerRunning(port = 3000): Promise<boolean> {
 async function ensureBackendServer(rootDir: string, port = 3000): Promise<void> {
   const isRunning = await checkServerRunning(port);
   if (isRunning) {
-    console.log(`[NovaIDE Electron] Backend server already responsive on port ${port}.`);
+    console.log(`[Vertex Forge Electron] Backend server already responsive on port ${port}.`);
     return;
   }
 
-  console.log(`[NovaIDE Electron] Spawning local backend server on port ${port}...`);
+  console.log(`[Vertex Forge Electron] Spawning local backend server on port ${port}...`);
   const isWin = process.platform === 'win32';
   const cmd = isWin ? 'npx.cmd' : 'npx';
   backendProcess = spawn(cmd, ['tsx', 'server.ts'], {
@@ -45,7 +45,7 @@ async function ensureBackendServer(rootDir: string, port = 3000): Promise<void> 
   });
 
   backendProcess.on('error', (err: any) => {
-    console.warn('[NovaIDE Electron] Backend spawn warning:', err?.message || err);
+    console.warn('[Vertex Forge Electron] Backend spawn warning:', err?.message || err);
   });
 
   // Wait up to 10 seconds for server to report ready
@@ -53,7 +53,7 @@ async function ensureBackendServer(rootDir: string, port = 3000): Promise<void> 
     await new Promise((r) => setTimeout(r, 500));
     const ready = await checkServerRunning(port);
     if (ready) {
-      console.log(`[NovaIDE Electron] Backend server is ready on port ${port}.`);
+      console.log(`[Vertex Forge Electron] Backend server is ready on port ${port}.`);
       return;
     }
   }
@@ -97,7 +97,7 @@ function createWindow() {
     height: 900,
     minWidth: 1024,
     minHeight: 700,
-    title: 'NovaIDE - Desktop AI Engineering Studio',
+    title: 'Vertex Forge - Desktop AI Engineering Studio',
     backgroundColor: '#020617', // slate-950
     titleBarStyle: 'hiddenInset',
     webPreferences: {
@@ -115,7 +115,7 @@ function createWindow() {
   const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:3000';
 
   mainWindow.webContents.on('did-fail-load', (_, errorCode, errorDescription, validatedURL) => {
-    console.warn(`[NovaIDE Electron] Failed to load ${validatedURL} (${errorCode}: ${errorDescription}), falling back to dist/index.html`);
+    console.warn(`[Vertex Forge Electron] Failed to load ${validatedURL} (${errorCode}: ${errorDescription}), falling back to dist/index.html`);
     if (fs.existsSync(distHtml) && !validatedURL.startsWith('file:')) {
       mainWindow?.loadFile(distHtml);
     }
@@ -123,12 +123,12 @@ function createWindow() {
 
   mainWindow.webContents.on('console-message', (_, level, message, line, sourceId) => {
     if (level >= 2) {
-      console.warn(`[NovaIDE Renderer ${level === 3 ? 'ERROR' : 'WARN'}] ${message} (${sourceId}:${line})`);
+      console.warn(`[Vertex Forge Renderer ${level === 3 ? 'ERROR' : 'WARN'}] ${message} (${sourceId}:${line})`);
     }
   });
 
   mainWindow.webContents.on('render-process-gone', (_, details) => {
-    console.error('[NovaIDE Electron] Render process gone:', details);
+    console.error('[Vertex Forge Electron] Render process gone:', details);
   });
 
   if (app.isPackaged) {
@@ -163,7 +163,7 @@ app.on('web-contents-created', (_, contents) => {
 
 function setupAutoUpdater() {
   if (!app.isPackaged) {
-    console.log('[NovaIDE AutoUpdater] Development environment detected; skipping auto-update checks.');
+    console.log('[Vertex Forge AutoUpdater] Development environment detected; skipping auto-update checks.');
     return;
   }
 
@@ -171,11 +171,11 @@ function setupAutoUpdater() {
   autoUpdater.autoInstallOnAppQuit = true;
 
   autoUpdater.on('checking-for-update', () => {
-    console.log('[NovaIDE AutoUpdater] Checking for available updates...');
+    console.log('[Vertex Forge AutoUpdater] Checking for available updates...');
   });
 
   autoUpdater.on('update-available', (info) => {
-    console.log(`[NovaIDE AutoUpdater] Update available: v${info.version}`);
+    console.log(`[Vertex Forge AutoUpdater] Update available: v${info.version}`);
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('nova:update-available', {
         version: info.version,
@@ -185,11 +185,11 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('update-not-available', () => {
-    console.log('[NovaIDE AutoUpdater] NovaIDE is currently on the latest version.');
+    console.log('[Vertex Forge AutoUpdater] Vertex Forge is currently on the latest version.');
   });
 
   autoUpdater.on('error', (err) => {
-    console.warn('[NovaIDE AutoUpdater] Update check failed:', err?.message || err);
+    console.warn('[Vertex Forge AutoUpdater] Update check failed:', err?.message || err);
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
@@ -202,12 +202,12 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('update-downloaded', (info) => {
-    console.log(`[NovaIDE AutoUpdater] Version ${info.version} downloaded successfully.`);
+    console.log(`[Vertex Forge AutoUpdater] Version ${info.version} downloaded successfully.`);
     if (mainWindow && !mainWindow.isDestroyed()) {
       dialog.showMessageBox(mainWindow, {
         type: 'info',
-        title: 'NovaIDE Update Ready',
-        message: `NovaIDE version ${info.version} has been downloaded.`,
+        title: 'Vertex Forge Update Ready',
+        message: `Vertex Forge version ${info.version} has been downloaded.`,
         detail: 'Would you like to restart now to install the update?',
         buttons: ['Restart and Install', 'Install Later'],
         defaultId: 0,
@@ -223,7 +223,7 @@ function setupAutoUpdater() {
   // Check for updates 6 seconds after launch
   setTimeout(() => {
     autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-      console.warn('[NovaIDE AutoUpdater] Background update check error:', err?.message || err);
+      console.warn('[Vertex Forge AutoUpdater] Background update check error:', err?.message || err);
     });
   }, 6000);
 }
@@ -232,7 +232,7 @@ app.whenReady().then(async () => {
   registerIpcHandlers();
   const rootDir = path.resolve(__dirname, '..');
   await ensureBackendServer(rootDir, 3000).catch((e) => {
-    console.warn('[NovaIDE Electron] Ensure backend server caught:', e);
+    console.warn('[Vertex Forge Electron] Ensure backend server caught:', e);
   });
   createWindow();
   setupAutoUpdater();
@@ -284,7 +284,7 @@ function registerIpcHandlers() {
   ipcMain.handle('workspace:setWorkspacePath', async (_, newPath: string) => {
     if (newPath && fs.existsSync(newPath)) {
       currentWorkspacePath = path.resolve(newPath);
-      console.log(`[NovaIDE Electron] Active workspace path set to: ${currentWorkspacePath}`);
+      console.log(`[Vertex Forge Electron] Active workspace path set to: ${currentWorkspacePath}`);
       return { success: true, path: currentWorkspacePath };
     }
     return { success: false, error: 'Path does not exist' };
@@ -473,3 +473,4 @@ function registerIpcHandlers() {
     return true;
   });
 }
+

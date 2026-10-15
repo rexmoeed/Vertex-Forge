@@ -1002,7 +1002,7 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let isMounted = true;
     const initHostWorkspace = async () => {
       const lastWorkspace = localStorage.getItem('novaide_last_workspace');
-      const isNovaRepo =
+      const isSelfRepo =
         !lastWorkspace ||
         lastWorkspace === '.' ||
         lastWorkspace === './' ||
@@ -1010,9 +1010,14 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         lastWorkspace.endsWith('Nova-IDE-main/') ||
         lastWorkspace.endsWith('Nova-IDE-main\\') ||
         lastWorkspace.endsWith('NovaIDE') ||
-        lastWorkspace.toLowerCase().includes('nova-ide-main');
+        lastWorkspace.toLowerCase().includes('nova-ide-main') ||
+        lastWorkspace.endsWith('Vertex-Forge-main') ||
+        lastWorkspace.endsWith('Vertex-Forge-main/') ||
+        lastWorkspace.endsWith('Vertex-Forge-main\\') ||
+        lastWorkspace.endsWith('VertexForge') ||
+        lastWorkspace.toLowerCase().includes('vertex-forge');
 
-      if (!isNovaRepo && lastWorkspace) {
+      if (!isSelfRepo && lastWorkspace) {
         try {
           const success = await openLocalFolder(lastWorkspace);
           if (success && isMounted) {

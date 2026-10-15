@@ -81,7 +81,7 @@ export class TerminalService {
       logs: [
         {
           type: 'system',
-          text: `NovaIDE Interactive Terminal v2.4 (${shell}) [Connected to workspace: ${cwd}]`,
+          text: `Vertex Forge Interactive Terminal v2.4 (${shell}) [Connected to workspace: ${cwd}]`,
           timestamp: new Date().toLocaleTimeString(),
         },
         {
@@ -288,3 +288,4 @@ export class TerminalService {
     return `Terminal Error in "${session.cwd}":\n` + latest.map(l => `[${l.timestamp}] ${l.text}`).join('\n');
   }
 }
+

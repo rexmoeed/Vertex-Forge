@@ -60,7 +60,7 @@ export const BottomPanel: React.FC = () => {
   } = useIDE() as any;
 
   // Multi-Session Terminal Management
-  const workspaceCwd = DesktopBridge.currentWorkspacePath || ((typeof process !== 'undefined' && process.cwd) ? process.cwd() : 'E:\\Nova IDE\\Nova-IDE-main');
+  const workspaceCwd = DesktopBridge.currentWorkspacePath || ((typeof process !== 'undefined' && process.cwd) ? process.cwd() : 'E:\\Vertex Forge\\Vertex-Forge-main');
   const [sessions, setSessions] = useState<TerminalSession[]>(() => {
     const defaultSess = TerminalService.createDefaultSession(workspaceCwd);
     const s1: TerminalSession = {
@@ -664,7 +664,7 @@ export const BottomPanel: React.FC = () => {
                   className="border-t px-3 py-1.5 flex items-center gap-2 transition-colors duration-150 shrink-0"
                 >
                   <span className="text-[#00ff88] font-bold select-none text-xs">
-                    PS {activeSession?.cwd || 'E:\\Nova IDE\\Nova-IDE-main'}&gt;
+                    PS {activeSession?.cwd || 'E:\\Vertex Forge\\Vertex-Forge-main'}&gt;
                   </span>
                   <input
                     type="text"
