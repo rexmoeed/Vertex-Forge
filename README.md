@@ -249,6 +249,39 @@ Visit `http://localhost:3000` in your browser.
 
 ---
 
+### 🐳 Docker & Containerized Running
+
+Run Vertex Forge in a completely isolated container without requiring any local dependencies:
+
+```bash
+# Build the production Docker image
+docker build -t vertex-forge .
+
+# Run the containerized IDE
+docker run -d -p 3000:3000 --name vertex-forge-app vertex-forge
+```
+
+Open `http://localhost:3000` to interact with the containerized studio.
+Vertex Forge also ships with `.devcontainer` configuration for instantaneous zero-install development in VS Code or GitHub Codespaces.
+
+---
+
+### ⚙️ Environment Configuration
+
+Copy `.env.example` to `.env` to configure runtime options:
+
+| Variable | Default | Purpose |
+|:---|:---|:---|
+| `PORT` | `3000` | Port for Express API server & static UI bundle |
+| `NODE_ENV` | `development` | Runtime environment mode (`development` or `production`) |
+| `DISABLE_HMR` | `false` | Disable Vite Hot Module Reloading for headless environments |
+| `VITE_API_URL` | `http://localhost:3000` | Backend API gateway destination |
+| `VITE_DEV_SERVER_URL` | `http://localhost:5173` | Internal dev server link for Vite client proxy |
+| `APP_URL` | `http://localhost:3000` | Base public URL for OAuth callbacks & self-referential links |
+| `GEMINI_API_KEY` | *(Optional)* | Cloud AI provider token (not required for offline/local LLMs or test suites) |
+
+---
+
 ### Desktop App (Electron)
 
 ```bash
