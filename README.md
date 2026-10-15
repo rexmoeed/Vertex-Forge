@@ -89,21 +89,21 @@ graph TD
 
 ## 🖥️ Desktop Packaging & Windows Installers
 
-Nova IDE is available as an Electron desktop suite designed specifically for Windows 10/11:
+Vertex Forge is available as an Electron desktop suite designed specifically for Windows 10/11:
 
 ### 📦 Distribution Formats (`release/`):
 | Package | Output File | Target Use Case |
 |---|---|---|
-| **Windows Setup Installer** | `NovaIDE Setup 1.0.0.exe` (~124 MB) | Full NSIS installer with customizable directory, Start Menu shortcuts, Desktop shortcut, and uninstaller. |
-| **Windows Portable** | `NovaIDE 1.0.0.exe` (~123 MB) | Single-file zero-install executable for USB sticks or quick execution without admin rights. |
-| **Unpacked Directory** | `win-unpacked/NovaIDE.exe` | Pre-extracted directory distribution for developers and test environments. |
+| **Windows Setup Installer** | `Vertex Forge Setup 1.0.0.exe` (~124 MB) | Full NSIS installer with customizable directory, Start Menu shortcuts, Desktop shortcut, and uninstaller. |
+| **Windows Portable** | `Vertex Forge 1.0.0.exe` (~123 MB) | Single-file zero-install executable for USB sticks or quick execution without admin rights. |
+| **Unpacked Directory** | `win-unpacked/Vertex Forge.exe` | Pre-extracted directory distribution for developers and test environments. |
 
 ### 🔄 Seamless Background Auto-Update
-Nova IDE includes native background update handling powered by `electron-updater` and GitHub Releases:
-1. **Silent Background Check**: When launched, the application checks `https://github.com/rexmoeed/NovaIDE/releases` for updates against `latest.yml`.
+Vertex Forge includes native background update handling powered by `electron-updater` and GitHub Releases:
+1. **Silent Background Check**: When launched, the application checks `https://github.com/rexmoeed/Vertex-Forge/releases` for updates against `latest.yml`.
 2. **Background Download**: Updates are downloaded silently in chunks with SHA-512 blockmap verification.
 3. **One-Click Restart**: A non-intrusive prompt appears when download completes:
-   > *"NovaIDE version X.Y.Z is ready. Restart now to complete the update?"*
+   > *"Vertex Forge version X.Y.Z is ready. Restart now to complete the update?"*
 4. **Manual Trigger**: Available anytime via `window.desktopAPI.checkForUpdates()`.
 
 ---
@@ -148,21 +148,21 @@ Nova IDE includes native background update handling powered by `electron-updater
 
 ### 5. 🎨 Universal Theme Engine (60+ Curated Themes)
 Single-source-of-truth registry dynamically synchronizing CSS root tokens, Monaco editor syntax colors, and xterm terminal palettes:
-- **Dark Themes**: Nova Dark (Default), VS Code Dark+, One Dark Pro, Dracula, Monokai, Nord, Tokyo Night, Catppuccin Mocha, Gruvbox Dark, GitHub Dark, Material Ocean, Rosé Pine, Synthwave '84, Poimandres, and more.
-- **Light Themes**: Nova Light, VS Code Light+, GitHub Light, Solarized Light, One Light, Catppuccin Latte, Gruvbox Light, Tokyo Night Light.
+- **Dark Themes**: Vertex Forge Dark (Default), VS Code Dark+, One Dark Pro, Dracula, Monokai, Nord, Tokyo Night, Catppuccin Mocha, Gruvbox Dark, GitHub Dark, Material Ocean, Rosé Pine, Synthwave '84, Poimandres, and more.
+- **Light Themes**: Vertex Forge Light, VS Code Light+, GitHub Light, Solarized Light, One Light, Catppuccin Latte, Gruvbox Light, Tokyo Night Light.
 - **Zero-Flash Pre-Paint Execution**: Inline boot script restores chosen theme before first DOM paint to prevent flash-of-white.
 
 ---
 
 ## 🛡️ Section 17E: KOS-Parity Governance Suite
 
-Nova IDE integrates an enterprise-grade operational governance suite with a zero-trust security architecture. The AI agent is untrusted by default; all policies, gates, and secrets are enforced server-side.
+Vertex Forge integrates an enterprise-grade operational governance suite with a zero-trust security architecture. The AI agent is untrusted by default; all policies, gates, and secrets are enforced server-side.
 
 | Feature | Service | Capability & Implementation |
 |---|---|---|
 | **1. Credential Vault** | `credentialVaultService.ts` | AES-256-GCM encrypted keystore. Raw secrets are never exposed to LLMs. Agents use `vault:name` references; the backend injects credentials at runtime while automatically redacting secret values from logs, terminal outputs, and chat transcripts. |
-| **2. Rulebook Engine** | `rulebookEngine.ts` | Hard pre-execution gates configured via `.nova/rulebook.yaml`. Enforces strict blocks on `.env` file modifications, `git push --force`, out-of-workspace writes, and unapproved dependency installs. Owner-override required for bypass. |
-| **3. Secret & Tamper Scanner** | `secretScannerService.ts` | Real-time Shannon entropy analysis and regex scanning for AWS, OpenAI, GitHub, and private keys. Tamper detection maintains SHA-256 manifests of protected configurations (`.novarules`, rulebooks, lockfiles). |
+| **2. Rulebook Engine** | `rulebookEngine.ts` | Hard pre-execution gates configured via `.vertex/rulebook.yaml`. Enforces strict blocks on `.env` file modifications, `git push --force`, out-of-workspace writes, and unapproved dependency installs. Owner-override required for bypass. |
+| **3. Secret & Tamper Scanner** | `secretScannerService.ts` | Real-time Shannon entropy analysis and regex scanning for AWS, OpenAI, GitHub, and private keys. Tamper detection maintains SHA-256 manifests of protected configurations (`.vertexrules`, rulebooks, lockfiles). |
 | **4. Multi-AI Council** | `multiAiCouncilService.ts` | Multi-model deliberation engine. Distributes architecture questions and code reviews across up to 4 models simultaneously (proposer, critic, reviewer, judge) with consensus summaries and dissent tracking. |
 | **5. Scoped Persistent Memory** | `persistentMemoryService.ts` | Multi-layered memory store (User, Workspace, Business) for architectural decisions, coding preferences, and facts. Injected into context with visible chips; never stores secrets. |
 | **6. Skill Sets Engine** | `skillSetService.ts` | Modular workspace skills defined with `SKILL.md` bundles containing domain triggers, instructions, and tool constraints. Supports custom `/slash-commands`. |
@@ -213,8 +213,8 @@ Access all shortcuts inside the IDE anytime by pressing `F1` or opening the inte
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/rexmoeed/NovaIDE.git
-cd NovaIDE
+git clone https://github.com/rexmoeed/Vertex-Forge.git
+cd Vertex Forge
 
 # 2. Install dependencies
 npm install
@@ -238,8 +238,8 @@ npm run electron:build
 ```
 
 Installable outputs will be created in `release/`:
-- `release/NovaIDE Setup 1.0.0.exe` (Installer)
-- `release/NovaIDE 1.0.0.exe` (Portable)
+- `release/Vertex Forge Setup 1.0.0.exe` (Installer)
+- `release/Vertex Forge 1.0.0.exe` (Portable)
 - `release/latest.yml` (Auto-update manifest)
 
 ---
@@ -247,7 +247,7 @@ Installable outputs will be created in `release/`:
 ### Verification & Quality Assurance
 
 ```bash
-# Run complete test suite (164 tests across 12 suites)
+# Run complete test suite (220 tests across 13 suites)
 npm test
 
 # Verify TypeScript type integrity (0 errors)
@@ -261,10 +261,11 @@ npm run build
 
 ## 📄 License
 
-Nova IDE is licensed under the [MIT License](LICENSE).
+Vertex Forge is licensed under the [MIT License](LICENSE).
 
 ---
 
 <div align="center">
 Built with ❤️ for developers who demand real tools, zero simulated answers, and uncompromising AI engineering control.
 </div>
+
