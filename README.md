@@ -1,25 +1,29 @@
 <div align="center">
 
 # ⚡ Vertex Forge
-### The Complete Cursor-Class AI-First Integrated Development Environment & Autonomous Engineering Studio
+### The Cursor-Class AI-First Integrated Development Environment & Autonomous Engineering Studio
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.0+-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Electron](https://img.shields.io/badge/Electron-34+-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Tests](https://img.shields.io/badge/Tests-220%2F220%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-237%2F237%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Type Check](https://img.shields.io/badge/tsc-0%20Errors-brightgreen)](https://www.typescriptlang.org/)
+[![Parallel Swarms](https://img.shields.io/badge/Parallel%20Swarms-4%20Engines-cyan)](https://github.com/rexmoeed/Vertex-Forge)
+[![Engineering Skills](https://img.shields.io/badge/Engineering%20Skills-33%20Active-purple)](https://github.com/rexmoeed/Vertex-Forge)
+[![Local LLMs](https://img.shields.io/badge/Local%20AI-Ollama%20%7C%20DeepSeek-orange)](https://github.com/rexmoeed/Vertex-Forge)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-*A state-of-the-art, fully autonomous, zero-mock developer workstation uniting real filesystem manipulation, interactive WebSocket PTY terminals, multi-provider BYOK AI orchestration, parallel hierarchical agent swarms, 29 specialized engineering skills, and enterprise governance gates.*
+*A state-of-the-art, fully autonomous, zero-mock developer workstation uniting real filesystem manipulation, interactive WebSocket PTY terminals, multi-provider BYOK AI orchestration, parallel hierarchical agent swarms, 33 specialized engineering skills, visual mission cockpits, inline ghost-text predictions, vision-to-code synthesis, offline local LLM hubs, Devin-style shadow sandboxes, and enterprise governance gates.*
 
 ---
 
 [Key Highlights](#-key-architectural-highlights) • 
-[Multi-Agent Swarm](#-hierarchical-multi-agent-parallel-execution-engine) • 
+[Visual Swarm Cockpit](#-visual-swarm-cockpit--parallel-execution) • 
+[Flagship AI Capabilities](#-flagship-ai-capabilities) • 
 [Feature Matrix](#-comprehensive-feature-matrix) • 
-[Windows App & Packaging](#-desktop-packaging--windows-installers) • 
-[KOS-Parity Governance](#-section-17e-kos-parity-governance-suite) • 
+[Slash Commands (33 Skills)](#-interactive-slash-commands--skills) • 
+[Windows Installers](#-desktop-packaging--windows-installers) • 
 [Getting Started](#-getting-started) • 
 [Shortcuts](#-keyboard-shortcuts)
 
@@ -29,154 +33,172 @@
 
 ## 🌟 Key Architectural Highlights
 
+- **Visual Swarm Cockpit & Live Graph**: Interactive real-time node topology drawer showing live specialist agents, active RWLock file reservations, pulse monitors, and one-click launchpads.
+- **Hierarchical Multi-Agent Parallel Swarms**: Decomposes complex software requirements into ordered Directed Acyclic Graph (DAG) task trees executed concurrently across 10 specialized Team Leads with Reader-Writer Lock (`RWLock`) file reservation to eliminate merge deadlocks.
+- **Cursor-Grade Inline Ghost-Text Autocomplete**: Monaco Editor inline completions provider supporting Tab-to-Accept, AST heuristics for rapid language pattern predictions, and multi-line speculative completion.
+- **Screenshot & Mockup to Component (Vision-to-Code)**: Converts UI screenshots, wireframes, and design mockups into responsive React 19 + TypeScript components with extracted design tokens (colors, typography, radii).
+- **100% Offline Local LLMs (Ollama & LM Studio)**: Zero-latency, completely private local AI engine powered by DeepSeek-Coder-V2, Qwen 2.5 Coder, and Llama 3.3 with strict offline Privacy Mode.
+- **Devin-Style Shadow Sandbox & Atomic Verification**: Isolates pending mutations in an in-memory virtual staging environment, validates AST syntax, verifies relative import integrity, runs security gates, and performs atomic commits with instant rollback.
 - **Zero-Native Dialog Experience**: Chrome-native popups (`showOpenFilePicker`, `showDirectoryPicker`, `window.alert`, `window.confirm`, `window.prompt`) have been permanently replaced by a custom-themed in-app workspace browser with drive navigation, path breadcrumbs, bookmark history, and folder creation.
-- **Hierarchical Multi-Agent Parallel Swarm**: Decomposes complex software requirements into ordered Directed Acyclic Graph (DAG) task trees executed concurrently across 10 specialized Team Leads with Reader-Writer Lock (`RWLock`) file reservation.
 - **Windows Installable & Portable Packages**: Pre-packaged as a Windows Setup Installer (`Vertex Forge Setup 1.0.0.exe`) and portable single-file executable with cryptographic verification.
-- **BYOK Multi-Provider Hub**: Direct first-class support for **Anthropic (Claude 3.5 Sonnet / Opus / 3.7)**, **Google Gemini (2.5 Pro / 2.0 Flash)**, **OpenAI (GPT-4o / o1 / o3-mini)**, **OpenRouter (460+ models including Hermes 3)**, and **Local LAN Endpoints (Ollama, LM Studio, vLLM)** with live API key testing and real token cost tracking.
+- **BYOK Multi-Provider Hub**: Direct first-class support for **Anthropic (Claude 3.5 Sonnet / Opus / 3.7)**, **Google Gemini (2.5 Pro / 2.0 Flash)**, **OpenAI (GPT-4o / o1 / o3-mini)**, **OpenRouter (460+ models)**, and **Local Endpoints (Ollama, LM Studio, vLLM)**.
 - **Real WebSocket PTY Terminals**: Multi-tab terminal driven by background `node-pty` processes streaming raw xterm.js sessions with full interactive shell support (PowerShell, CMD, Git Bash, WSL).
 - **Single Source of Truth Theming**: 60+ curated themes (Vertex Forge Dark, VS Code Modern, Dracula, Catppuccin, Monokai, Tokyo Night, Gruvbox) synchronized instantly across CSS variables, Monaco Editor syntax, and xterm ANSI palettes with pre-paint zero-flash injection.
 - **Zero-Loss Session Retention & Hot-Exit**: Reopening Vertex Forge instantly restores open files, cursor coordinates, scroll offsets, terminal working directories, active chat contexts, and dirty buffer recovery.
-- **Enterprise KOS-Parity Governance**: Complete implementation of all 17 advanced governance capabilities: AES-256 Credential Vault, Rulebook Hard Gates, Secret Scanning, Multi-AI Council, and Unified Operator Console.
+- **Enterprise KOS-Parity Governance**: Complete implementation of all 17 Section E specifications including hardware telemetry, cryptographic API credential vaults, and strict approval workflows.
 
 ---
 
-## 🤖 Hierarchical Multi-Agent Parallel Execution Engine
+## 🎛️ Visual Swarm Cockpit & Parallel Execution
 
-Vertex Forge features a production-grade autonomous agent hierarchy capable of decomposing arbitrary project requests into a phased, parallelized execution pipeline:
+Vertex Forge features a dedicated visual command center for orchestrating parallel sub-agent swarms with zero file conflicts:
 
-```mermaid
-graph TD
-    UserReq[User Feature or Project Request] --> Planner[Dynamic Decomposition Engine]
-    Planner --> DAG[10-Task Dependency DAG]
-
-    subgraph Phase1 [Phase 1: Discovery & Blueprint]
-        TL1[Lead Architect]
-        TL2[Design System Lead]
-    end
-
-    subgraph Phase2 [Phase 2: Core Foundations]
-        TL3[Backend API Engineer]
-        TL4[Database & Storage Admin]
-    end
-
-    subgraph Phase3 [Phase 3: Implementation & Parallel Assembly]
-        TL5[Frontend Specialist]
-        TL6[Security Auditor]
-        TL7[DevOps & Tooling Lead]
-    end
-
-    subgraph Phase4 [Phase 4: Verification & Delivery]
-        TL8[QA & Test Engineer]
-        TL9[Docs & DX Specialist]
-        TL10[Release Coordinator]
-    end
-
-    DAG --> Phase1
-    Phase1 --> Phase2
-    Phase2 --> Phase3
-    Phase3 --> Phase4
-
-    RWLock[Reader-Writer Concurrency RWLock] -.-> Phase2
-    RWLock -.-> Phase3
+```
+                          ┌─────────────────────────────┐
+                          │   SWARM COORDINATOR CORE    │
+                          │   (Level 1 Lead Planner)    │
+                          └──────────────┬──────────────┘
+                                         │
+                 ┌───────────────────────┼───────────────────────┐
+                 │                       │                       │
+                 ▼                       ▼                       ▼
+    ┌────────────────────────┐  ┌─────────────────┐  ┌────────────────────────┐
+    │     BackendLead        │  │   FrontendLead  │  │        QALead          │
+    │ ┌────────────────────┐ │  │ ┌─────────────┐ │  │ ┌────────────────────┐ │
+    │ │DatabaseSchemaSpec  │ │  │ │ReactCompBldr│ │  │ │ UnitTestWriter      │ │
+    │ └────────────────────┘ │  │ └─────────────┘ │  │ └────────────────────┘ │
+    │ ┌────────────────────┐ │  └─────────────────┘  │ ┌────────────────────┐ │
+    │ │APIEndpointBuilder  │ │                       │ │TestRunnerDiagnost  │ │
+    │ └────────────────────┘ │                       │ └────────────────────┘ │
+    └────────────────────────┘                       └────────────────────────┘
+                 │                       │                       │
+                 ▼                       ▼                       ▼
+    ┌────────────────────────┐  ┌─────────────────┐  ┌────────────────────────┐
+    │ models/billing.model.ts│  │BillingView.tsx  │  │ billing.spec.ts        │
+    │ [RWLock: Excl Write]   │  │ [RWLock: Excl]  │  │ [RWLock: Excl Write]   │
+    └────────────────────────┘  └─────────────────┘  └────────────────────────┘
 ```
 
-### Concurrency Guarantees:
-- **Phase-Ordered Synchronization**: Dependent tasks (e.g., UI implementation waiting on API schemas) execute strictly according to their DAG prerequisites.
-- **File Reservation Lock (`RWLock`)**: Multiple agents modifying independent files run simultaneously with high throughput. Shared files trigger automatic write-locks, eliminating edit collision and overwrites.
-- **Real-Time Progress & Verification**: Each task undergoes automated validation, test discovery, and self-repair before proceeding to phase completion.
+### The 4 Autonomous Parallel Swarms
+
+| Swarm | Role Specializations | Execution Model | Slash Command |
+|---|---|---|---|
+| **1. Feature-Slicing Swarm** | `DatabaseSchemaSpecialist`, `APIEndpointBuilder`, `ReactComponentBuilder`, `UnitTestWriter` | 4 Concurrent Threads with zero file lock overlap | `/swarm-feature` |
+| **2. Continuous Background Guardians** | `TypeLintSentry`, `SecretLeakSniffer`, `PerfLeakWatcher` | Silent parallel watchdogs auditing AST, tokens, & memory | `/swarm-guard` |
+| **3. Self-Healing Test & Patch Swarm** | `TestRunnerDiagnostician`, `PatchSynthesizer` | Devin-style RCA diagnosis ➔ minimal AST surgical patch | `/swarm-heal` |
+| **4. Doc & Environment Sync Swarm** | `DocSyncAgent`, `EnvSyncAgent` | Concurrent updates to README, TSDoc, and `.env.example` | `/swarm-sync` |
 
 ---
 
-## 🖥️ Desktop Packaging & Windows Installers
+## 🚀 Flagship AI Capabilities
 
-Vertex Forge is available as an Electron desktop suite designed specifically for Windows 10/11:
+### 1. 👻 Inline Ghost-Text Speculative Autocomplete
+Cursor/Copilot-style predictive code generation rendered directly inside Monaco Editor:
+- **Instant Ast Heuristics**: Sub-10ms pattern recognition for TypeScript interfaces, React `useState`/`useEffect` hooks, `try-catch` structures, and async arrow functions.
+- **DeepSeek Speculative Generation**: Automatically queries local or cloud models for multi-line block completions ahead of your cursor.
+- **Tab-to-Accept**: Press `Tab` to accept full suggestions, `Escape` to dismiss, with live acceptance rate analytics.
 
-### 📦 Distribution Formats (`release/`):
-| Package | Output File | Target Use Case |
+### 2. 📸 Screenshot & Mockup to Component (Vision-to-Code)
+Turn any UI design into working code in seconds:
+- **Design Token Extraction**: Automatically extracts color palettes, surface tones, typography hierarchies, and border radii.
+- **Clean React 19 Generation**: Emits clean, accessible TypeScript components with typed props and companion CSS variables.
+- **Virtual File System Integration**: Automatically registers synthesized files in your project with zero manual copy-pasting.
+
+### 3. 🦙 100% Offline Local LLMs (Ollama & LM Studio)
+Run state-of-the-art coding intelligence locally on your hardware:
+- **Auto-Detection & Healthchecks**: Automatically polls `localhost:11434` (Ollama) and `localhost:1234` (LM Studio).
+- **Model Support**: First-class support for `deepseek-coder-v2`, `qwen2.5-coder`, `llama3.3`, `codellama`, and `starcoder2`.
+- **Strict Privacy Mode**: Toggle on Privacy Mode to guarantee zero packets leave your local machine.
+
+### 4. 🧪 Shadow Sandbox Auto-Verification (Devin-Style)
+Zero-risk agent code generation that never leaves your build broken:
+- **Virtual Staging**: File additions and edits are staged inside an in-memory virtual clone of your workspace.
+- **Multi-Stage Automated Gates**: Validates curly brace balancing, AST syntax, and resolves relative import targets before saving.
+- **Security Interceptors**: Blocks accidental tampering with `.env`, private keys, and credential stores.
+- **Atomic Commits & Instant Rollback**: Changes are only merged into your real workspace once 100% verified.
+
+---
+
+## ⚡ Interactive Slash Commands & Skills
+
+Vertex Forge includes **33 specialized autonomous engineering skills** invokable via natural language or slash commands:
+
+<details>
+<summary><b>👉 Click to expand full 33-Skills Directory & Slash Commands</b></summary>
+
+| Command | Skill ID | Specialty |
 |---|---|---|
-| **Windows Setup Installer** | `Vertex Forge Setup 1.0.0.exe` (~124 MB) | Full NSIS installer with customizable directory, Start Menu shortcuts, Desktop shortcut, and uninstaller. |
-| **Windows Portable** | `Vertex Forge 1.0.0.exe` (~123 MB) | Single-file zero-install executable for USB sticks or quick execution without admin rights. |
-| **Unpacked Directory** | `win-unpacked/Vertex Forge.exe` | Pre-extracted directory distribution for developers and test environments. |
+| `/swarm-feature` | `swarm-feature-slicing` | 4-tier parallel feature slicing (DB, API, UI, Tests) |
+| `/swarm-guard` | `swarm-background-guardians` | Continuous TypeLint, SecretLeak, and PerfLeak watchdogs |
+| `/swarm-heal` | `swarm-self-healing` | Autonomous test diagnosis and surgical patch synthesis |
+| `/swarm-sync` | `swarm-doc-env-sync` | Synchronize README, TSDoc, OpenAPI, and `.env.example` |
+| `/review` | `code-review` | Static security, OWASP Top 10, performance audit |
+| `/refactor` | `refactor-clean` | Clean code, SOLID principles, cyclomatic complexity reduction |
+| `/test` | `unit-test-gen` | Formulate comprehensive Vitest / Jest test suites |
+| `/explain` | `explain-code` | Deep code explanation with architecture & flow diagrams |
+| `/optimize` | `perf-optimize` | Memory profiling, bundle sizing, O(N) algorithmic improvements |
+| `/security` | `security-audit` | Penetration review, secret detection, dependency CVE scan |
+| `/debug` | `debug-investigate` | Diagnostic stack trace analysis and root-cause isolation |
+| `/doc` | `doc-writer` | Technical documentation, markdown guides, TSDoc specs |
+| `/git` | `git-assistant` | Conventional commits, PR preparation, interactive rebase |
+| `/types` | `ts-type-wizard` | Strict TypeScript types, generics, discriminated unions |
+| `/api` | `api-scaffolding` | REST / GraphQL / tRPC router endpoints with Zod schemas |
+| `/docker` | `docker-devops` | Multi-stage Dockerfiles, Docker Compose, CI/CD pipelines |
+| `/css` | `css-styling-pro` | Responsive design tokens, Tailwind, Vanilla CSS glassmorphism |
+| `/db` | `db-migration` | Prisma, Drizzle, SQL migrations and schema optimization |
+| `/accessibility` | `a11y-audit` | WCAG 2.1 AA compliance, ARIA attributes, keyboard navigation |
+| `/ai` | `ai-prompt-eng` | System prompts, structured JSON schemas, few-shot templates |
+| `/regex` | `regex-generator` | Safe, performant regular expressions with test cases |
+| `/deploy` | `deploy-advisor` | Production readiness, edge functions, serverless hosting |
+| `/state` | `state-architect` | Redux Toolkit, Zustand, React Context state orchestration |
+| `/i18n` | `i18n-localization`| Multi-language translations, RTL support, ICU formats |
+| `/microservice` | `microservice-architect`| Distributed systems, event sourcing, gRPC contracts |
+| `/k8s` | `kubernetes-operator`| K8s manifests, Helm charts, ingress, horizontal pod autoscalers |
+| `/graphql` | `graphql-expert` | GraphQL schemas, resolvers, DataLoader N+1 mitigations |
+| `/electron` | `electron-specialist`| Secure IPC bridge protocols, desktop packaging, native addons |
+| `/appstore` | `mobile-app-distributor`| Fastlane lanes, TestFlight, Google Play Console release checks |
+| `/deps` | `dependency-guard` | Outdated package audits, breaking changes, license compliance |
+| `/mock` | `mock-data-generator` | Realistic test fixtures, Faker schemas, MSW mock handlers |
+| `/bench` | `performance-benchmarker`| Benchmark.js latency tests, throughput, ops/sec telemetry |
+| `/design-system`| `design-system-curator`| Token governance, atomic component libraries, Storybook |
 
-### 🔄 Seamless Background Auto-Update
-Vertex Forge includes native background update handling powered by `electron-updater` and GitHub Releases:
-1. **Silent Background Check**: When launched, the application checks `https://github.com/rexmoeed/Vertex-Forge/releases` for updates against `latest.yml`.
-2. **Background Download**: Updates are downloaded silently in chunks with SHA-512 blockmap verification.
-3. **One-Click Restart**: A non-intrusive prompt appears when download completes:
-   > *"Vertex Forge version X.Y.Z is ready. Restart now to complete the update?"*
-4. **Manual Trigger**: Available anytime via `window.desktopAPI.checkForUpdates()`.
-
----
-
-## 🚀 Comprehensive Feature Matrix
-
-### 1. 📝 Monaco Editor Core
-- **Full VS Code Language Experience**: Real TypeScript, JavaScript, Python, JSON, CSS, and HTML diagnostics and syntax highlighting.
-- **Advanced Editing Tools**: Multi-cursor editing, bracket pair colorization, indentation guides, code folding, minimap toggle, and breadcrumb navigation.
-- **Quick Navigation**:
-  - `Ctrl + P`: Quick Open file search with fuzzy matching.
-  - `Ctrl + Shift + P`: Unified Command Palette.
-  - `Ctrl + Shift + O`: Workspace symbol lookup.
-  - `Ctrl + F` / `Ctrl + H`: High-speed Find and Replace with RegEx support.
-- **Side-by-Side Diff Viewer**: Split diff comparisons for reviewable AI changes and unstaged git edits with atomic Accept/Reject actions.
-
-### 2. 💬 AI Chat & Conversation Hub
-- **Conversation-First UX**: Clutter-free chat interface inspired by Cursor and ChatGPT. No artificial mock outputs or placeholders.
-- **Full-Fidelity Streaming Engine**: Robust SSE parser handling split UTF-8 chunks, mid-stream keep-alive notices, token counters, and cost metrics.
-- **Context-Aware Composer**:
-  - `@` Mentions: Attach active files, folders, git diffs, terminal outputs, or symbols directly into prompt context.
-  - `/` Slash Commands: Trigger specialized agent workflows (e.g., `/plan`, `/review`, `/test`, `/fix`).
-  - Image and document drag-and-drop attachments.
-- **Contextual Actions**: One-click **Apply to File**, **Insert at Cursor**, **Review Diff**, or **Copy Code**.
-
-### 3. ✨ Cursor-Style AI Features
-- **Inline Code Editing (`Ctrl + K`)**: Select any code snippet, type an instruction, and review live inline diff proposals directly within Monaco.
-- **Tab Ghost-Text Autocomplete**: Fast inline AI completions with debounced background model requests and multi-token Tab accept.
-- **Terminal Natural Language AI (`Ctrl + K` in Terminal)**: Convert natural language requests into verified shell commands with mandatory approval before execution.
-- **AI Commit Generator**: Automatically analyze staged git diffs and produce conventional, high-quality git commit messages.
-- **Semantic Codebase Search (`@codebase`)**: Query your entire workspace using an AST-indexed keyword and symbol search engine.
-
-### 4. 💻 Real Terminal, Process & Git Management
-- **Interactive Multi-Session PTY**: Spawns real OS terminal sessions streaming over WebSockets. Supports terminal resizing, custom shells, ANSI colors, and copy-paste.
-- **Real-Time Git Integration**:
-  - View modified, staged, untracked, and deleted files.
-  - One-click Stage / Unstage / Discard changes.
-  - Branch creation, checkout, commit, push, and pull with real output diagnostics.
-- **Managed Dev Servers & Ports Panel**:
-  - Start, monitor, and terminate background development processes.
-  - Automatic port readiness detection and active port listener status.
-
-### 5. 🎨 Universal Theme Engine (60+ Curated Themes)
-Single-source-of-truth registry dynamically synchronizing CSS root tokens, Monaco editor syntax colors, and xterm terminal palettes:
-- **Dark Themes**: Vertex Forge Dark (Default), VS Code Dark+, One Dark Pro, Dracula, Monokai, Nord, Tokyo Night, Catppuccin Mocha, Gruvbox Dark, GitHub Dark, Material Ocean, Rosé Pine, Synthwave '84, Poimandres, and more.
-- **Light Themes**: Vertex Forge Light, VS Code Light+, GitHub Light, Solarized Light, One Light, Catppuccin Latte, Gruvbox Light, Tokyo Night Light.
-- **Zero-Flash Pre-Paint Execution**: Inline boot script restores chosen theme before first DOM paint to prevent flash-of-white.
+</details>
 
 ---
 
-## 🛡️ Section 17E: KOS-Parity Governance Suite
+## 💻 Comprehensive Feature Matrix
 
-Vertex Forge integrates an enterprise-grade operational governance suite with a zero-trust security architecture. The AI agent is untrusted by default; all policies, gates, and secrets are enforced server-side.
-
-| Feature | Service | Capability & Implementation |
+| Subsystem | Module | Description |
 |---|---|---|
-| **1. Credential Vault** | `credentialVaultService.ts` | AES-256-GCM encrypted keystore. Raw secrets are never exposed to LLMs. Agents use `vault:name` references; the backend injects credentials at runtime while automatically redacting secret values from logs, terminal outputs, and chat transcripts. |
-| **2. Rulebook Engine** | `rulebookEngine.ts` | Hard pre-execution gates configured via `.vertex/rulebook.yaml`. Enforces strict blocks on `.env` file modifications, `git push --force`, out-of-workspace writes, and unapproved dependency installs. Owner-override required for bypass. |
-| **3. Secret & Tamper Scanner** | `secretScannerService.ts` | Real-time Shannon entropy analysis and regex scanning for AWS, OpenAI, GitHub, and private keys. Tamper detection maintains SHA-256 manifests of protected configurations (`.vertexrules`, rulebooks, lockfiles). |
-| **4. Multi-AI Council** | `multiAiCouncilService.ts` | Multi-model deliberation engine. Distributes architecture questions and code reviews across up to 4 models simultaneously (proposer, critic, reviewer, judge) with consensus summaries and dissent tracking. |
-| **5. Scoped Persistent Memory** | `persistentMemoryService.ts` | Multi-layered memory store (User, Workspace, Business) for architectural decisions, coding preferences, and facts. Injected into context with visible chips; never stores secrets. |
-| **6. Skill Sets Engine** | `skillSetService.ts` | Modular workspace skills defined with `SKILL.md` bundles containing domain triggers, instructions, and tool constraints. Supports custom `/slash-commands`. |
-| **7. Multi-Business Trackers** | `businessTrackerService.ts` | 6 isolated business slots with independent Kanban task trackers, credential boundaries, and budgets. Prevents context cross-contamination. |
-| **8. Owner Approval Queue** | `approvalQueueService.ts` | Unified decision queue for high-risk operations (destructive commands, cloud deployments, vault access). Zero automated approvals while the owner is away. |
-| **9. Self-Healing Jobs** | `backgroundJobScheduler.ts` | Backend cron scheduler with exponential backoff, circuit breakers, and dead-letter queues for automated index refreshes, CVE audits, and test suites. |
-| **10. PR Automation** | `prAutomationService.ts` | Automated branch management, PR draft generation, AI inline code reviews, and policy-checked merges using Git tokens or GitHub CLI. |
-| **11. Task-Based Model Router** | `modelRouterService.ts` | Intelligently routes tasks (autocomplete, chat, planning, code review) to optimal models based on latency, cost ceilings, and tool capabilities with automated fallback chains. |
-| **12. Local AI LAN Nodes** | `localAiNodeService.ts` | Cluster registry for local and private network GPU instances (Ollama, LM Studio, vLLM) with automated health pings, latency tracking, and offline failover. |
-| **13. Real-Time Ops Visibility** | `opsVisibilityService.ts` | Real-time metrics dashboard visualizing running background tasks, queue depth, token usage, API latency, gate violations, and an immutable audit log. |
-| **14. Safe Automation Suite** | `automationToolService.ts` | Browser testing via Playwright in isolated sandboxes, Android ADB emulator integration, and desktop automation guarded by domain allowlists and an instant kill-switch. |
-| **15. Knowledge Graph Engine** | `knowledgeGraphService.ts` | AST-driven symbol dependency graph mapping imports, classes, functions, and callers across the entire codebase with interactive querying. |
-| **16. Semantic Versioning** | `versioningService.ts` | Automated semantic version calculation, conventional changelog generation, and version rollback management. |
-| **17. Unified Operator Console** | `OperatorConsoleView.tsx` | All-in-one central control panel unifying the vault, rulebook, approval queue, background jobs, memory, and ops metrics in a single interface. |
+| **Autonomous Swarms** | `agentHierarchyService.ts` | 4 concurrent swarms with DAG task dependencies and RWLock file reservations. |
+| **Swarm Cockpit** | `SwarmMissionCockpit.tsx` | Visual node topology drawer with live status pulses and one-click launchpad. |
+| **Inline Autocomplete**| `ghostAutocompleteService.ts` | Predictive inline ghost-text with Tab-to-accept and AST pattern heuristics. |
+| **Vision Engine** | `visionToComponentService.ts` | Screenshot and wireframe to React 19 + TypeScript component synthesis. |
+| **Offline Local AI** | `localLLMService.ts` | Native Ollama and LM Studio integration with DeepSeek-Coder and Privacy Mode. |
+| **Shadow Sandbox** | `shadowSandboxService.ts` | Devin-style virtual staging, import validation, and atomic commits. |
+| **Workspace Browser** | `WorkspaceOpenModal.tsx` | Native dialog replacement with physical drive browsing and folder creation. |
+| **Desktop Bridge** | `desktopBridge.ts` | Dual-mode desktop integration (Electron IPC + HTTP REST fallback). |
+| **Virtual File System**| `virtualFs.ts` | In-memory VFS with reactive watchers and git diff staging. |
+| **Multi-Provider Hub** | `aiProviderService.ts` | BYOK integration with Claude 3.7, Gemini 2.5, GPT-4o, and DeepSeek. |
+| **PTY Terminal** | `TerminalDock.tsx` | Real interactive terminal streaming raw xterm.js sessions via `node-pty`. |
+| **Security Vault** | `credentialVaultService.ts` | Cryptographic AES-256-GCM vault with automatic memory zeroization. |
+| **Live Debugger** | `debuggerEngine.ts` | Breakpoints, call-stack inspection, variable evaluation, and watchpoints. |
+
+---
+
+## 📦 Desktop Packaging & Windows Installers
+
+Vertex Forge compiles natively to standalone Windows installers and single-file portable packages:
+
+```bash
+# Package Windows setup installer and portable executable
+npm run electron:build
+```
+
+**Build Artifacts (in `release/`):**
+- `release/Vertex Forge Setup 1.0.0.exe` (Full NSIS Installer with desktop shortcuts)
+- `release/Vertex Forge 1.0.0.exe` (Single-file portable executable)
+- `release/latest.yml` (Auto-update cryptographic hash manifest)
 
 ---
 
@@ -186,26 +208,26 @@ Access all shortcuts inside the IDE anytime by pressing `F1` or opening the inte
 
 | Shortcut | Action | Category |
 |---|---|---|
-| `Cmd/Ctrl + I` | Cursor Composer: Multi-file generation with `@` mentions | AI & Copilot |
+| `Tab` | Accept inline ghost-text code prediction | AI & Autocomplete |
+| `Cmd/Ctrl + I` | Cursor Composer: Multi-file generation with `@` context | AI & Copilot |
 | `Cmd/Ctrl + K` | Cursor Inline Edit: In-editor diff review | AI & Copilot |
-| `Tab` | Cursor Tab: Accept inline ghost-text code prediction | AI & Copilot |
 | `Cmd/Ctrl + K (Terminal)` | Terminal AI: Natural language shell command synthesis | AI & Copilot |
 | `Cmd/Ctrl + P` | Quick-open file across entire workspace | Navigation |
 | `Cmd/Ctrl + Shift + F` | Global codebase grep search and replace | Navigation |
 | `Cmd/Ctrl + S` | Save active file & snapshot to history | Execution |
 | `Cmd/Ctrl + Enter` | Execute autonomous agent task or send prompt | Execution |
 | `Cmd/Ctrl + \`` | Toggle integrated terminal & diagnostics dock | Execution |
-| `Cmd/Ctrl + Shift + T` | Run all Vitest assertions & unit test suites | Testing & DAP |
-| `F5 / Shift + F5` | Start / Continue / Stop DAP Debugging session | Testing & DAP |
-| `F10 / F11` | Step Over / Step Into current statement | Testing & DAP |
-| `Escape` | Dismiss active modal, search, or dialog | Global |
+| `Cmd/Ctrl + Shift + T` | Run all Vitest assertions & unit test suites | Testing |
+| `F5 / Shift + F5` | Start / Continue / Stop DAP Debugging session | Debugger |
+| `F10 / F11` | Step Over / Step Into current statement | Debugger |
+| `Escape` | Dismiss active modal, search, or inline ghost suggestion | Global |
 
 ---
 
 ## 🏁 Getting Started
 
 ### Prerequisites
-- **Node.js**: v18.0.0 or higher
+- **Node.js**: v18.0.0 or higher (v22.x recommended)
 - **Git**: Installed and available in system PATH
 - **Operating System**: Windows 10/11, macOS, or Linux
 
@@ -214,7 +236,7 @@ Access all shortcuts inside the IDE anytime by pressing `F1` or opening the inte
 ```bash
 # 1. Clone repository
 git clone https://github.com/rexmoeed/Vertex-Forge.git
-cd Vertex Forge
+cd Vertex-Forge-main
 
 # 2. Install dependencies
 npm install
@@ -237,17 +259,12 @@ npm run electron
 npm run electron:build
 ```
 
-Installable outputs will be created in `release/`:
-- `release/Vertex Forge Setup 1.0.0.exe` (Installer)
-- `release/Vertex Forge 1.0.0.exe` (Portable)
-- `release/latest.yml` (Auto-update manifest)
-
 ---
 
 ### Verification & Quality Assurance
 
 ```bash
-# Run complete test suite (220 tests across 13 suites)
+# Run complete test suite (237 tests across 14 test suites)
 npm test
 
 # Verify TypeScript type integrity (0 errors)
@@ -266,6 +283,5 @@ Vertex Forge is licensed under the [MIT License](LICENSE).
 ---
 
 <div align="center">
-Built with ❤️ for developers who demand real tools, zero simulated answers, and uncompromising AI engineering control.
+Built with ❤️ for developers who demand real tools, zero simulated answers, and uncompromising autonomous AI engineering control.
 </div>
-
