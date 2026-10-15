@@ -1,3 +1,4 @@
+import { SwarmMissionCockpit } from './SwarmMissionCockpit';
 import React, { useState, useEffect } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import {
@@ -708,6 +709,9 @@ export const AgentWorkspaceView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* SWARM MISSION COCKPIT & LIVE GRAPH */}
+      <SwarmMissionCockpit hierarchyService={hierarchyService} onNavigateToFile={openFile} />
 
       {/* 2. TEAM LEADS ROSTER (Level 2) */}
       <div className="flex flex-col gap-3">
