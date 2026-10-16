@@ -271,6 +271,30 @@ export class LocalLLMService {
     return res.content.trim().replace(/^```[a-z]*\n?/i, '').replace(/```$/g, '');
   }
 
+  public static async autoDetectAllEndpoints(): Promise<{
+    endpoints: LocalServerEndpoint[];
+    onlineCount: number;
+    detectedModelsCount: number;
+  }> {
+    const ids = Array.from(this.endpoints.keys());
+    await Promise.allSettled(ids.map(id => this.checkEndpointHealth(id)));
+
+    const allEndpoints = this.getEndpoints();
+    const onlineEndpoints = allEndpoints.filter(e => e.status === 'online');
+    const totalModels = onlineEndpoints.reduce((acc, e) => acc + e.availableModels.length, 0);
+
+    const active = this.getActiveEndpoint();
+    if (active.status !== 'online' && onlineEndpoints.length > 0) {
+      this.setActiveEndpoint(onlineEndpoints[0].id);
+    }
+
+    return {
+      endpoints: allEndpoints,
+      onlineCount: onlineEndpoints.length,
+      detectedModelsCount: totalModels,
+    };
+  }
+
   public static getEndpoints(): LocalServerEndpoint[] {
     return Array.from(this.endpoints.values());
   }

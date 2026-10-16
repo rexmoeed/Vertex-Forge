@@ -164,6 +164,62 @@ export class TerminalService {
       return { stdout: `Directory changed to: ${session.cwd}`, stderr: '', exitCode: 0 };
     }
 
+    // 1. First priority: Check if running inside Electron Native Desktop Bridge (Native PTY/Shell)
+    if (typeof window !== 'undefined' && (window as any).desktopAPI?.executeCommand) {
+      try {
+        const result = await (window as any).desktopAPI.executeCommand(trimmed, {
+          cwd: session.cwd,
+        });
+
+        let loggedAny = false;
+        if (result.stdout && result.stdout.trim()) {
+          session.logs.push({
+            type: 'stdout',
+            text: result.stdout.trimEnd(),
+            timestamp: new Date().toLocaleTimeString(),
+            exitCode: result.exitCode,
+          });
+          loggedAny = true;
+        }
+
+        if (result.stderr && result.stderr.trim()) {
+          session.logs.push({
+            type: 'stderr',
+            text: result.stderr.trimEnd(),
+            timestamp: new Date().toLocaleTimeString(),
+            exitCode: result.exitCode,
+          });
+          loggedAny = true;
+        }
+
+        if (!loggedAny) {
+          if (result.exitCode === 0) {
+            session.logs.push({
+              type: 'system',
+              text: '[Command completed successfully with exit code 0]',
+              timestamp: new Date().toLocaleTimeString(),
+              exitCode: 0,
+            });
+          } else {
+            session.logs.push({
+              type: 'stderr',
+              text: `[Process exited with code ${result.exitCode}]`,
+              timestamp: new Date().toLocaleTimeString(),
+              exitCode: result.exitCode,
+            });
+          }
+        }
+
+        session.isRunning = false;
+        session.currentCommand = undefined;
+        session.currentExecutionId = undefined;
+        onLogUpdate?.(session);
+        return { stdout: result.stdout, stderr: result.stderr, exitCode: result.exitCode };
+      } catch (nativeErr: any) {
+        console.warn('[TerminalService] Native Electron execution error, falling back to server/simulation:', nativeErr);
+      }
+    }
+
     // Call real backend execution endpoint
     try {
       const res = await fetch('/api/process/execute', {

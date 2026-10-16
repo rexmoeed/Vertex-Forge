@@ -40,6 +40,7 @@ import {
   ModelCapability,
 } from '../../types/aiProvider';
 import { AIProviderService } from '../../services/aiProviderService';
+import { LocalLLMService } from '../../services/localLLMService';
 
 export const AIProviderHubView: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<
@@ -66,6 +67,44 @@ export const AIProviderHubView: React.FC<{ onClose?: () => void }> = ({ onClose 
   const [baseUrlInput, setBaseUrlInput] = useState('');
   const [showKeyPlaintext, setShowKeyPlaintext] = useState(false);
   const [wizardTestResult, setWizardTestResult] = useState<ConnectionTestResult | null>(null);
+
+  // Local AI Auto-Detection State
+  const [isAutoDetecting, setIsAutoDetecting] = useState(false);
+  const [autoDetectResult, setAutoDetectResult] = useState<{
+    onlineCount: number;
+    detectedModelsCount: number;
+    message: string;
+  } | null>(null);
+
+  const handleAutoDetectLocal = async () => {
+    setIsAutoDetecting(true);
+    setAutoDetectResult(null);
+    try {
+      const res = await LocalLLMService.autoDetectAllEndpoints();
+      if (res.onlineCount > 0) {
+        setAutoDetectResult({
+          onlineCount: res.onlineCount,
+          detectedModelsCount: res.detectedModelsCount,
+          message: `Success: Detected ${res.onlineCount} local server(s) with ${res.detectedModelsCount} model(s) ready for 100% offline inference.`,
+        });
+        setProviders(AIProviderService.loadProviders());
+      } else {
+        setAutoDetectResult({
+          onlineCount: 0,
+          detectedModelsCount: 0,
+          message: 'No active local LLMs found on localhost:11434 (Ollama) or localhost:1234 (LM Studio). Start Ollama or LM Studio and scan again.',
+        });
+      }
+    } catch {
+      setAutoDetectResult({
+        onlineCount: 0,
+        detectedModelsCount: 0,
+        message: 'Scan completed. Make sure Ollama or LM Studio is running.',
+      });
+    } finally {
+      setIsAutoDetecting(false);
+    }
+  };
   const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   // Model Catalog Filter State
@@ -299,6 +338,54 @@ export const AIProviderHubView: React.FC<{ onClose?: () => void }> = ({ onClose 
                   <span>Connect New Provider</span>
                 </button>
               </div>
+
+              {/* Local AI Zero-Config Auto-Discovery Banner */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-900 border border-indigo-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+                    <Cpu className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xs font-bold text-white">Local AI Auto-Discovery</h3>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30">100% Offline & Private</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Auto-detect Ollama (:11434) and LM Studio (:1234) models with zero manual configuration.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAutoDetectLocal}
+                  disabled={isAutoDetecting}
+                  className="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/25 flex items-center gap-2 transition-all cursor-pointer shrink-0 disabled:opacity-50"
+                >
+                  <RotateCw className={`w-3.5 h-3.5 ${isAutoDetecting ? 'animate-spin' : ''}`} />
+                  <span>{isAutoDetecting ? 'Scanning Local Ports...' : 'Auto-Detect Local LLMs'}</span>
+                </button>
+              </div>
+
+              {autoDetectResult && (
+                <div className={`p-3.5 rounded-xl border text-xs flex items-center justify-between ${
+                  autoDetectResult.onlineCount > 0
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                    : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    {autoDetectResult.onlineCount > 0 ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                    )}
+                    <span>{autoDetectResult.message}</span>
+                  </div>
+                  <button onClick={() => setAutoDetectResult(null)} className="text-slate-400 hover:text-white px-1">
+                    &times;
+                  </button>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 gap-4">
                 {providers.map(p => {

@@ -494,19 +494,19 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
             </button>
           )}
 
-          {/* Diff Mode Toggle */}
-          {currentDiff && (
+          {/* Visual Side-by-Side Diff Toggle */}
+          {activeFile && (
             <button
               onClick={() => setDiffMode(!diffMode)}
-              className={`px-2 py-0.5 rounded text-[10px] font-mono flex items-center gap-1 border transition-colors ${
+              className={`px-2.5 py-0.5 rounded text-[10px] font-mono flex items-center gap-1.5 border transition-all cursor-pointer shadow-xs ${
                 diffMode
-                  ? 'bg-indigo-600 text-white border-indigo-500'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
+                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-indigo-600/30'
+                  : 'bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-indigo-600/10 hover:text-indigo-400 dark:hover:border-indigo-500/50'
               }`}
-              title="Toggle Diff Comparison"
+              title={diffMode ? 'Return to Code Editor' : 'Open Visual Side-by-Side Diff against Git HEAD'}
             >
-              <SplitSquareVertical className="w-3 h-3" />
-              <span>+{currentDiff.additions} -{currentDiff.deletions}</span>
+              <SplitSquareVertical className="w-3.5 h-3.5 text-indigo-400" />
+              <span>{currentDiff ? `+${currentDiff.additions} -${currentDiff.deletions}` : 'Side-by-Side Diff'}</span>
             </button>
           )}
 

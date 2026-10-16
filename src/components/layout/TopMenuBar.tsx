@@ -26,6 +26,7 @@ interface TopMenuBarProps {
   onOpenComposer?: () => void;
   onOpenCursorRules?: () => void;
   onOpenShortcuts?: () => void;
+  onOpenJulesMission?: () => void;
 }
 
 export const TopMenuBar: React.FC<TopMenuBarProps> = ({
@@ -34,6 +35,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
   onOpenComposer,
   onOpenCursorRules,
   onOpenShortcuts,
+  onOpenJulesMission,
 }) => {
   const ide = useIDE() as any;
   const layout = useLayout();
@@ -682,6 +684,13 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
       case 'Agent / AI':
         return [
           {
+            id: 'ai.julesMission',
+            title: 'Google Jules: Launch Cloud Agent Mission...',
+            category: 'Agent / AI',
+            description: 'Delegate autonomous coding tasks to Google Jules in cloud VM',
+            execute: () => onOpenJulesMission?.(),
+          },
+          {
             id: 'ai.composer',
             title: 'Open Cursor Composer (Multi-File Agent)',
             category: 'Agent / AI',
@@ -1030,6 +1039,16 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
         >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <span>Gemini 3.8 Flash</span>
+        </button>
+
+        {/* Google Jules Cloud Agent Mission Button */}
+        <button
+          onClick={onOpenJulesMission}
+          className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 text-[11px] font-medium transition cursor-pointer shadow-xs"
+          title="Google Jules Cloud Agent: Autonomous PR missions in sandboxed cloud VM"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <span>Jules Cloud</span>
         </button>
 
         {/* Toggle Bottom Dock */}

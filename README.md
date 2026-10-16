@@ -7,7 +7,7 @@
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.0+-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Electron](https://img.shields.io/badge/Electron-34+-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Tests](https://img.shields.io/badge/Tests-290%2F290%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-292%2F292%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Type Check](https://img.shields.io/badge/tsc-0%20Errors-brightgreen)](https://www.typescriptlang.org/)
 [![Parallel Swarms](https://img.shields.io/badge/Parallel%20Swarms-4%20Engines-cyan)](https://github.com/rexmoeed/Vertex-Forge)
 [![Engineering Skills](https://img.shields.io/badge/Engineering%20Skills-33%20Active-purple)](https://github.com/rexmoeed/Vertex-Forge)
@@ -34,6 +34,10 @@
 
 ## 🌟 Key Architectural Highlights
 
+- **Google Jules Cloud Mission Dispatcher**: Dedicated interactive UI modal (`JulesCloudMissionModal.tsx`) providing automated GitHub repository selection, plan formulation review, and background Pull Request creation with real-time cloud activity streams.
+- **Zero-Config Local AI Auto-Detection**: One-click concurrent probe across `localhost:11434` (Ollama) and `localhost:1234` (LM Studio) auto-detecting installed models (Llama 3.3, Qwen 2.5 Coder, DeepSeek) for 100% private, offline coding.
+- **Native Desktop Terminal Execution (Electron Bridge)**: Real host shell execution on Windows PowerShell and CMD with live bidirectional directory tracking, child process spawning, and ANSI error diagnosis.
+- **Universal Side-by-Side Visual Diff Viewer**: Persistent 1-click diff comparison against Git HEAD in the editor header, supporting split-line inspection, hunk navigation, and AI code review.
 - **Visual Swarm Cockpit & Live Graph**: Interactive real-time node topology drawer showing live specialist agents, active RWLock file reservations, pulse monitors, and one-click launchpads.
 - **Hierarchical Multi-Agent Parallel Swarms**: Decomposes complex software requirements into ordered Directed Acyclic Graph (DAG) task trees executed concurrently across 10 specialized Team Leads with Reader-Writer Lock (`RWLock`) file reservation to eliminate merge deadlocks.
 - **Cursor-Grade Inline Ghost-Text Autocomplete**: Monaco Editor inline completions provider supporting Tab-to-Accept, AST heuristics for rapid language pattern predictions, and multi-line speculative completion.

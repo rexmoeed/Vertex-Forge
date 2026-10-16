@@ -554,6 +554,10 @@ export const BottomPanel: React.FC = () => {
               className="px-3 py-1.5 border-b flex items-center justify-between gap-2 overflow-x-auto no-scrollbar"
             >
               <div className="flex items-center gap-1.5 shrink-0">
+                <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold mr-2 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{typeof window !== 'undefined' && (window as any).desktopAPI?.isElectron ? 'Native Shell (Win32)' : 'Native Bridge'}</span>
+                </span>
                 <span className="text-[10px] uppercase font-sans font-semibold mr-1" style={{ color: 'var(--ide-text-muted)' }}>Quick:</span>
                 {['npm install', 'npm run dev', 'npm test', 'npm run build', 'git status', 'git diff', 'clear'].map(cmd => (
                   <button

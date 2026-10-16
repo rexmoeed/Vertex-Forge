@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { AIProviderService } from '../aiProviderService';
 import { CodebaseIntelligenceEngine } from '../codebaseIntelligence';
 import { TerminalService } from '../terminalService';
+import { LocalLLMService } from '../localLLMService';
 import { VirtualFileSystem } from '../virtualFs';
 
 // Ensure localStorage is polyfilled in Node.js test runner
@@ -217,6 +218,37 @@ describe('Vertex Forge AI Provider Hub & Intelligent Engine Test Suite', () => {
       const errText = TerminalService.extractErrorContext(session);
       expect(errText).toContain('Cannot find module');
       expect(errText).toContain('/workspace');
+    });
+
+    it('executes native shell commands directly via desktopAPI in Electron environment', async () => {
+      const session = TerminalService.createDefaultSession('/workspace');
+      
+      // Mock window.desktopAPI
+      (globalThis as any).window = {
+        desktopAPI: {
+          isElectron: true,
+          executeCommand: async (cmd: string, opts?: any) => ({
+            stdout: 'v22.14.0\n',
+            stderr: '',
+            exitCode: 0,
+            durationMs: 12,
+          }),
+        },
+      };
+
+      const res = await TerminalService.executeCommand(session, 'node -v');
+      expect(res.stdout).toBe('v22.14.0\n');
+      expect(res.exitCode).toBe(0);
+      expect(session.logs.some(l => l.text.includes('v22.14.0'))).toBe(true);
+      delete (globalThis as any).window;
+    });
+
+    it('auto-detects local LLM servers across endpoints via LocalLLMService', async () => {
+      const result = await LocalLLMService.autoDetectAllEndpoints();
+      expect(result).toBeDefined();
+      expect(Array.isArray(result.endpoints)).toBe(true);
+      expect(typeof result.onlineCount).toBe('number');
+      expect(typeof result.detectedModelsCount).toBe('number');
     });
   });
 });

@@ -38,6 +38,7 @@ import { OpenFolderModal } from './components/modals/OpenFolderModal';
 import { CursorComposerModal } from './components/cursor/CursorComposerModal';
 import { CursorRulesModal } from './components/cursor/CursorRulesModal';
 import { WalkthroughTourModal } from './components/modals/WalkthroughTourModal';
+import { JulesCloudMissionModal } from './components/modals/JulesCloudMissionModal';
 import { useCommandInitializer } from './hooks/useCommandInitializer';
 
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -89,6 +90,7 @@ function IDEWorkbench() {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [isCursorRulesOpen, setIsCursorRulesOpen] = useState(false);
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
+  const [isJulesMissionOpen, setIsJulesMissionOpen] = useState(false);
 
   // Auto-launch walkthrough tour for first-time users
   useEffect(() => {
@@ -282,6 +284,7 @@ function IDEWorkbench() {
         onOpenComposer={() => setIsComposerOpen(true)}
         onOpenCursorRules={() => setIsCursorRulesOpen(true)}
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
+        onOpenJulesMission={() => setIsJulesMissionOpen(true)}
       />
 
       {/* 3. MAIN WORKBENCH PANELS LAYOUT */}
@@ -454,6 +457,11 @@ function IDEWorkbench() {
       />
 
       <VoiceCodingModal />
+
+      <JulesCloudMissionModal
+        isOpen={isJulesMissionOpen}
+        onClose={() => setIsJulesMissionOpen(false)}
+      />
 
       <CloneRepoModal
         isOpen={isCloneModalOpen}
