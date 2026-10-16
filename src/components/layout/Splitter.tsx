@@ -8,7 +8,7 @@ interface SplitterProps {
   className?: string;
 }
 
-export const Splitter: React.FC<SplitterProps> = ({
+export const Splitter: React.FC<SplitterProps> = React.memo(({
   direction,
   onResize,
   onDoubleClick,
@@ -113,4 +113,4 @@ export const Splitter: React.FC<SplitterProps> = ({
       </div>
     </div>
   );
-};
+});
