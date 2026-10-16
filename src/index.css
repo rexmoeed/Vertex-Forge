@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@variant dark (&:where(.dark, .dark *));
 
 :root {
   /* Default Design Tokens (Antigravity Obsidian / Cursor Dark) */
@@ -517,6 +517,7 @@ pre {
 .line-clamp-1-safe {
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: break-word;
@@ -527,6 +528,7 @@ pre {
 .line-clamp-2-safe {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: break-word;
@@ -537,6 +539,7 @@ pre {
 .line-clamp-3-safe {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: break-word;
