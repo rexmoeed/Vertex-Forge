@@ -7,11 +7,12 @@
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.0+-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Electron](https://img.shields.io/badge/Electron-34+-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Tests](https://img.shields.io/badge/Tests-237%2F237%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-290%2F290%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Type Check](https://img.shields.io/badge/tsc-0%20Errors-brightgreen)](https://www.typescriptlang.org/)
 [![Parallel Swarms](https://img.shields.io/badge/Parallel%20Swarms-4%20Engines-cyan)](https://github.com/rexmoeed/Vertex-Forge)
 [![Engineering Skills](https://img.shields.io/badge/Engineering%20Skills-33%20Active-purple)](https://github.com/rexmoeed/Vertex-Forge)
 [![Local LLMs](https://img.shields.io/badge/Local%20AI-Ollama%20%7C%20DeepSeek-orange)](https://github.com/rexmoeed/Vertex-Forge)
+[![Google Jules](https://img.shields.io/badge/Google%20Jules-Cloud%20PR%20Agent-blue?logo=google&logoColor=white)](https://jules.google.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 *A state-of-the-art, fully autonomous, zero-mock developer workstation uniting real filesystem manipulation, interactive WebSocket PTY terminals, multi-provider BYOK AI orchestration, parallel hierarchical agent swarms, 33 specialized engineering skills, visual mission cockpits, inline ghost-text predictions, vision-to-code synthesis, offline local LLM hubs, Devin-style shadow sandboxes, and enterprise governance gates.*
@@ -41,7 +42,9 @@
 - **Devin-Style Shadow Sandbox & Atomic Verification**: Isolates pending mutations in an in-memory virtual staging environment, validates AST syntax, verifies relative import integrity, runs security gates, and performs atomic commits with instant rollback.
 - **Zero-Native Dialog Experience**: Chrome-native popups (`showOpenFilePicker`, `showDirectoryPicker`, `window.alert`, `window.confirm`, `window.prompt`) have been permanently replaced by a custom-themed in-app workspace browser with drive navigation, path breadcrumbs, bookmark history, and folder creation.
 - **Windows Installable & Portable Packages**: Pre-packaged as a Windows Setup Installer (`Vertex Forge Setup 1.0.0.exe`) and portable single-file executable with cryptographic verification.
-- **BYOK Multi-Provider Hub**: Direct first-class support for **Anthropic (Claude 3.5 Sonnet / Opus / 3.7)**, **Google Gemini (2.5 Pro / 2.0 Flash)**, **OpenAI (GPT-4o / o1 / o3-mini)**, **OpenRouter (460+ models)**, and **Local Endpoints (Ollama, LM Studio, vLLM)**.
+- **Google Jules Cloud Agent & Autonomous PRs**: Native integration with Google Jules (`jules.googleapis.com`) allowing developers to trigger asynchronous cloud tasks in sandboxed VMs, approve execution plans, track real-time agent activities, and merge automated GitHub Pull Requests directly from the IDE.
+- **BYOK Multi-Provider Hub**: Direct first-class support for **Google Jules**, **Google Gemini (3.8 Flash / 2.5 Pro)**, **Anthropic (Claude 3.7 / 3.5 Sonnet)**, **OpenAI (GPT-4o / o1 / o3-mini)**, **DeepSeek**, **OpenRouter (460+ models)**, and **Local Endpoints (Ollama, LM Studio, vLLM)**.
+- **Universal Text Containment & UI Resilience**: Bulletproof layout architecture enforcing flexbox boundary preservation (`min-width: 0`), automated prose word-breaking, and overflow containment across all sidebars, chat bubbles, Omnibar, and modals on any viewport.
 - **Real WebSocket PTY Terminals**: Multi-tab terminal driven by background `node-pty` processes streaming raw xterm.js sessions with full interactive shell support (PowerShell, CMD, Git Bash, WSL).
 - **Single Source of Truth Theming**: 60+ curated themes (Vertex Forge Dark, VS Code Modern, Dracula, Catppuccin, Monokai, Tokyo Night, Gruvbox) synchronized instantly across CSS variables, Monaco Editor syntax, and xterm ANSI palettes with pre-paint zero-flash injection.
 - **Zero-Loss Session Retention & Hot-Exit**: Reopening Vertex Forge instantly restores open files, cursor coordinates, scroll offsets, terminal working directories, active chat contexts, and dirty buffer recovery.
@@ -179,7 +182,8 @@ Vertex Forge includes **33 specialized autonomous engineering skills** invokable
 | **Workspace Browser** | `WorkspaceOpenModal.tsx` | Native dialog replacement with physical drive browsing and folder creation. |
 | **Desktop Bridge** | `desktopBridge.ts` | Dual-mode desktop integration (Electron IPC + HTTP REST fallback). |
 | **Virtual File System**| `virtualFs.ts` | In-memory VFS with reactive watchers and git diff staging. |
-| **Multi-Provider Hub** | `aiProviderService.ts` | BYOK integration with Claude 3.7, Gemini 2.5, GPT-4o, and DeepSeek. |
+| **Multi-Provider Hub** | `aiProviderService.ts` | BYOK integration with Google Jules, Claude 3.7, Gemini 3.8 Flash, GPT-4o, and DeepSeek. |
+| **Google Jules Cloud** | `julesService.ts` | Asynchronous cloud coding missions, GitHub sources, plan sign-offs & PR workflows. |
 | **PTY Terminal** | `TerminalDock.tsx` | Real interactive terminal streaming raw xterm.js sessions via `node-pty`. |
 | **Security Vault** | `credentialVaultService.ts` | Cryptographic AES-256-GCM vault with automatic memory zeroization. |
 | **Live Debugger** | `debuggerEngine.ts` | Breakpoints, call-stack inspection, variable evaluation, and watchpoints. |
@@ -279,6 +283,7 @@ Copy `.env.example` to `.env` to configure runtime options:
 | `VITE_DEV_SERVER_URL` | `http://localhost:5173` | Internal dev server link for Vite client proxy |
 | `APP_URL` | `http://localhost:3000` | Base public URL for OAuth callbacks & self-referential links |
 | `GEMINI_API_KEY` | *(Optional)* | Cloud AI provider token (not required for offline/local LLMs or test suites) |
+| `JULES_API_KEY` | *(Optional)* | Google Jules Cloud Agent token for autonomous missions, VM tasks & GitHub PRs |
 
 ---
 
@@ -297,7 +302,7 @@ npm run electron:build
 ### Verification & Quality Assurance
 
 ```bash
-# Run complete test suite (237 tests across 14 test suites)
+# Run complete test suite (290 tests across 17 test suites (100% passing))
 npm test
 
 # Verify TypeScript type integrity (0 errors)
