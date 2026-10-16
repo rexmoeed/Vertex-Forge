@@ -102,7 +102,7 @@ app.post('/api/ai/config', async (req: Request, res: Response) => {
 // Real AI Provider Connection Verification
 app.post('/api/ai/provider/test', async (req: Request, res: Response) => {
   const { providerId = 'gemini', apiKey: inputKey, baseUrl, model, testType = 'auth' } = req.body;
-  const key = inputKey || (providerId === 'gemini' ? (currentApiKey || process.env.GEMINI_API_KEY) : '');
+  const key = inputKey || (providerId === 'gemini' ? (currentApiKey || process.env.GEMINI_API_KEY) : providerId === 'jules' ? process.env.JULES_API_KEY : '');
   const startTime = Date.now();
 
   try {
@@ -138,6 +138,60 @@ app.post('/api/ai/provider/test', async (req: Request, res: Response) => {
         message: `Connected successfully to Google Gemini (${model || 'gemini-3.8-flash'}) in ${latencyMs}ms. Response: ${response.text?.trim() || 'OK'}`,
         timestamp: Date.now(),
       });
+    }
+
+    // Google Jules Autonomous Cloud Agent
+    if (providerId === 'jules') {
+      const julesKey = key || process.env.JULES_API_KEY;
+      if (!julesKey) {
+        return res.json({
+          providerId,
+          success: false,
+          testType,
+          latencyMs: 0,
+          message: 'Google Jules API key required. Set JULES_API_KEY in .env or enter your key.',
+          timestamp: Date.now(),
+        });
+      }
+
+      try {
+        const julesRes = await fetch('https://jules.googleapis.com/v1alpha/sources', {
+          headers: { 'x-goog-api-key': julesKey },
+        });
+
+        const latencyMs = Date.now() - startTime;
+        if (julesRes.ok) {
+          const data: any = await julesRes.json().catch(() => ({}));
+          const count = data.sources?.length || 0;
+          return res.json({
+            providerId,
+            success: true,
+            testType,
+            latencyMs,
+            message: `Connected successfully to Google Jules Platform in ${latencyMs}ms. Found ${count} connected GitHub repositories.`,
+            timestamp: Date.now(),
+          });
+        } else {
+          const errData: any = await julesRes.json().catch(() => ({}));
+          return res.json({
+            providerId,
+            success: false,
+            testType,
+            latencyMs,
+            message: errData?.error?.message || `Jules API returned HTTP ${julesRes.status}`,
+            timestamp: Date.now(),
+          });
+        }
+      } catch (err: any) {
+        return res.json({
+          providerId,
+          success: false,
+          testType,
+          latencyMs: Date.now() - startTime,
+          message: `Failed to connect to Google Jules: ${err?.message}`,
+          timestamp: Date.now(),
+        });
+      }
     }
 
     // Anthropic
@@ -3202,6 +3256,179 @@ app.post('/api/security/fixture/create', async (req: Request, res: Response) => 
   }
 });
 
+
+// ==========================================
+// Google Jules Cloud Agent API Endpoints
+// ==========================================
+
+function getJulesApiKey(req: Request): string | undefined {
+  const headerKey = req.headers['x-goog-api-key'] as string;
+  return headerKey || process.env.JULES_API_KEY;
+}
+
+// List connected GitHub sources/repositories
+app.get('/api/jules/sources', async (req: Request, res: Response) => {
+  const apiKey = getJulesApiKey(req);
+  if (!apiKey) {
+    return res.status(401).json({ error: 'Jules API key is required. Set JULES_API_KEY in .env or provide x-goog-api-key header.' });
+  }
+
+  try {
+    const url = new URL('https://jules.googleapis.com/v1alpha/sources');
+    if (req.query.pageSize) url.searchParams.set('pageSize', String(req.query.pageSize));
+    if (req.query.pageToken) url.searchParams.set('pageToken', String(req.query.pageToken));
+
+    const response = await fetch(url.toString(), {
+      headers: { 'x-goog-api-key': apiKey },
+    });
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to fetch Jules sources', details: err?.message });
+  }
+});
+
+// List coding sessions
+app.get('/api/jules/sessions', async (req: Request, res: Response) => {
+  const apiKey = getJulesApiKey(req);
+  if (!apiKey) {
+    return res.status(401).json({ error: 'Jules API key is required.' });
+  }
+
+  try {
+    const url = new URL('https://jules.googleapis.com/v1alpha/sessions');
+    if (req.query.pageSize) url.searchParams.set('pageSize', String(req.query.pageSize));
+    if (req.query.pageToken) url.searchParams.set('pageToken', String(req.query.pageToken));
+
+    const response = await fetch(url.toString(), {
+      headers: { 'x-goog-api-key': apiKey },
+    });
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to list Jules sessions', details: err?.message });
+  }
+});
+
+// Create an autonomous coding session
+app.post('/api/jules/sessions', async (req: Request, res: Response) => {
+  const apiKey = getJulesApiKey(req);
+  if (!apiKey) {
+    return res.status(401).json({ error: 'Jules API key is required.' });
+  }
+
+  try {
+    const response = await fetch('https://jules.googleapis.com/v1alpha/sessions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to create Jules session', details: err?.message });
+  }
+});
+
+// Get session details
+app.get('/api/jules/sessions/:id', async (req: Request, res: Response) => {
+  const apiKey = getJulesApiKey(req);
+  if (!apiKey) {
+    return res.status(401).json({ error: 'Jules API key is required.' });
+  }
+
+  try {
+    const sessionId = encodeURIComponent(req.params.id);
+    const response = await fetch(`https://jules.googleapis.com/v1alpha/sessions/${sessionId}`, {
+      headers: { 'x-goog-api-key': apiKey },
+    });
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to get Jules session', details: err?.message });
+  }
+});
+
+// Get activities/steps within a session
+app.get('/api/jules/sessions/:id/activities', async (req: Request, res: Response) => {
+  const apiKey = getJulesApiKey(req);
+  if (!apiKey) {
+    return res.status(401).json({ error: 'Jules API key is required.' });
+  }
+
+  try {
+    const sessionId = encodeURIComponent(req.params.id);
+    const url = new URL(`https://jules.googleapis.com/v1alpha/sessions/${sessionId}/activities`);
+    if (req.query.pageSize) url.searchParams.set('pageSize', String(req.query.pageSize));
+    if (req.query.pageToken) url.searchParams.set('pageToken', String(req.query.pageToken));
+
+    const response = await fetch(url.toString(), {
+      headers: { 'x-goog-api-key': apiKey },
+    });
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to get Jules activities', details: err?.message });
+  }
+});
+
+// Approve execution plan
+app.post('/api/jules/sessions/:id/approve', async (req: Request, res: Response) => {
+  const apiKey = getJulesApiKey(req);
+  if (!apiKey) {
+    return res.status(401).json({ error: 'Jules API key is required.' });
+  }
+
+  try {
+    const sessionId = encodeURIComponent(req.params.id);
+    const response = await fetch(`https://jules.googleapis.com/v1alpha/sessions/${sessionId}:approvePlan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify(req.body || {}),
+    });
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to approve Jules plan', details: err?.message });
+  }
+});
+
+// Send message to active session
+app.post('/api/jules/sessions/:id/message', async (req: Request, res: Response) => {
+  const apiKey = getJulesApiKey(req);
+  if (!apiKey) {
+    return res.status(401).json({ error: 'Jules API key is required.' });
+  }
+
+  try {
+    const sessionId = encodeURIComponent(req.params.id);
+    const response = await fetch(`https://jules.googleapis.com/v1alpha/sessions/${sessionId}:sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify(req.body || {}),
+    });
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to send message to Jules', details: err?.message });
+  }
+});
 
 // Start Express server and attach Vite middleware
 async function startServer() {

@@ -597,6 +597,26 @@ export class AIProviderService {
         description: 'On-device reasoning model running locally via Ollama / LM Studio.',
       },
     ],
+    jules: [
+      {
+        id: 'jules-cloud-agent',
+        name: 'Google Jules Autonomous Agent',
+        providerId: 'jules',
+        contextWindow: 1048576,
+        maxOutputTokens: 8192,
+        inputModalities: ['text', 'image'],
+        outputModalities: ['text', 'code'],
+        supportsToolCalling: true,
+        supportsStreaming: true,
+        supportsStructuredOutput: true,
+        supportsVision: true,
+        isReasoning: true,
+        isCoding: true,
+        pricing: { promptPer1k: 0, completionPer1k: 0 },
+        status: 'verified',
+        description: 'Google cloud-based coding agent that executes tasks in secure cloud VMs and generates GitHub Pull Requests.',
+      },
+    ],
   };
 
   public static getInitialProviders(): ProviderConfig[] {
@@ -793,6 +813,20 @@ export class AIProviderService {
         authMethod: 'api_key',
         models: this.DEFAULT_MODELS.custom,
         defaultModelId: 'deepseek-chat',
+      },
+      {
+        id: 'jules',
+        name: 'Google Jules',
+        type: 'cloud',
+        description: 'Autonomous cloud coding agent that executes tasks and creates GitHub pull requests.',
+        icon: 'Sparkles',
+        enabled: true,
+        status: 'connected',
+        isVerified: true,
+        baseUrl: 'https://jules.googleapis.com/v1alpha',
+        authMethod: 'api_key',
+        models: this.DEFAULT_MODELS.jules,
+        defaultModelId: 'jules-cloud-agent',
       },
       {
         id: 'local',

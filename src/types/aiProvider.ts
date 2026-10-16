@@ -13,6 +13,7 @@ export type ProviderId =
   | 'ollama'
   | 'lmstudio'
   | 'local'
+  | 'jules'
   | 'custom';
 
 export type ModelCapability =
