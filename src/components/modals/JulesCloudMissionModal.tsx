@@ -115,6 +115,7 @@ export const JulesCloudMissionModal: React.FC<JulesCloudMissionModalProps> = ({
   useEffect(() => {
     if (!currentSession?.id && !currentSession?.name) return;
     const sessionId = currentSession.id || currentSession.name;
+    const isTerminal = ['COMPLETED', 'FAILED', 'CANCELLED'].includes(currentSession.state || '');
 
     const fetchStatus = async () => {
       try {
@@ -129,6 +130,8 @@ export const JulesCloudMissionModal: React.FC<JulesCloudMissionModalProps> = ({
     };
 
     fetchStatus();
+    if (isTerminal) return;
+
     const interval = setInterval(fetchStatus, 4000);
     return () => clearInterval(interval);
   }, [currentSession?.id, currentSession?.name, currentSession?.state]);

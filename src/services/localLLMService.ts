@@ -134,8 +134,10 @@ export class LocalLLMService {
           endpoint.status = 'offline';
         }
       } else {
-        // LM Studio / OpenAI-compatible /v1/models
-        const res = await this.fetchClient(`${endpoint.baseUrl}/models`, {
+        // LM Studio / OpenAI-compatible /v1/models (handle with or without /v1 and trailing slash)
+        const cleanBase = endpoint.baseUrl.replace(/\/+$/, '');
+        const modelsUrl = cleanBase.endsWith('/v1') ? `${cleanBase}/models` : `${cleanBase}/v1/models`;
+        const res = await this.fetchClient(modelsUrl, {
           method: 'GET',
           headers: { Accept: 'application/json' },
         });

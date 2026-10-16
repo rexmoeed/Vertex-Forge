@@ -50,6 +50,7 @@ export const VisualDiffEditor: React.FC<VisualDiffEditorProps> = ({
     try {
       const result = await GitWorkflowService.getFileDiff(filePath, staged);
       setDiff(result);
+      setActiveHunkIndex(0);
     } catch (e) {
       console.error('Failed to load diff:', e);
     } finally {

@@ -148,9 +148,40 @@ export class TerminalService {
       return { stdout: session.cwd, stderr: '', exitCode: 0 };
     }
 
-    if (trimmed.startsWith('cd ')) {
-      const targetDir = trimmed.slice(3).trim();
-      session.cwd = targetDir === '..' ? session.cwd.split('/').slice(0, -1).join('/') || '/' : `${session.cwd}/${targetDir}`.replace(/\/+/g, '/');
+    if (trimmed === 'cd' || trimmed.startsWith('cd ')) {
+      const rawTarget = trimmed.startsWith('cd ') ? trimmed.slice(3).trim().replace(/^['"]|['"]$/g, '') : '~';
+      let nextCwd = session.cwd;
+
+      if (!rawTarget || rawTarget === '~') {
+        nextCwd = session.cwd.includes('\\') ? session.cwd.split('\\').slice(0, 2).join('\\') || session.cwd : '/workspace';
+      } else if (rawTarget === '..') {
+        // Robust Windows and POSIX parent navigation
+        const isWindows = /^[a-zA-Z]:/i.test(session.cwd) || session.cwd.includes('\\');
+        const parts = session.cwd.split(/[\\\/]+/).filter(Boolean);
+        if (parts.length > 1) {
+          parts.pop();
+          if (isWindows) {
+            nextCwd = parts.length === 1 && /^[a-zA-Z]:$/i.test(parts[0]) ? `${parts[0]}\\` : parts.join('\\');
+          } else {
+            nextCwd = '/' + parts.join('/');
+          }
+        } else if (isWindows && parts.length === 1) {
+          nextCwd = `${parts[0]}\\`;
+        } else {
+          nextCwd = '/';
+        }
+      } else if (/^[a-zA-Z]:[\\\/]/i.test(rawTarget) || rawTarget.startsWith('/') || rawTarget.startsWith('\\')) {
+        // Absolute path direct assignment
+        nextCwd = rawTarget;
+      } else {
+        // Relative path navigation
+        const isWindows = session.cwd.includes('\\') || /^[a-zA-Z]:/i.test(session.cwd);
+        const sep = isWindows ? '\\' : '/';
+        const cleanBase = session.cwd.replace(/[\\\/]+$/, '');
+        nextCwd = `${cleanBase}${sep}${rawTarget}`;
+      }
+
+      session.cwd = nextCwd;
       session.logs.push({
         type: 'stdout',
         text: `Directory changed to: ${session.cwd}`,
