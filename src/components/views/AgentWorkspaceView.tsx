@@ -157,7 +157,7 @@ export const AgentWorkspaceView: React.FC = () => {
       className="flex-1 w-full h-full overflow-y-auto p-6 flex flex-col gap-6 select-none min-h-0"
     >
       {/* 1. ORCHESTRATOR COMMAND BAR */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg">
             <Users className="w-5 h-5" />
@@ -175,25 +175,25 @@ export const AgentWorkspaceView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-6 border-r border-slate-800 pr-6 text-xs">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex items-center gap-5 border-r border-slate-800 pr-5 text-xs whitespace-nowrap shrink-0">
             <div>
-              <span className="text-slate-500 text-[10px] uppercase font-semibold block">Quality Gates</span>
-              <span className="text-emerald-400 font-bold font-mono text-sm">{totalQualityGates} Passed</span>
+              <span className="text-slate-500 text-[10px] uppercase font-semibold block whitespace-nowrap">Quality Gates</span>
+              <span className="text-emerald-400 font-bold font-mono text-sm whitespace-nowrap">{totalQualityGates} Passed</span>
             </div>
             <div>
-              <span className="text-slate-500 text-[10px] uppercase font-semibold block">Delegated Tasks</span>
-              <span className="text-indigo-400 font-bold font-mono text-sm">{tasks.length} Managed</span>
+              <span className="text-slate-500 text-[10px] uppercase font-semibold block whitespace-nowrap">Delegated Tasks</span>
+              <span className="text-indigo-400 font-bold font-mono text-sm whitespace-nowrap">{tasks.length} Managed</span>
             </div>
             <div>
-              <span className="text-slate-500 text-[10px] uppercase font-semibold block">File Locks</span>
-              <span className="text-cyan-400 font-bold font-mono text-sm">{hierarchyService.getFileReservations().length} Active</span>
+              <span className="text-slate-500 text-[10px] uppercase font-semibold block whitespace-nowrap">File Locks</span>
+              <span className="text-cyan-400 font-bold font-mono text-sm whitespace-nowrap">{hierarchyService.getFileReservations().length} Active</span>
             </div>
           </div>
 
           <button
             onClick={() => setActiveView('editor')}
-            className="px-3 py-2 bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-750 hover:border-slate-600 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            className="px-3 py-2 bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-750 hover:border-slate-600 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap shrink-0"
             title="Return to Main Editor Workspace"
           >
             <span>←</span> Editor
@@ -201,60 +201,60 @@ export const AgentWorkspaceView: React.FC = () => {
 
           <button
             onClick={() => setActiveView('providers')}
-            className="px-3 py-2 bg-slate-950 hover:bg-slate-800 text-amber-300 border border-slate-750 hover:border-amber-500/50 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            className="px-3 py-2 bg-slate-950 hover:bg-slate-800 text-amber-300 border border-slate-750 hover:border-amber-500/50 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap shrink-0"
             title="Configure LLM model assignments and BYOK API keys for each agent role"
           >
             <Key className="w-3.5 h-3.5 text-amber-400" />
-            <span>Agent Models & Keys</span>
+            <span className="whitespace-nowrap">Agent Models & Keys</span>
           </button>
 
           <button
             onClick={handleRunParallelSubAgents}
             disabled={isParallelRunning}
-            className="px-4 py-2 bg-gradient-to-r from-amber-500 via-indigo-600 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2 bg-gradient-to-r from-amber-500 via-indigo-600 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer whitespace-nowrap shrink-0"
             title="Decompose any active project and execute multiple sub-agents in parallel"
           >
             {isParallelRunning ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />}
-            <span>{isParallelRunning ? `Running (${activeParallelSubAgents.length} Parallel)...` : 'Decompose & Run Parallel'}</span>
+            <span className="whitespace-nowrap">{isParallelRunning ? `Running (${activeParallelSubAgents.length} Parallel)...` : 'Decompose & Run Parallel'}</span>
           </button>
 
           <button
             onClick={handleRunFullTeamBenchmark}
             disabled={isOrchestrating || isParallelRunning}
-            className="px-3.5 py-2 bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-750 hover:border-slate-600 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            className="px-3.5 py-2 bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-750 hover:border-slate-600 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap shrink-0"
           >
             {isOrchestrating ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-white" />}
-            <span>Benchmark</span>
+            <span className="whitespace-nowrap">Benchmark</span>
           </button>
         </div>
       </div>
 
       {/* 1A. DYNAMIC PROJECT DECOMPOSITION & MULTI-AGENT PARALLEL EXECUTION STUDIO */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-lg">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shrink-0">
               <Zap className="w-5 h-5 fill-white" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-white">Dynamic Project Decomposition & Multi-Agent Parallel Tasking</h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-sm font-bold text-white whitespace-nowrap">Dynamic Project Decomposition & Multi-Agent Parallel Tasking</h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
                   {isParallelRunning ? `${activeParallelSubAgents.length} Active in Parallel` : 'Ready to Decompose'}
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap shrink-0">
                   Workspace: {activeProject?.name || 'Current Project'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-400 mt-0.5">
                 Any project is decomposed into a structured DAG of sub-tasks across 10 specialized Team Leads and executed concurrently with file-lock concurrency control.
               </p>
             </div>
           </div>
 
           {/* Concurrency Selector */}
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
+          <div className="flex items-center gap-2 whitespace-nowrap shrink-0">
+            <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1 whitespace-nowrap shrink-0">
               <Split className="w-3 h-3 text-amber-400" />
               Parallel Threads:
             </span>
