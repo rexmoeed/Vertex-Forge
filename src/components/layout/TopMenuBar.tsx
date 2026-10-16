@@ -11,7 +11,6 @@ import {
   PanelLeft,
   PanelBottom,
   Search,
-  Sparkles,
   Check,
   FolderOpen,
   ArrowLeft,
@@ -48,6 +47,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
 
   const [activeMenu, setActiveMenu] = useState<CommandCategory | null>(null);
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [, setCommandVersion] = useState(0);
   const menuBarRef = useRef<HTMLDivElement>(null);
 
@@ -79,45 +79,100 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
     'Help',
   ];
 
+  // Helper to focus editor textarea for native actions
+  const focusEditorTextarea = (): HTMLTextAreaElement | null => {
+    const ta = document.querySelector('textarea.scrollbar-slim') as HTMLTextAreaElement | null;
+    if (ta) {
+      ta.focus();
+      return ta;
+    }
+    return null;
+  };
+
   // Close menus on outside click or Escape
   useEffect(() => {
     const handlePointerDown = (e: MouseEvent) => {
       if (menuBarRef.current && !menuBarRef.current.contains(e.target as Node)) {
         setActiveMenu(null);
         setIsProjectDropdownOpen(false);
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setActiveMenu(null);
-        setIsProjectDropdownOpen(false);
+        setSelectedIndex(-1);
       }
     };
 
     window.addEventListener('mousedown', handlePointerDown);
-    window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('mousedown', handlePointerDown);
-      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  // Keyboard navigation for menu bar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!activeMenu && !isProjectDropdownOpen) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setActiveMenu(null);
+        setIsProjectDropdownOpen(false);
+        setSelectedIndex(-1);
+        return;
+      }
+
+      if (activeMenu) {
+        const commands = getCategoryCommands(activeMenu);
+        const currentCatIndex = menuCategories.indexOf(activeMenu);
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const nextCat = menuCategories[(currentCatIndex + 1) % menuCategories.length];
+          setActiveMenu(nextCat);
+          setSelectedIndex(-1);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const prevCat = menuCategories[(currentCatIndex - 1 + menuCategories.length) % menuCategories.length];
+          setActiveMenu(prevCat);
+          setSelectedIndex(-1);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setSelectedIndex(prev => (prev + 1) % commands.length);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setSelectedIndex(prev => (prev - 1 + commands.length) % commands.length);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (selectedIndex >= 0 && selectedIndex < commands.length) {
+            const cmd = commands[selectedIndex];
+            if (!cmd.isEnabled || cmd.isEnabled()) {
+              executeCommandItem(cmd);
+            }
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeMenu, isProjectDropdownOpen, selectedIndex]);
 
   const handleMenuClick = (e: React.MouseEvent, cat: CommandCategory) => {
     e.stopPropagation();
     setActiveMenu(prev => (prev === cat ? null : cat));
     setIsProjectDropdownOpen(false);
+    setSelectedIndex(-1);
   };
 
   const handleMenuHover = (cat: CommandCategory) => {
-    if (activeMenu !== null) {
+    if (activeMenu !== null && activeMenu !== cat) {
       setActiveMenu(cat);
+      setSelectedIndex(-1);
     }
   };
 
-  const handleCommandClick = async (e: React.MouseEvent, cmd: Command) => {
-    e.stopPropagation();
+  const executeCommandItem = async (cmd: Command) => {
     setActiveMenu(null);
+    setSelectedIndex(-1);
     try {
       if (cmd.execute) {
         await cmd.execute();
@@ -146,8 +201,15 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             shortcut: 'Ctrl+N',
             description: 'Create a new file in workspace',
             execute: () => {
-              const name = prompt('Enter new file path (e.g. src/utils/helpers.ts):');
-              if (name) ide.createFileOrFolder?.(name, 'file', '');
+              ide.setActiveView?.('editor');
+              ide.setActiveSidebarTab?.('explorer');
+              layout.focusPanel?.('primarySidebar');
+              if (ide.startCreatingFile) {
+                ide.startCreatingFile();
+              } else {
+                const name = prompt('Enter new file path (e.g. src/utils/helpers.ts):');
+                if (name) ide.createFileOrFolder?.(name, 'file', '');
+              }
             },
           },
           {
@@ -156,8 +218,15 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             category: 'File',
             description: 'Create a new directory in workspace',
             execute: () => {
-              const name = prompt('Enter new folder path (e.g. src/components/ui):');
-              if (name) ide.createFileOrFolder?.(name, 'folder');
+              ide.setActiveView?.('editor');
+              ide.setActiveSidebarTab?.('explorer');
+              layout.focusPanel?.('primarySidebar');
+              if (ide.startCreatingFolder) {
+                ide.startCreatingFolder();
+              } else {
+                const name = prompt('Enter new folder path (e.g. src/components/ui):');
+                if (name) ide.createFileOrFolder?.(name, 'folder');
+              }
             },
           },
           {
@@ -175,6 +244,14 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             shortcut: 'Ctrl+O',
             description: 'Open an existing real project folder from disk',
             execute: () => ide.openLocalFolder?.(),
+          },
+          {
+            id: 'file.openFile',
+            title: 'Open File... (Quick Search)',
+            category: 'File',
+            shortcut: 'Ctrl+P',
+            description: 'Search and open any file by name',
+            execute: () => onOpenCommandPalette?.(),
           },
           {
             id: 'file.cloneRepo',
@@ -213,11 +290,21 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
           },
           {
             id: 'file.closeProject',
-            title: 'Close Project',
+            title: 'Close Project / Workspace',
             category: 'File',
             shortcut: 'Ctrl+Shift+W',
-            description: 'Safely close project workspace',
+            description: 'Safely close project workspace and return to Welcome screen',
             execute: () => ide.closeProject?.(),
+          },
+          {
+            id: 'file.revertFile',
+            title: 'Revert File Changes',
+            category: 'File',
+            description: 'Discard uncommitted changes in active file',
+            isEnabled: () => !!ide.activeFile,
+            execute: () => {
+              if (ide.activeFile) ide.revertFile?.(ide.activeFile);
+            },
           },
         ];
       case 'Edit':
@@ -228,7 +315,10 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             category: 'Edit',
             shortcut: 'Ctrl+Z',
             description: 'Undo last edit in editor',
-            execute: () => document.execCommand('undo'),
+            execute: () => {
+              const ta = focusEditorTextarea();
+              if (ta) document.execCommand('undo');
+            },
           },
           {
             id: 'edit.redo',
@@ -236,7 +326,56 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             category: 'Edit',
             shortcut: 'Ctrl+Y',
             description: 'Redo last undone edit',
-            execute: () => document.execCommand('redo'),
+            execute: () => {
+              const ta = focusEditorTextarea();
+              if (ta) document.execCommand('redo');
+            },
+          },
+          {
+            id: 'edit.cut',
+            title: 'Cut',
+            category: 'Edit',
+            shortcut: 'Ctrl+X',
+            description: 'Cut selection to clipboard',
+            execute: () => {
+              const ta = focusEditorTextarea();
+              if (ta) document.execCommand('cut');
+            },
+          },
+          {
+            id: 'edit.copy',
+            title: 'Copy',
+            category: 'Edit',
+            shortcut: 'Ctrl+C',
+            description: 'Copy selection to clipboard',
+            execute: () => {
+              const ta = focusEditorTextarea();
+              if (ta) document.execCommand('copy');
+            },
+          },
+          {
+            id: 'edit.paste',
+            title: 'Paste',
+            category: 'Edit',
+            shortcut: 'Ctrl+V',
+            description: 'Paste from clipboard into editor',
+            execute: async () => {
+              const ta = focusEditorTextarea();
+              if (navigator.clipboard?.readText && ta) {
+                try {
+                  const text = await navigator.clipboard.readText();
+                  if (text && ide.updateFileContent) {
+                    const start = ta.selectionStart;
+                    const end = ta.selectionEnd;
+                    const val = ta.value;
+                    const updated = val.substring(0, start) + text + val.substring(end);
+                    ide.updateFileContent(updated);
+                  }
+                } catch {
+                  document.execCommand('paste');
+                }
+              }
+            },
           },
           {
             id: 'edit.selectAll',
@@ -244,7 +383,10 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             category: 'Edit',
             shortcut: 'Ctrl+A',
             description: 'Select all text in focused editor',
-            execute: () => document.execCommand('selectAll'),
+            execute: () => {
+              const ta = focusEditorTextarea();
+              if (ta) ta.select();
+            },
           },
           {
             id: 'edit.findInFiles',
@@ -267,7 +409,10 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             category: 'Selection',
             shortcut: 'Ctrl+A',
             description: 'Select entire file contents',
-            execute: () => document.execCommand('selectAll'),
+            execute: () => {
+              const ta = focusEditorTextarea();
+              if (ta) ta.select();
+            },
           },
           {
             id: 'selection.duplicateLine',
@@ -279,6 +424,17 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
               if (ide.activeFileContent) {
                 ide.updateFileContent?.(ide.activeFileContent + '\n' + ide.activeFileContent.split('\n').slice(-1)[0]);
               }
+            },
+          },
+          {
+            id: 'selection.expandSelection',
+            title: 'Expand Selection',
+            category: 'Selection',
+            shortcut: 'Shift+Alt+Right',
+            description: 'Expand selection to enclosing syntax block',
+            execute: () => {
+              const ta = focusEditorTextarea();
+              if (ta) ta.select();
             },
           },
         ];
@@ -325,6 +481,13 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             execute: () => layout.togglePreview?.(),
           },
           {
+            id: 'view.toggleActivityBar',
+            title: 'Toggle Activity Bar',
+            category: 'View',
+            description: 'Show or hide the slim left activity bar',
+            execute: () => layout.toggleActivityBar?.(),
+          },
+          {
             id: 'view.toggleZenMode',
             title: 'Toggle Zen Mode',
             category: 'View',
@@ -341,9 +504,59 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             execute: () => layout.splitEditor?.('vertical'),
           },
           {
+            id: 'view.splitEditorDown',
+            title: 'Split Editor Down',
+            category: 'View',
+            description: 'Split current editor top-and-bottom',
+            execute: () => layout.splitEditor?.('horizontal'),
+          },
+          {
+            id: 'view.resetLayout',
+            title: 'Reset Layout to Defaults',
+            category: 'View',
+            description: 'Restore default workbench dimensions',
+            execute: () => layout.resetLayout?.(),
+          },
+          {
+            id: 'view.explorer',
+            title: 'Open File Explorer',
+            category: 'View',
+            shortcut: 'Ctrl+Shift+E',
+            description: 'Focus file tree in primary sidebar',
+            execute: () => {
+              ide.setActiveView?.('editor');
+              ide.setActiveSidebarTab?.('explorer');
+              layout.focusPanel?.('primarySidebar');
+            },
+          },
+          {
+            id: 'view.sourceControl',
+            title: 'Open Source Control (Git)',
+            category: 'View',
+            shortcut: 'Ctrl+Shift+G',
+            description: 'Focus git staging and commit panel',
+            execute: () => {
+              ide.setActiveView?.('editor');
+              ide.setActiveSidebarTab?.('git');
+              layout.focusPanel?.('primarySidebar');
+            },
+          },
+          {
+            id: 'view.tests',
+            title: 'Open Test Explorer',
+            category: 'View',
+            description: 'View Vitest test suites and assertions',
+            execute: () => {
+              ide.setActiveView?.('editor');
+              ide.setActiveSidebarTab?.('tests');
+              layout.focusPanel?.('primarySidebar');
+            },
+          },
+          {
             id: 'view.settings',
             title: 'Open Settings & Preferences',
             category: 'View',
+            shortcut: 'Ctrl+,',
             description: 'Configure editor, models and studio behavior',
             execute: () => setActiveView?.('settings'),
           },
@@ -374,7 +587,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             execute: () => {
               if (ide.problems && ide.problems.length > 0) {
                 ide.setActiveSidebarTab?.('problems');
-                layout.focusPanel?.('bottomPanel');
+                layout.focusPanel?.('terminal');
               }
             },
           },
@@ -435,7 +648,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             shortcut: 'Ctrl+Shift+`',
             description: 'Create a new sandboxed bash/powershell terminal',
             execute: () => {
-              layout.focusPanel?.('bottomPanel');
+              layout.focusPanel?.('terminal');
               ide.setBottomPanelTab?.('terminal');
             },
           },
@@ -454,7 +667,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             shortcut: 'Ctrl+`',
             description: 'Show and focus bottom terminal panel',
             execute: () => {
-              layout.focusPanel?.('bottomPanel');
+              layout.focusPanel?.('terminal');
               ide.setBottomPanelTab?.('terminal');
             },
           },
@@ -576,7 +789,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
         borderColor: 'var(--ide-border)',
         color: 'var(--ide-text)',
       }}
-      className="h-8 border-b px-2 flex items-center justify-between select-none z-50 text-xs font-sans relative shrink-0"
+      className="h-8 border-b px-2 flex items-center justify-between select-none z-[100] text-xs font-sans relative shrink-0"
     >
       {/* 1. LEFT: Brand Emblem, Menus & Workspace Switcher */}
       <div className="flex items-center gap-1 min-w-0">
@@ -596,7 +809,8 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
         {/* Workspace Project Dropdown Pill */}
         <div className="relative mr-1 hidden sm:block">
           <button
-            onClick={(e) => {
+            onMouseDown={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               setIsProjectDropdownOpen(!isProjectDropdownOpen);
               setActiveMenu(null);
@@ -612,11 +826,11 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
           {isProjectDropdownOpen && (
             <div
               style={{
-                backgroundColor: 'var(--ide-surface-elevated)',
-                borderColor: 'var(--ide-border)',
-                color: 'var(--ide-text)',
+                backgroundColor: 'var(--ide-surface-elevated, #151926)',
+                borderColor: 'var(--ide-border, rgba(255,255,255,0.1))',
+                color: 'var(--ide-text, #ffffff)',
               }}
-              className="absolute top-full left-0 mt-1 w-64 backdrop-blur-xl border rounded-lg shadow-2xl py-1 z-50 animate-fadeIn"
+              className="absolute top-full left-0 mt-1 w-64 backdrop-blur-xl border rounded-lg shadow-2xl py-1 z-[110] animate-fadeIn"
             >
               <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
                 Workspaces
@@ -624,7 +838,9 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
               {(projects || []).map((p: any) => (
                 <button
                   key={p.id}
-                  onClick={() => {
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     switchProject?.(p.id);
                     setIsProjectDropdownOpen(false);
                   }}
@@ -641,7 +857,9 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
 
               <div className="border-t border-white/10 my-1" />
               <button
-                onClick={() => {
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   setIsProjectDropdownOpen(false);
                   onOpenNewProject?.();
                 }}
@@ -650,7 +868,9 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
                 <span>+</span> New Project with AI Architect...
               </button>
               <button
-                onClick={() => {
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   setIsProjectDropdownOpen(false);
                   ide.openLocalFolder?.();
                 }}
@@ -663,8 +883,8 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
           )}
         </div>
 
-        {/* Application Menus */}
-        <div className="hidden md:flex items-center">
+        {/* Application Menus - always accessible */}
+        <div className="flex items-center">
           {menuCategories.map(cat => {
             const isOpen = activeMenu === cat;
             const commands = getCategoryCommands(cat);
@@ -672,7 +892,13 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             return (
               <div key={cat} className="relative">
                 <button
-                  onClick={(e) => handleMenuClick(e, cat)}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveMenu(prev => (prev === cat ? null : cat));
+                    setIsProjectDropdownOpen(false);
+                    setSelectedIndex(-1);
+                  }}
                   onMouseEnter={() => handleMenuHover(cat)}
                   className={`px-2 py-0.5 rounded text-[11px] transition-colors cursor-pointer ${
                     isOpen
@@ -687,32 +913,42 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
                 {isOpen && (
                   <div
                     style={{
-                      backgroundColor: 'var(--ide-surface-elevated)',
-                      borderColor: 'var(--ide-border)',
-                      color: 'var(--ide-text)',
+                      backgroundColor: 'var(--ide-surface-elevated, #151926)',
+                      borderColor: 'var(--ide-border, rgba(255,255,255,0.1))',
+                      color: 'var(--ide-text, #ffffff)',
                     }}
-                    className="absolute top-full left-0 mt-0.5 min-w-[260px] border rounded-lg shadow-2xl py-1 z-50 animate-fadeIn"
+                    className="absolute top-full left-0 mt-0.5 min-w-[270px] border rounded-lg shadow-2xl py-1 z-[110] animate-fadeIn backdrop-blur-xl"
                   >
                     {commands.length === 0 ? (
                       <div className="px-3 py-2 text-[11px] italic" style={{ color: 'var(--ide-text-muted)' }}>
                         No commands available
                       </div>
                     ) : (
-                      commands.map(cmd => {
+                      commands.map((cmd, idx) => {
                         const isEnabled = cmd.isEnabled ? cmd.isEnabled() : true;
+                        const isSelected = selectedIndex === idx;
 
                         return (
                           <button
                             key={cmd.id}
                             disabled={!isEnabled}
-                            onClick={(e) => handleCommandClick(e, cmd)}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (isEnabled) {
+                                executeCommandItem(cmd);
+                              }
+                            }}
+                            onMouseEnter={() => setSelectedIndex(idx)}
                             style={{
                               color: isEnabled ? 'var(--ide-text)' : 'var(--ide-text-muted)',
                             }}
                             className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between transition-colors ${
-                              isEnabled
+                              isSelected
+                                ? 'bg-emerald-500/25 text-[var(--ide-accent,#00ff88)]'
+                                : isEnabled
                                 ? 'hover:bg-emerald-500/20 hover:text-[var(--ide-accent,#00ff88)] cursor-pointer'
-                                : 'cursor-not-allowed opacity-50'
+                                : 'cursor-not-allowed opacity-40'
                             }`}
                           >
                             <span className="truncate pr-4">{cmd.title}</span>

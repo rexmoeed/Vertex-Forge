@@ -1029,22 +1029,9 @@ export const IDEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
 
-      // If no valid user project is loaded, present the Welcome screen and ask the user what to open!
+      // If no valid user project is loaded, present the Welcome screen cleanly without auto-popping folder dialogs
       if (isMounted) {
         setActiveView('welcome');
-        if (DesktopBridge.isElectron) {
-          // In Electron, automatically trigger the native Windows folder picker!
-          setTimeout(async () => {
-            if (isMounted) {
-              const chosen = await DesktopBridge.openDirectoryDialog();
-              if (chosen && isMounted) {
-                await openLocalFolder(chosen);
-              }
-            }
-          }, 300);
-        } else {
-          setIsOpenFolderModalOpen(true);
-        }
       }
     };
 
