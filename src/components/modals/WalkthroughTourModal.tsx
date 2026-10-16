@@ -299,20 +299,20 @@ export const WalkthroughTourModal: React.FC<WalkthroughTourModalProps> = ({
       >
         {/* Top Header & Progress Bar */}
         <div className="px-5 py-4 border-b border-slate-800 bg-slate-950/80 shrink-0 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-xl ${currentStep.iconBg} border flex items-center justify-center ${currentStep.iconColor} shadow-inner`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-9 h-9 rounded-xl shrink-0 ${currentStep.iconBg} border flex items-center justify-center ${currentStep.iconColor} shadow-inner`}>
               <StepIcon className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 truncate max-w-[200px]">
                   {currentStep.badge}
                 </span>
-                <span className="text-[11px] text-slate-400 font-medium">
+                <span className="text-[11px] text-slate-400 font-medium shrink-0">
                   {currentStepIndex + 1} of {steps.length}
                 </span>
               </div>
-              <h2 className="text-sm sm:text-base font-bold text-white tracking-tight mt-0.5">
+              <h2 className="text-sm sm:text-base font-bold text-white tracking-tight mt-0.5 truncate min-w-0">
                 {currentStep.title}
               </h2>
             </div>
@@ -356,7 +356,7 @@ export const WalkthroughTourModal: React.FC<WalkthroughTourModalProps> = ({
             {currentStep.visualHighlights.map((vh, i) => (
               <div
                 key={i}
-                className="bg-slate-950/60 border border-slate-800 p-3 rounded-xl flex flex-col justify-between"
+                className="bg-slate-950/60 border border-slate-800 p-3 rounded-xl flex flex-col justify-between min-w-0 overflow-hidden break-words"
               >
                 <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">{vh.label}</span>
                 <span className="text-sm font-bold text-white my-0.5">{vh.value}</span>

@@ -737,7 +737,7 @@ export const AgentWorkspaceView: React.FC = () => {
                   else if (lead.role === 'FrontendLead' || lead.role === 'BackendLead' || lead.role === 'FullStackLead') setActiveArtifactTab('code');
                   else setActiveArtifactTab('contracts');
                 }}
-                className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between gap-3 ${
+                className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between gap-3 min-w-0 overflow-hidden break-words ${
                   isSelected
                     ? 'bg-indigo-600/15 border-indigo-500 shadow-md ring-1 ring-indigo-500/30'
                     : 'bg-slate-900/60 border-slate-800 hover:bg-slate-900 hover:border-slate-700'

@@ -445,3 +445,127 @@ html.reduce-motion *::after {
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
+
+
+/* ============================================================
+   UNIVERSAL TEXT CONTAINMENT & OVERFLOW RESILIENCE SYSTEM
+   Guarantees no text ever leaks out of cards, flex containers,
+   modals, panels, sidebars, or toolbars across Vertex Forge
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Ensure flex children don't blow out their parent containers */
+.flex-1,
+[class*='flex-1'] {
+  min-width: 0;
+}
+
+/* Universal text wrapping for prose and descriptions */
+p,
+span:not([class*='whitespace-nowrap']):not([class*='shrink-0']),
+label,
+blockquote,
+li,
+dd,
+dt {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Prevent code snippets and pre blocks from bursting container widths */
+pre,
+code:not([class*='whitespace-nowrap']) {
+  max-width: 100%;
+  overflow-x: auto;
+  word-break: break-word;
+}
+
+/* Pre blocks inside chat or cards */
+pre {
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* Explicit bulletproof containment utility classes */
+.text-contain {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.text-break-all {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+/* Single line ellipsis with automatic flex containment */
+.text-truncate-safe {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Safe multi-line clamp utilities with containment */
+.line-clamp-1-safe {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+}
+
+.line-clamp-2-safe {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+}
+
+.line-clamp-3-safe {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+}
+
+/* Container safety overrides */
+.antigravity-card,
+.antigravity-glass,
+.ide-panel-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+/* Chat bubble text containment */
+.chat-bubble-contain {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.chat-bubble-contain pre,
+.chat-bubble-contain code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}

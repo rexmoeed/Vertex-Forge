@@ -146,10 +146,10 @@ export const SwarmMissionCockpit: React.FC<SwarmMissionCockpitProps> = ({
       </div>
 
       {/* 2. Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800/60 pb-2">
+      <div className="flex items-center gap-2 border-b border-slate-800/60 pb-2 overflow-x-auto scrollbar-none flex-nowrap md:flex-wrap min-w-0 max-w-full">
         <button
           onClick={() => setActiveTab('network_graph')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shrink-0 ${
             activeTab === 'network_graph'
               ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-900'
@@ -161,7 +161,7 @@ export const SwarmMissionCockpit: React.FC<SwarmMissionCockpitProps> = ({
 
         <button
           onClick={() => setActiveTab('launchpad')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shrink-0 ${
             activeTab === 'launchpad'
               ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-900'
@@ -173,7 +173,7 @@ export const SwarmMissionCockpit: React.FC<SwarmMissionCockpitProps> = ({
 
         <button
           onClick={() => setActiveTab('file_locks')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shrink-0 ${
             activeTab === 'file_locks'
               ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-900'
@@ -185,7 +185,7 @@ export const SwarmMissionCockpit: React.FC<SwarmMissionCockpitProps> = ({
 
         <button
           onClick={() => setActiveTab('guardians')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shrink-0 ${
             activeTab === 'guardians'
               ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-900'
@@ -363,7 +363,8 @@ export const SwarmMissionCockpit: React.FC<SwarmMissionCockpitProps> = ({
                     <Lock className={`w-3.5 h-3.5 ${res.mode === 'exclusive_write' ? 'text-amber-400' : 'text-cyan-400'}`} />
                     <button
                       onClick={() => onNavigateToFile?.(res.filePath)}
-                      className="text-slate-200 hover:text-indigo-400 font-mono transition-colors"
+                      className="text-slate-200 hover:text-indigo-400 font-mono transition-colors truncate max-w-[180px] sm:max-w-xs md:max-w-md min-w-0"
+                      title={res.filePath}
                     >
                       {res.filePath}
                     </button>

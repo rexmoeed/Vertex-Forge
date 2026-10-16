@@ -997,15 +997,15 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
       </div>
 
       {/* 2. CENTER: Unified Antigravity / Cursor Omnibar Search Pill */}
-      <div className="flex-1 flex justify-center max-w-xs md:max-w-md lg:max-w-lg mx-2">
+      <div className="flex-1 flex justify-center max-w-xs md:max-w-md lg:max-w-lg mx-2 min-w-0">
         <button
           onClick={onOpenCommandPalette}
-          className="w-full flex items-center justify-between gap-2 px-3 py-1 bg-black/60 hover:bg-black/90 border border-white/10 hover:border-emerald-500/50 rounded-lg text-xs transition-all shadow-inner group cursor-pointer"
+          className="w-full flex items-center justify-between gap-2 px-3 py-1 bg-black/60 hover:bg-black/90 border border-white/10 hover:border-emerald-500/50 rounded-lg text-xs transition-all shadow-inner group cursor-pointer min-w-0 overflow-hidden"
           title="Search files, symbols & commands (Ctrl+P / Cmd+K)"
         >
-          <div className="flex items-center gap-2 truncate">
+          <div className="flex items-center gap-2 truncate min-w-0">
             <Search className="w-3.5 h-3.5 text-[var(--ide-accent,#00ff88)] shrink-0" />
-            <span className="truncate text-white/70 group-hover:text-white font-sans text-[11px]">
+            <span className="truncate text-white/70 group-hover:text-white font-sans text-[11px] min-w-0">
               {currentFileName ? `${activeProject?.name || 'Vertex-Forge-main'} › ${currentFileName}` : 'Ask AI or search files & commands...'}
             </span>
           </div>
@@ -1018,7 +1018,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
       {/* 3. RIGHT: Workspace Name, Active Model, Panel Toggles & Window Controls */}
       <div className="flex items-center gap-2 text-xs shrink-0">
         {/* Workspace Title */}
-        <span className="font-mono text-[11px] text-white/80 hover:text-white transition cursor-pointer hidden md:inline">
+        <span className="font-mono text-[11px] text-white/80 hover:text-white transition cursor-pointer hidden md:inline truncate max-w-[130px]">
           {activeProject?.name || 'Vertex-Forge-main'}
         </span>
 

@@ -146,10 +146,10 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   isSelected ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
                 }`}
               >
-                <div className="flex items-center gap-2.5 truncate">
-                  <FileCode className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-indigo-400'}`} />
-                  <span className="font-medium text-white truncate">{file.name}</span>
-                  <span className={`text-[11px] truncate ${isSelected ? 'text-indigo-200' : 'text-slate-500'}`}>
+                <div className="flex items-center gap-2.5 truncate min-w-0 flex-1">
+                  <FileCode className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-indigo-400'}`} />
+                  <span className="font-medium text-white truncate shrink-0 max-w-[160px]">{file.name}</span>
+                  <span className={`text-[11px] truncate min-w-0 ${isSelected ? 'text-indigo-200' : 'text-slate-500'}`}>
                     {file.path}
                   </span>
                 </div>
@@ -176,13 +176,13 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   isSelected ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
                 }`}
               >
-                <div className="flex items-center gap-2.5 truncate">
-                  <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold ${
+                <div className="flex items-center gap-2.5 truncate min-w-0 flex-1">
+                  <div className={`w-6 h-6 shrink-0 rounded-md flex items-center justify-center text-[10px] font-bold ${
                     isSelected ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-indigo-400'
                   }`}>
                     <Zap className="w-3.5 h-3.5" />
                   </div>
-                  <div className="flex flex-col truncate">
+                  <div className="flex flex-col truncate min-w-0 flex-1">
                     <span className="font-medium text-white truncate">{cmd.title}</span>
                     <span className={`text-[10px] truncate ${isSelected ? 'text-indigo-200' : 'text-slate-400'}`}>
                       {cmd.category} — {cmd.description}

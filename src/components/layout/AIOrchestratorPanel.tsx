@@ -1361,12 +1361,12 @@ export const AIOrchestratorPanel: React.FC = () => {
         {chatMessages.map((msg, i) => (
           <div
             key={i}
-            className={`flex flex-col gap-1 text-xs ${
+            className={`flex flex-col gap-1 text-xs w-full min-w-0 ${
               msg.role === 'user' ? 'items-end' : 'items-start'
             }`}
           >
             <div
-              className={`p-3 rounded-2xl max-w-[98%] leading-relaxed ${
+              className={`p-3 rounded-2xl max-w-[98%] min-w-0 break-words leading-relaxed overflow-hidden chat-bubble-contain ${
                 msg.role === 'user'
                   ? 'bg-[#18181b] text-white border border-slate-800 shadow-sm'
                   : 'bg-black/60 border border-slate-800 text-slate-200 shadow-xs'
@@ -1437,7 +1437,7 @@ export const AIOrchestratorPanel: React.FC = () => {
                 </div>
               )}
 
-              <p className="whitespace-pre-wrap">{msg.content}</p>
+              <p className="whitespace-pre-wrap break-words break-all max-w-full overflow-hidden leading-relaxed">{msg.content}</p>
 
               {/* Data Flow Trace Visualization */}
               {msg.dataFlow && (
@@ -1601,17 +1601,17 @@ export const AIOrchestratorPanel: React.FC = () => {
       </div>
 
       {/* 3. BOTTOM STATUS FOOTER (Exact Match to Screenshot 2) */}
-      <div className="h-7 border-t border-white/10 bg-[#0e0e11] px-3 flex items-center justify-between text-[11px] font-mono text-slate-400 select-none shrink-0">
-        <div className="flex items-center gap-2">
-          <span>Agent Stats: {autonomousPlan?.tasks?.filter((t: any) => t.status === 'completed').length || 0}/{autonomousPlan?.tasks?.length || 0} ({taskPlan.length > 0 ? progressPercent : 0}%)</span>
-          <span className="text-slate-600">•</span>
-          <div className="flex items-center gap-1 text-slate-300">
-            <span className="text-cyan-400 font-sans">--o--</span>
-            <span>269485c</span>
-            <span className="text-emerald-400 font-semibold">100.00% AI</span>
+      <div className="h-7 border-t border-white/10 bg-[#0e0e11] px-3 flex items-center justify-between text-[11px] font-mono text-slate-400 select-none shrink-0 overflow-hidden min-w-0">
+        <div className="flex items-center gap-2 min-w-0 truncate">
+          <span className="truncate">Agent Stats: {autonomousPlan?.tasks?.filter((t: any) => t.status === 'completed').length || 0}/{autonomousPlan?.tasks?.length || 0} ({taskPlan.length > 0 ? progressPercent : 0}%)</span>
+          <span className="text-slate-600 shrink-0">•</span>
+          <div className="flex items-center gap-1 text-slate-300 min-w-0 truncate">
+            <span className="text-cyan-400 font-sans shrink-0">--o--</span>
+            <span className="shrink-0">269485c</span>
+            <span className="text-emerald-400 font-semibold shrink-0">100.00% AI</span>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-slate-400">
+        <div className="flex items-center gap-1 text-slate-400 shrink-0 ml-2">
           <MessageSquare className="w-3.5 h-3.5" />
         </div>
       </div>

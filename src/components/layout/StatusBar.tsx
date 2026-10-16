@@ -95,7 +95,7 @@ export const StatusBar: React.FC = () => {
         borderColor: 'var(--ide-border)',
         color: 'var(--ide-accent, #00ff88)',
       }}
-      className="h-6 border-t px-2 flex items-center justify-between text-[11px] font-mono select-none z-30 shrink-0"
+      className="h-6 border-t px-2 flex items-center justify-between text-[11px] font-mono select-none z-30 shrink-0 overflow-hidden min-w-0"
     >
       {/* Left: Remote Badge, Diagnostics, Git */}
       <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ export const StatusBar: React.FC = () => {
             backgroundColor: 'var(--ide-accent, #00ff88)',
             color: '#000000',
           }}
-          title="Antigravity Remote Connected: Local Workspace"
+          title="Vertex Forge Remote Connected: Local Workspace"
         >
           &gt;&lt;
         </div>
@@ -160,17 +160,17 @@ export const StatusBar: React.FC = () => {
             color: 'var(--ide-accent, #00ff88)',
             backgroundColor: 'rgba(0, 255, 136, 0.05)',
           }}
-          title="Antigravity Autonomous Core"
+          title="Vertex Forge Autonomous Core"
         >
           <Sparkles className="w-2.5 h-2.5 animate-pulse" />
-          <span>Antigravity Core</span>
+          <span>Vertex Forge Core</span>
           <span className="opacity-60">•</span>
           <span className="capitalize">{activeAgent}</span>
         </button>
       </div>
 
       {/* Right: Line/Col, Indent, Encoding, Language & Settings */}
-      <div className="flex items-center gap-3" style={{ color: 'var(--ide-accent, #00ff88)' }}>
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0" style={{ color: 'var(--ide-accent, #00ff88)' }}>
         <span>Ln {cursorPosition?.line || 1}, Col {cursorPosition?.column || 1}</span>
         <span>Spaces: 2</span>
         <span className="hidden sm:inline">UTF-8</span>
@@ -184,7 +184,7 @@ export const StatusBar: React.FC = () => {
           <button
             onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
             className="flex items-center gap-1.5 px-2 py-0.5 rounded hover:bg-white/10 transition-colors cursor-pointer text-[11px]"
-            title={`Active Theme: ${themeEngine.activeTheme.name} (Click to select Antigravity Themes)`}
+            title={`Active Theme: ${themeEngine.activeTheme.name} (Click to select Vertex Forge Themes)`}
           >
             <Palette className="w-3 h-3 text-[var(--ide-accent,#00ff88)]" />
             <span className="truncate max-w-[130px] font-sans font-medium">{themeEngine.activeTheme.name}</span>
@@ -204,7 +204,7 @@ export const StatusBar: React.FC = () => {
                 <div>
                   <div className="font-bold text-[11px] text-white flex items-center gap-1.5">
                     <Palette className="w-3 h-3 text-[var(--ide-accent,#00ff88)]" />
-                    <span>Antigravity IDE Themes</span>
+                    <span>Vertex Forge Themes</span>
                   </div>
                   <div className="text-[10px] text-slate-400">Select studio color palette</div>
                 </div>
@@ -254,13 +254,13 @@ export const StatusBar: React.FC = () => {
           )}
         </div>
 
-        {/* Antigravity - Settings link */}
+        {/* Vertex Forge - Settings link */}
         <button
           onClick={() => setActiveView('settings')}
           className="hover:underline flex items-center gap-1 cursor-pointer font-sans text-[11px]"
           title="Open Settings"
         >
-          Antigravity - Settings
+          Vertex Forge - Settings
         </button>
 
         {/* Notification Bell */}
