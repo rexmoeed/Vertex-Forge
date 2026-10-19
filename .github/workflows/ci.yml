@@ -35,8 +35,8 @@ jobs:
       - name: Run Typecheck & Lint
         run: npm run lint
 
-      - name: Run Vitest Suite
-        run: npm test
+      - name: Run Vitest Suite with Enforced Coverage
+        run: npm run test:coverage
 
       - name: Verify Production Build
         run: npm run build
