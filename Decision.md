@@ -207,7 +207,7 @@ This document records all **critical architectural decisions, technical trade-of
 
 ---
 
-## ADR 012: Comprehensive 292-Test Quality Assurance & Zero-Error Soundness
+## ADR 012: Comprehensive 301-Test Quality Assurance & Zero-Error Soundness
 - **Status**: `ACCEPTED & CONTINUOUSLY VERIFIED`
 - **Date**: `2026-10-16`
 - **Context**:
@@ -215,12 +215,79 @@ This document records all **critical architectural decisions, technical trade-of
 - **Decision**:
   - Maintain a comprehensive unit and integration test suite using **Vitest**:
     - **17 Dedicated Test Suites**
-    - **292 Automated Assertions**
+    - **301 Automated Assertions across 18 Test Suites**
     - 100% test passing rate across git workflows, DAG hierarchy, test engines, virtual FS, security auditors, BYOK hubs, and Google Jules integrations.
   - Enforce zero TypeScript compilation errors (`tsc --noEmit`) on every pull request and commit.
 - **Consequences**:
   - Maximum architectural stability and confidence during rapid iterative development.
   - Guaranteed reliability in production deployments.
+
+
+---
+
+## ADR 013: Layered Modular Server Architecture & Monolith Decomposition
+- **Status**: `ACCEPTED & IMPLEMENTED`
+- **Date**: `2026-10-19`
+- **Context**:
+  The backend entry point `server.ts` grew to over 3,000 lines, mixing HTTP transport, process management, file operations, AI coordination, and GitHub Git integrations in a single monolithic file without clean boundaries.
+- **Decision**:
+  - Decompose `server.ts` into a slim 69-line entrypoint.
+  - Implement an Express application factory (`server/app.ts`) with domain-driven layered routing:
+    - `server/routes/ai.routes.ts`: AI generation, streaming chat, BYOK healthchecks, and model routing.
+    - `server/routes/fs.routes.ts`: Safe file system CRUD, recursive trees, and directory watchers.
+    - `server/routes/process.routes.ts`: Child process execution, dev server port negotiation, and PTY terminal management.
+    - `server/routes/git.routes.ts`: Real Git CLI bindings, commit generation, diff explanations, and GitHub API bridges.
+    - `server/routes/test.routes.ts`: Automated test engine runs, coverage instrumentation, and regression generation.
+    - `server/routes/jules.routes.ts`: Google Jules cloud session management, approvals, and activities.
+- **Consequences**:
+  - Clear separation of concerns, high maintainability, and clean dependency injection.
+  - Zero coupling between transport layers and domain logic.
+
+---
+
+## ADR 014: API Boundary Input Validation Schemas & Sanitization
+- **Status**: `ACCEPTED & IMPLEMENTED`
+- **Date**: `2026-10-19`
+- **Context**:
+  Unvalidated HTTP request bodies at API boundaries present risks of type pollution, illegal character injections (e.g. null bytes in file paths), and undefined property crashes.
+- **Decision**:
+  - Introduce typed boundary validation middleware (`server/middleware/validation.ts`).
+  - Enforce schemas for required fields, type conformance, min/max length boundaries, regex patterns, and null-byte injection prevention on endpoints.
+  - Create dedicated unit test suite (`src/services/__tests__/apiValidation.test.ts`) verifying that malicious or malformed payloads receive immediate, clear 400 Bad Request responses.
+- **Consequences**:
+  - Hardened API surface preventing security and runtime regressions at ingress points.
+
+---
+
+## ADR 015: Automated CI Test Coverage Thresholds with @vitest/coverage-v8
+- **Status**: `ACCEPTED & IMPLEMENTED`
+- **Date**: `2026-10-19`
+- **Context**:
+  Without enforced coverage thresholds in configuration and continuous integration, test degradation can occur unnoticed over time.
+- **Decision**:
+  - Integrate `@vitest/coverage-v8` into Vitest runner configuration (`vitest.config.ts`).
+  - Configure strict coverage thresholds:
+    - Statements: 40%
+    - Branches: 30%
+    - Functions: 50%
+    - Lines: 40%
+  - Update `.github/workflows/ci.yml` to execute `npm run test:coverage` as a mandatory gate for all pull requests and branch builds.
+- **Consequences**:
+  - Deterministic code quality guarantees enforced automatically in CI.
+
+---
+
+## ADR 016: Deliberate Security Fixture Isolation & Zero-Secret Tracking
+- **Status**: `ACCEPTED & IMPLEMENTED`
+- **Date**: `2026-10-19`
+- **Context**:
+  Synthetic vulnerability samples used by the offline security auditor (SQL injection, hardcoded test tokens) triggered false positives in automated repository security scanners when committed to git tracking.
+- **Decision**:
+  - Untrack `sample-projects/security-fixtures/` from git index.
+  - Enforce gitignore exclusion rule for local fixture directories.
+  - Refactor `securityAuditor.test.ts` to generate isolated in-memory AST fixtures dynamically during test runs.
+- **Consequences**:
+  - Clean security scanner audit score with zero raw secret triggers while maintaining full test coverage.
 
 ---
 
