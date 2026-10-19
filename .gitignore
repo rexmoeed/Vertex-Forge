@@ -45,3 +45,6 @@ coverage/
 
 # Misc
 .cache/
+
+# Deliberate Security Auditor Benchmark Fixtures (dynamically generated for tests, never committed)
+sample-projects/security-fixtures/
