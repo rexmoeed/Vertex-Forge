@@ -57,6 +57,9 @@ import { UniversalSystemPromptBuilder } from '../../services/universalSystemProm
 import { SkillSetService } from '../../services/skillSetService';
 import { CodebaseIntelligenceEngine, GroundedAIResponse, DataFlowTrace, ProjectMemoryEntry } from '../../services/codebaseIntelligence';
 import { InspectionStep } from '../../types/desktop';
+import { ModelSelectorBar } from './orchestrator/ModelSelectorBar';
+import { AutonomousProgressCard } from './orchestrator/AutonomousProgressCard';
+import { OrchestratorModals } from './orchestrator/OrchestratorModals';
 
 export type ContextAttachmentType = 'file' | 'image' | 'terminal' | 'lines';
 
@@ -748,157 +751,23 @@ export const AIOrchestratorPanel: React.FC = () => {
           )}
 
           {/* Bottom Bar inside Composer Card */}
-          <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
-            {/* Left Controls: (∞ v) Mode, Model Pill, Lock */}
-            <div className="flex items-center gap-1.5">
-              {/* Loop / Autonomous Mode Toggle (∞ v) */}
-              <button
-                type="button"
-                onClick={() => setCursorMode(cursorMode === 'agent' ? 'ask' : 'agent')}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono border transition cursor-pointer ${
-                  cursorMode === 'agent'
-                    ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300'
-                    : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
-                }`}
-                title={`Mode: ${cursorMode.toUpperCase()} (Click to toggle Agent/Ask)`}
-              >
-                <span className="text-xs">∞</span>
-                <ChevronDown className="w-2.5 h-2.5 opacity-60" />
-              </button>
-
-              {/* Model Selector Pill */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-md hover:bg-white/5 text-slate-300 hover:text-white text-[11px] font-sans transition cursor-pointer"
-                  title="Select AI Model"
-                >
-                  <span className="truncate max-w-[115px]">
-                    {selectedModel === 'gemini-3.8-flash'
-                      ? 'Gemini 3.8 Flash'
-                      : selectedModel === 'claude-3-7-sonnet'
-                      ? 'Claude 3.7 Sonnet'
-                      : selectedModel === 'gpt-4o'
-                      ? 'GPT-4o Omni'
-                      : selectedModel === 'deepseek-r1'
-                      ? 'DeepSeek R1'
-                      : selectedModel === 'gemini-2.5-pro'
-                      ? 'Gemini 2.5 Pro'
-                      : selectedModel}
-                  </span>
-                  <ChevronDown className="w-2.5 h-2.5 text-slate-500" />
-                </button>
-              </div>
-
-              {/* Privacy / BYOK Lock */}
-              <button
-                type="button"
-                onClick={() => setActiveView('providers')}
-                className="text-slate-500 hover:text-slate-300 p-1 rounded hover:bg-white/5 transition cursor-pointer"
-                title="API Keys & Model Providers"
-              >
-                <Key className="w-3 h-3" />
-              </button>
-            </div>
-
-            {/* Right Controls: Paperclip, Mic, Send */}
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setShowAtMenu(!showAtMenu)}
-                className="text-slate-400 hover:text-white p-1 rounded hover:bg-white/5 transition cursor-pointer"
-                title="Attach Context (@)"
-              >
-                <Paperclip className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsVoiceModalOpen?.(true)}
-                className="text-slate-400 hover:text-white p-1 rounded hover:bg-white/5 transition cursor-pointer"
-                title="Voice Coding (Cmd+Shift+M)"
-              >
-                <Mic className="w-3.5 h-3.5" />
-              </button>
-
-              {(chatInput.trim() || isChatLoading) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (isChatLoading) {
-                      setIsChatLoading(false);
-                    } else {
-                      handleSendQuery();
-                    }
-                  }}
-                  className={`p-1 rounded-full text-white transition cursor-pointer ${
-                    isChatLoading
-                      ? 'bg-rose-600 hover:bg-rose-500'
-                      : 'bg-indigo-600 hover:bg-indigo-500'
-                  }`}
-                  title={isChatLoading ? 'Stop generation' : 'Send message'}
-                >
-                  {isChatLoading ? (
-                    <Square className="w-2.5 h-2.5 fill-current" />
-                  ) : (
-                    <ArrowRight className="w-3 h-3" />
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
+          <ModelSelectorBar
+            cursorMode={cursorMode}
+            setCursorMode={setCursorMode}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+            isModelDropdownOpen={isModelDropdownOpen}
+            setIsModelDropdownOpen={setIsModelDropdownOpen}
+            setActiveView={setActiveView}
+            showAtMenu={showAtMenu}
+            setShowAtMenu={setShowAtMenu}
+            setIsVoiceModalOpen={setIsVoiceModalOpen}
+            chatInput={chatInput}
+            isChatLoading={isChatLoading}
+            setIsChatLoading={setIsChatLoading}
+            handleSendQuery={handleSendQuery}
+          />
         </div>
-
-        {/* Model Selector Popover */}
-        {isModelDropdownOpen && (
-          <div className="absolute left-2 right-2 top-full mt-1 bg-[#141416] border border-white/10 rounded-xl shadow-2xl p-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2 py-1">
-              Select Model
-            </div>
-            <div className="space-y-0.5">
-              {[
-                { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash (Thinking)', badge: 'Default' },
-                { id: 'claude-3-7-sonnet', name: 'Claude 3.7 Sonnet', badge: 'Coding' },
-                { id: 'gpt-4o', name: 'GPT-4o Omniscient', badge: 'Multimodal' },
-                { id: 'deepseek-r1', name: 'DeepSeek R1', badge: 'Reasoning' },
-                { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro (Deep Analysis)', badge: 'Analysis' },
-              ].map(m => (
-                <button
-                  key={m.id}
-                  onClick={() => {
-                    setSelectedModel(m.id);
-                    setIsModelDropdownOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer ${
-                    selectedModel === m.id
-                      ? 'bg-indigo-600/20 text-white border border-indigo-500/30'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-[11px]">{m.name}</span>
-                  </div>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400">
-                    {m.badge}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <div className="pt-1 mt-1 border-t border-white/5">
-              <button
-                onClick={() => {
-                  setIsModelDropdownOpen(false);
-                  setActiveView('providers');
-                }}
-                className="w-full flex items-center justify-center gap-1.5 py-1 text-[10px] text-cyan-400 hover:text-cyan-300 hover:bg-white/5 rounded cursor-pointer"
-              >
-                <Key className="w-3 h-3" />
-                <span>Configure API Keys & Providers</span>
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Floating '/' Slash Command Skills Autocomplete Menu */}
         {showSlashMenu && (
@@ -1096,265 +965,19 @@ export const AIOrchestratorPanel: React.FC = () => {
 
         {/* Autonomous Progress in Agent Mode */}
         {cursorMode === 'agent' && (taskPlan.length > 0 || autonomousPlan) && (
-          <div className="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col gap-2.5 shadow-xs text-xs">
-            {/* Header with Title and State Badge */}
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-                <span className="font-bold text-slate-900 dark:text-slate-100">Autonomous Engineer</span>
-              </div>
-              <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold border ${
-                  autonomousExecutionState === 'completed'
-                    ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                    : autonomousExecutionState === 'executing'
-                    ? 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-500/30 animate-pulse'
-                    : autonomousExecutionState === 'waiting_plan_approval' || autonomousExecutionState === 'waiting_step_approval'
-                    ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/30'
-                    : autonomousExecutionState === 'paused'
-                    ? 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/30'
-                    : autonomousExecutionState === 'failed'
-                    ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/30'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                {autonomousExecutionState}
-              </span>
-            </div>
-
-            {/* Plan Goal */}
-            {autonomousPlan?.goal && (
-              <p className="text-[11px] text-slate-800 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-800/80 font-mono line-clamp-2">
-                {autonomousPlan.goal}
-              </p>
-            )}
-
-            {/* Progress Bar */}
-            <div className="flex flex-col gap-1">
-              <div className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400 font-mono">
-                <span>Progress</span>
-                <span>{progressPercent}%</span>
-              </div>
-              <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400 transition-all duration-300"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Action Toolbar */}
-            <div className="flex items-center gap-1.5 pt-1 border-t border-slate-200 dark:border-slate-800/80">
-              {autonomousExecutionState === 'executing' && (
-                <button
-                  onClick={pauseAutonomousPlan}
-                  className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-750 text-amber-700 dark:text-amber-300 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
-                  title="Pause execution loop"
-                >
-                  <Pause className="w-3 h-3" />
-                  <span>Pause</span>
-                </button>
-              )}
-              {autonomousExecutionState === 'paused' && (
-                <button
-                  onClick={resumeAutonomousPlan}
-                  className="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
-                  title="Resume execution loop"
-                >
-                  <Play className="w-3 h-3" />
-                  <span>Resume</span>
-                </button>
-              )}
-              <button
-                onClick={cancelAutonomousPlan}
-                className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-750 text-slate-700 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-300 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
-                title="Cancel ongoing orchestration"
-              >
-                <X className="w-3 h-3" />
-                <span>Cancel</span>
-              </button>
-              <button
-                onClick={() => rollbackAutonomousPlan()}
-                className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-750 text-slate-700 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-cyan-300 text-[11px] font-semibold flex items-center gap-1 cursor-pointer ml-auto"
-                title="Rollback agent modifications using latest checkpoint"
-              >
-                <Undo2 className="w-3 h-3 text-indigo-500 dark:text-cyan-400" />
-                <span>Rollback</span>
-              </button>
-            </div>
-
-            {/* Plan Approval Card */}
-            {autonomousExecutionState === 'waiting_plan_approval' && autonomousPlan && (
-              <div className="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl flex flex-col gap-2 text-amber-900 dark:text-amber-200 mt-1">
-                <div className="flex items-center gap-1.5 font-bold text-amber-700 dark:text-amber-300">
-                  <ShieldCheck className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                  <span>Review Autonomous Plan</span>
-                </div>
-                <p className="text-[11px] text-amber-800 dark:text-amber-200/90">
-                  The agent synthesized {autonomousPlan.tasks.length} tasks for your approval:
-                </p>
-                <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
-                  {autonomousPlan.tasks.map((t: AutonomousTask, idx: number) => (
-                    <div key={t.id} className="p-1.5 rounded bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-[10px] text-slate-700 dark:text-slate-300">
-                      <div className="font-bold text-slate-900 dark:text-white">{idx + 1}. {t.title}</div>
-                      <div className="text-slate-500 dark:text-slate-400 text-[9px] truncate">{t.description}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={approveAutonomousPlan}
-                    className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition shadow"
-                  >
-                    Approve Plan & Begin
-                  </button>
-                  <button
-                    onClick={rejectAutonomousPlan}
-                    className="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs"
-                  >
-                    Reject
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Interactive Task State Machine */}
-            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 mt-1">
-              {autonomousPlan?.tasks.map((t: AutonomousTask, idx: number) => (
-                <div
-                  key={t.id}
-                  className={`p-2 rounded-lg border text-[11px] transition-colors flex flex-col gap-1 ${
-                    t.status === 'running'
-                      ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-300 dark:border-indigo-500/50 text-indigo-900 dark:text-indigo-100'
-                      : t.status === 'completed'
-                      ? 'bg-slate-50 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
-                      : t.status === 'failed'
-                      ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-500/40 text-rose-800 dark:text-rose-200'
-                      : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800/80 text-slate-600 dark:text-slate-400'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 truncate">
-                      {t.status === 'completed' ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
-                      ) : t.status === 'running' ? (
-                        <RefreshCw className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 animate-spin shrink-0" />
-                      ) : t.status === 'failed' ? (
-                        <AlertCircle className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400 shrink-0" />
-                      ) : t.status === 'blocked' ? (
-                        <AlertCircle className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
-                      ) : (
-                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      )}
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                        {idx + 1}. {t.title}
-                      </span>
-                    </div>
-                    <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800/80 text-slate-700 dark:text-slate-400 shrink-0">
-                      {t.status}
-                    </span>
-                  </div>
-
-                  {t.error && (
-                    <div className="flex items-center justify-between text-[10px] text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/50 p-1 rounded">
-                      <span className="truncate">{t.error}</span>
-                      <button
-                        onClick={() => retryAutonomousTask(t.id)}
-                        className="text-indigo-600 dark:text-cyan-300 hover:underline font-bold text-[9px] ml-1 shrink-0"
-                      >
-                        Retry
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Collapsible Live Tool Activity Inspector */}
-            {autonomousPlan && (
-              <div className="border-t border-slate-200 dark:border-slate-800/80 pt-2">
-                <button
-                  onClick={() => setShowToolActivity(!showToolActivity)}
-                  className="flex items-center justify-between w-full text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 text-[11px] font-mono cursor-pointer"
-                >
-                  <span className="flex items-center gap-1">
-                    <Terminal className="w-3 h-3 text-indigo-500 dark:text-cyan-400" />
-                    <span>Tool Activity Stream</span>
-                  </span>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform ${
-                      showToolActivity ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-
-                {showToolActivity && (
-                  <div className="mt-2 max-h-40 overflow-y-auto space-y-1 bg-slate-50 dark:bg-slate-900/90 p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-[10px] font-mono">
-                    {autonomousPlan.tasks.flatMap((t: AutonomousTask) => t.executionHistory).length === 0 ? (
-                      <div className="text-slate-400 text-center py-2">No tool calls recorded yet</div>
-                    ) : (
-                      autonomousPlan.tasks.flatMap((t: AutonomousTask) => t.executionHistory).map((record: StepExecutionRecord) => (
-                        <div key={record.id} className="p-1 rounded bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-850 flex flex-col gap-0.5">
-                          <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
-                            <span className="text-indigo-600 dark:text-cyan-300 font-bold">{record.tool}</span>
-                            <span className={record.result.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
-                              {record.result.success ? 'OK' : 'ERR'} ({record.result.durationMs || 0}ms)
-                            </span>
-                          </div>
-                          <div className="text-slate-500 dark:text-slate-400 text-[9px] truncate">{record.observation}</div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Real Verification Summary Card */}
-            {verificationSummary && (
-              <div className={`p-2.5 rounded-xl border flex flex-col gap-2 mt-1 text-xs ${
-                verificationSummary.overallSuccess
-                  ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-500/40 text-emerald-900 dark:text-emerald-200'
-                  : 'bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-500/40 text-rose-900 dark:text-rose-200'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-bold">
-                    <ShieldCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                    <span>Verification Report</span>
-                  </div>
-                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-white shadow-xs">
-                    {verificationSummary.overallSuccess ? 'PASSED' : 'CHECK ISSUES'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                  <div className="p-1 rounded bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400 block">Files Changed:</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{verificationSummary.filesChanged.length}</span>
-                  </div>
-                  <div className="p-1 rounded bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400 block">Tests:</span>
-                    <span className="font-bold text-emerald-600 dark:text-emerald-300">{verificationSummary.testsPassed} passed</span>
-                  </div>
-                  <div className="p-1 rounded bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400 block">Type Soundness:</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{verificationSummary.typeCheckPassed ? 'Clean' : 'Errors'}</span>
-                  </div>
-                  <div className="p-1 rounded bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400 block">Commands:</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{verificationSummary.commandsExecuted.length} run</span>
-                  </div>
-                </div>
-
-                {verificationSummary.remainingRisks.length > 0 && (
-                  <div className="text-[10px] text-amber-800 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/40 p-1.5 rounded border border-amber-300 dark:border-amber-500/20">
-                    <span className="font-bold block">Remaining Risks:</span>
-                    <span>{verificationSummary.remainingRisks.join(', ')}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          <AutonomousProgressCard
+            autonomousPlan={autonomousPlan}
+            autonomousExecutionState={autonomousExecutionState}
+            progressPercent={progressPercent}
+            pauseAutonomousPlan={pauseAutonomousPlan}
+            resumeAutonomousPlan={resumeAutonomousPlan}
+            cancelAutonomousPlan={cancelAutonomousPlan}
+            rollbackAutonomousPlan={rollbackAutonomousPlan}
+            approveAutonomousPlan={approveAutonomousPlan}
+            rejectAutonomousPlan={rejectAutonomousPlan}
+            retryAutonomousTask={retryAutonomousTask}
+            verificationSummary={verificationSummary}
+          />
         )}
 
         {/* Message Stream */}
@@ -1629,204 +1252,27 @@ export const AIOrchestratorPanel: React.FC = () => {
         }}
       />
 
-      {/* MODAL: WORKSPACE FILE PICKER */}
-      {showFilePicker && (
-        <div className="absolute inset-x-2 bottom-12 bg-[#141416] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-40 max-h-80 flex flex-col animate-in fade-in duration-100">
-          <div className="p-2.5 border-b border-white/10 flex items-center justify-between bg-black/40">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-              <FileText className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Attach Workspace File</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowFilePicker(false)}
-              className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="p-2 border-b border-white/10">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-              <input
-                type="text"
-                autoFocus
-                value={fileSearchQuery}
-                onChange={e => setFileSearchQuery(e.target.value)}
-                placeholder="Filter files by path or name..."
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-
-          <div className="overflow-y-auto max-h-52 p-1 space-y-0.5">
-            {Array.from(vfs?.getAllFiles()?.keys() as Iterable<string> || [])
-              .filter(filePath => !fileSearchQuery || filePath.toLowerCase().includes(fileSearchQuery.toLowerCase()))
-              .map(filePath => {
-                const fileName = filePath.split('/').pop() || filePath;
-                const dirPath = filePath.includes('/') ? filePath.substring(0, filePath.lastIndexOf('/')) : '';
-                const isCurrentActive = activeFile === filePath;
-
-                return (
-                  <button
-                    key={filePath}
-                    type="button"
-                    onClick={() => handleAttachFile(filePath)}
-                    className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left hover:bg-white/10 group transition cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      <FileCode className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                      <span className="text-xs font-mono font-medium text-slate-200 group-hover:text-indigo-400 truncate">
-                        {fileName}
-                      </span>
-                      {dirPath && (
-                        <span className="text-[10px] text-slate-500 truncate font-mono">
-                          {dirPath}
-                        </span>
-                      )}
-                    </div>
-                    {isCurrentActive && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 font-mono font-medium shrink-0">
-                        Active
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: CODE LINE RANGE REFERENCE PICKER */}
-      {showLinePicker && (
-        <div className="absolute inset-x-2 bottom-12 bg-[#141416] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-40 max-h-96 flex flex-col animate-in fade-in duration-100">
-          <div className="p-2.5 border-b border-white/10 flex items-center justify-between bg-black/40">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-              <Code2 className="w-3.5 h-3.5 text-amber-400" />
-              <span>Reference Code Lines</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowLinePicker(false)}
-              className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="p-3 space-y-3">
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                Target File
-              </label>
-              <select
-                value={selectedFileForLines || activeFile || 'src/App.tsx'}
-                onChange={e => setSelectedFileForLines(e.target.value)}
-                className="w-full text-xs font-mono bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-amber-500"
-              >
-                {Array.from(vfs?.getAllFiles()?.keys() as Iterable<string> || []).map(f => (
-                  <option key={f} value={f} className="bg-slate-900 text-white">{f} {f === activeFile ? '(Active)' : ''}</option>
-                ))}
-              </select>
-            </div>
-
-            {(() => {
-              const targetFilePath = selectedFileForLines || activeFile || 'src/App.tsx';
-              const content = (targetFilePath === activeFile ? activeFileContent : vfs?.readFile(targetFilePath)) || '';
-              const totalLines = Math.max(1, content ? content.split('\n').length : 1);
-
-              return (
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Line Range (Total: {totalLines} lines)
-                    </label>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <span className="text-[10px] text-slate-400 block mb-0.5">Start Line:</span>
-                      <input
-                        type="number"
-                        min={1}
-                        max={totalLines}
-                        value={lineStartInput}
-                        onChange={e => setLineStartInput(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-full text-xs font-mono bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 text-white focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 block mb-0.5">End Line:</span>
-                      <input
-                        type="number"
-                        min={lineStartInput}
-                        max={totalLines}
-                        value={lineEndInput}
-                        onChange={e => setLineEndInput(Math.min(totalLines, Math.max(lineStartInput, parseInt(e.target.value) || lineStartInput)))}
-                        className="w-full text-xs font-mono bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 text-white focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-2.5">
-                    <span className="text-[10px] text-slate-400 block mb-1">Lines Preview:</span>
-                    <pre className="p-2 rounded-lg bg-black/60 text-slate-200 font-mono text-[10px] max-h-28 overflow-y-auto whitespace-pre-wrap border border-white/10 select-text">
-                      {content
-                        ? content.split('\n').slice(lineStartInput - 1, lineEndInput).join('\n')
-                        : '// Empty file'}
-                    </pre>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 mt-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowLinePicker(false)}
-                      className="px-2.5 py-1 text-xs text-slate-400 hover:text-white cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAttachLines(targetFilePath, lineStartInput, lineEndInput)}
-                      className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold shadow cursor-pointer"
-                    >
-                      Attach Lines {lineStartInput}-{lineEndInput}
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: FULL IMAGE PREVIEW */}
-      {imageModalUrl && (
-        <div
-          onClick={() => setImageModalUrl(null)}
-          className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4"
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            className="relative max-w-2xl max-h-[85vh] bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col"
-          >
-            <div className="p-2 flex items-center justify-between border-b border-slate-800 bg-slate-950">
-              <span className="text-xs text-slate-300 font-medium">Attached Image Preview</span>
-              <button
-                type="button"
-                onClick={() => setImageModalUrl(null)}
-                className="p-1 text-slate-400 hover:text-white rounded cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-2 overflow-auto flex items-center justify-center">
-              <img src={imageModalUrl} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded" />
-            </div>
-          </div>
-        </div>
-      )}
+      <OrchestratorModals
+        showFilePicker={showFilePicker}
+        setShowFilePicker={setShowFilePicker}
+        fileSearchQuery={fileSearchQuery}
+        setFileSearchQuery={setFileSearchQuery}
+        vfs={vfs}
+        activeFile={activeFile}
+        handleAttachFile={handleAttachFile}
+        showLinePicker={showLinePicker}
+        setShowLinePicker={setShowLinePicker}
+        selectedFileForLines={selectedFileForLines}
+        setSelectedFileForLines={setSelectedFileForLines}
+        activeFileContent={activeFileContent}
+        lineStartInput={lineStartInput}
+        setLineStartInput={setLineStartInput}
+        lineEndInput={lineEndInput}
+        setLineEndInput={setLineEndInput}
+        handleAttachLines={handleAttachLines}
+        imageModalUrl={imageModalUrl}
+        setImageModalUrl={setImageModalUrl}
+      />
     </aside>
   );
 };
