@@ -1,3 +1,4 @@
+import { logger } from './logger';
 /**
  * Professional Git & GitHub Workflow Service
  * Connects frontend source control to real Git operations and GitHub REST API
@@ -49,7 +50,7 @@ export class GitWorkflowService {
         return await res.json();
       }
     } catch (e) {
-      console.warn('[GitService] Failed to fetch status:', e);
+      logger.warn('[GitService] Failed to fetch status', {}, e);
     }
 
     return {
@@ -174,7 +175,7 @@ export class GitWorkflowService {
         return data.commits || [];
       }
     } catch (e) {
-      console.warn('[GitService] Log error:', e);
+      logger.warn('[GitService] Log error', {}, e);
     }
     return [];
   }
@@ -196,7 +197,7 @@ export class GitWorkflowService {
         return data.branches || [];
       }
     } catch (e) {
-      console.warn('[GitService] Branches error:', e);
+      logger.warn('[GitService] Branches error', {}, e);
     }
     return [{ name: 'main', isCurrent: true, isRemote: false, commitHash: '', commitMessage: '' }];
   }
@@ -482,7 +483,7 @@ export class GitWorkflowService {
         return this.parseUnifiedDiff(data.diff || '', filePath, staged);
       }
     } catch (e) {
-      console.warn('[GitService] Diff fetch error:', e);
+      logger.warn('[GitService] Diff fetch error', {}, e);
     }
 
     return {

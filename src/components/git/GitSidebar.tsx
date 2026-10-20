@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   GitBranch,
@@ -148,7 +149,7 @@ export const GitSidebar: React.FC = () => {
         }
       }
     } catch (e: any) {
-      console.warn('Error loading Git status:', e);
+      logger.warn('Error loading Git status', { owner: gitHubOwner }, e);
     } finally {
       setLoading(false);
     }
@@ -513,8 +514,10 @@ export const GitSidebar: React.FC = () => {
       } else {
         showToast(res.error || 'Failed to create PR', 'error');
       }
-    } catch (e: any) {
-      showToast(e.message || 'PR creation error', 'error');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'PR creation error';
+      logger.error('Failed to create GitHub pull request', { owner: gitHubOwner, repo: gitHubRepo }, e);
+      showToast(msg, 'error');
     }
   };
 
