@@ -207,7 +207,7 @@ This document records all **critical architectural decisions, technical trade-of
 
 ---
 
-## ADR 012: Comprehensive 301-Test Quality Assurance & Zero-Error Soundness
+## ADR 012: Comprehensive 312-Test Quality Assurance & Zero-Error Soundness
 - **Status**: `ACCEPTED & CONTINUOUSLY VERIFIED`
 - **Date**: `2026-10-16`
 - **Context**:
@@ -288,6 +288,33 @@ This document records all **critical architectural decisions, technical trade-of
   - Refactor `securityAuditor.test.ts` to generate isolated in-memory AST fixtures dynamically during test runs.
 - **Consequences**:
   - Clean security scanner audit score with zero raw secret triggers while maintaining full test coverage.
+
+
+---
+
+## ADR 017: Structured Logging Framework & Typed Error Tracking
+- **Status**: `ACCEPTED & IMPLEMENTED`
+- **Date**: `2026-10-20`
+- **Context**:
+  Raw `console.warn` and `console.error` calls across services swallowed error context without standard schemas or historical tracking, making production telemetry difficult.
+- **Decision**:
+  - Implement a centralized structured logger (`src/services/logger.ts`) with severity levels (`debug`, `info`, `warn`, `error`), timestamped entries, in-memory ring buffers, and subscriber event channels.
+  - Require all service and UI catch blocks to pass the original error instance to the `cause` field.
+- **Consequences**:
+  - Full traceability for background agent actions, git workflows, and dev servers.
+
+---
+
+## ADR 018: Subcomponent Decomposition & Behavioral Component Testing
+- **Status**: `ACCEPTED & IMPLEMENTED`
+- **Date**: `2026-10-20`
+- **Context**:
+  Large UI panels like `AIOrchestratorPanel.tsx` (1834 LOC) and context files lacked granular component-level test assertions, concentrating too much state and layout in single files.
+- **Decision**:
+  - Decompose large panels into focused subcomponents under `src/components/layout/orchestrator/` and extract dedicated sub-contexts (`FileSystemContext`, `DebuggerContext`).
+  - Add behavioral component test suites using `@testing-library/react` and `jsdom` to assert user interactions and live state transitions.
+- **Consequences**:
+  - High maintainability, reduced cyclomatic complexity, and test breadth covering both service and UI layers.
 
 ---
 
