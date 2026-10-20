@@ -220,7 +220,7 @@ export class CodebaseIntelligenceEngine {
     const files = vfs.getAllFiles();
 
     // Look for dashboard or relevant domain
-    let pageFile = 'src/App.tsx';
+    const pageFile = 'src/App.tsx';
     let componentFile = 'src/components/ui/Button.tsx';
     let hookFile = '';
     let serviceFile = 'src/services/apiClient.ts';

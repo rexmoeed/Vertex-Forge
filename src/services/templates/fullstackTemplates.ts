@@ -282,7 +282,7 @@ export const fullstackRnFirebase: TemplateDefinition = {
       content: `import { initializeApp } from 'firebase/app';
 
 const firebaseConfig = {
-  apiKey: "SAMPLE_API_KEY",
+  apiKey: process.env.VITE_FIREBASE_API_KEY || "demo-firebase-client-key",
   authDomain: "sample.firebaseapp.com",
   projectId: "sample-project",
 };

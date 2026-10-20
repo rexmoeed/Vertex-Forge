@@ -8,7 +8,7 @@ on:
 
 jobs:
   validate:
-    name: Lint, Typecheck & Test
+    name: Lint, Typecheck, Audit & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -32,8 +32,14 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Typecheck & Lint
+      - name: Run Typecheck (tsc)
+        run: npm run typecheck
+
+      - name: Run ESLint
         run: npm run lint
+
+      - name: Run Dependency Audit
+        run: npm audit --audit-level=high
 
       - name: Run Vitest Suite with Enforced Coverage
         run: npm run test:coverage

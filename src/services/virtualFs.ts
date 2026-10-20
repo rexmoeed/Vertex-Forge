@@ -115,7 +115,7 @@ export class VirtualFileSystem {
 
   public writeFile(pathStr: string, content: string): boolean {
     const cleanPath = pathStr.replace(/^\//, '');
-    let node = this.findNode(cleanPath);
+    const node = this.findNode(cleanPath);
 
     if (node && node.type === 'file') {
       node.content = content;
