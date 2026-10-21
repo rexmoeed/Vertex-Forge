@@ -335,13 +335,18 @@ export const Sidebar: React.FC = () => {
     return <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0" />;
   };
 
+  // Memoize modified files set to optimize O(N*M) lookup in recursive file tree rendering to O(N+M)
+  const modifiedFilePaths = React.useMemo(() => {
+    return new Set(modifiedFiles.map((m: any) => m.filePath));
+  }, [modifiedFiles]);
+
   // Render file tree recursively
   const renderTree = (nodes: FileNode[], depth: number = 0) => {
     return nodes.map(node => {
       const isFolder = node.type === 'folder';
       const isCollapsed = collapsedFolders[node.path];
       const isSelected = activeFile === node.path;
-      const isModified = modifiedFiles.some((m: any) => m.filePath === node.path);
+      const isModified = modifiedFilePaths.has(node.path);
 
       const isBeingDragged = draggingPath === node.path;
 
