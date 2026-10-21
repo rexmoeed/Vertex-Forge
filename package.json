@@ -79,7 +79,7 @@
     "@typescript-eslint/parser": "^8.72.0",
     "@vitest/coverage-v8": "^5.0.2",
     "autoprefixer": "^10.4.21",
-    "electron": "^44.7.2",
+    "electron": "^44.9.0",
     "electron-builder": "^26.15.3",
     "esbuild": "^0.28.0",
     "eslint": "^10.13.0",
