@@ -7,13 +7,12 @@
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.0+-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Electron](https://img.shields.io/badge/Electron-34+-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Tests](https://img.shields.io/badge/Tests-312%2F312%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-389%2F389%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Type Check](https://img.shields.io/badge/tsc-0%20Errors-brightgreen)](https://www.typescriptlang.org/)
 [![Parallel Swarms](https://img.shields.io/badge/Parallel%20Swarms-4%20Engines-cyan)](https://github.com/rexmoeed/Vertex-Forge)
 [![Engineering Skills](https://img.shields.io/badge/Engineering%20Skills-33%20Active-purple)](https://github.com/rexmoeed/Vertex-Forge)
 [![Local LLMs](https://img.shields.io/badge/Local%20AI-Ollama%20%7C%20DeepSeek-orange)](https://github.com/rexmoeed/Vertex-Forge)
 [![Google Jules](https://img.shields.io/badge/Google%20Jules-Cloud%20PR%20Agent-blue?logo=google&logoColor=white)](https://jules.google.com)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 *A state-of-the-art, fully autonomous, zero-mock developer workstation uniting real filesystem manipulation, interactive WebSocket PTY terminals, multi-provider BYOK AI orchestration, parallel hierarchical agent swarms, 33 specialized engineering skills, visual mission cockpits, inline ghost-text predictions, vision-to-code synthesis, offline local LLM hubs, Devin-style shadow sandboxes, and enterprise governance gates.*
 
@@ -316,11 +315,6 @@ npx tsc --noEmit
 npm run build
 ```
 
----
-
-## 📄 License
-
-Vertex Forge is licensed under the [MIT License](LICENSE).
 
 ---
 
