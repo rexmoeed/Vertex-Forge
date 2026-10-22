@@ -1,3 +1,4 @@
+import { validateServerEnvironment } from './src/schemas/server.schema';
 /**
  * Vertex Forge Backend Server Entry Point
  * Layered Architecture: Transport, Modular Routes & Vite Development Server
@@ -10,7 +11,8 @@ import { Request, Response } from 'express';
 import { createServer as createViteServer } from 'vite';
 import { createApp } from './server/app';
 
-const PORT = Number(process.env.PORT) || 3000;
+const validatedEnv = validateServerEnvironment(process.env);
+const PORT = validatedEnv.PORT || 3000;
 const { app } = createApp();
 
 async function startServer() {

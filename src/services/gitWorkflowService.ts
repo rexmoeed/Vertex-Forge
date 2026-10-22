@@ -1,3 +1,4 @@
+import { GitHubRepoParamsSchema, GitHubPullRequestParamsSchema, GitHubCreatePRSchema, GitCommitParamsSchema } from '../schemas/gitHubIntegration.schema';
 import { logger } from './logger';
 /**
  * Professional Git & GitHub Workflow Service
@@ -144,6 +145,7 @@ export class GitWorkflowService {
   // ==========================================
 
   public static async commit(message: string, amend = false, cwd?: string): Promise<{ success: boolean; output?: string; error?: string }> {
+    GitCommitParamsSchema.parse({ message, amend, cwd });
     const targetCwd = cwd || this.getCwd();
     try {
       const res = await fetch('/api/git/commit', {
@@ -625,6 +627,7 @@ export class GitWorkflowService {
   }
 
   public static async getGitHubRepo(owner: string, repo: string): Promise<GitHubRepoInfo | null> {
+    GitHubRepoParamsSchema.parse({ owner, repo });
     try {
       const res = await fetch('/api/github/repo', {
         method: 'POST',
@@ -637,6 +640,7 @@ export class GitWorkflowService {
   }
 
   public static async getGitHubPullRequests(owner: string, repo: string, state = 'open'): Promise<GitHubPullRequest[]> {
+    GitHubPullRequestParamsSchema.parse({ owner, repo, state: state as any });
     try {
       const res = await fetch('/api/github/pulls', {
         method: 'POST',

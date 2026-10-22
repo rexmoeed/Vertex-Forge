@@ -1,3 +1,4 @@
+import { AIPlanRequestSchema, AICodeRequestSchema, AIChatRequestSchema, AISaveApiKeySchema } from '../schemas/aiProviderRequest.schema';
 export interface AIPlanResponse {
   interpretation: string;
   technologyRationale?: string;
@@ -62,6 +63,11 @@ export class GeminiService {
 
   public static async saveApiKey(apiKey: string): Promise<boolean> {
     try {
+      AISaveApiKeySchema.parse(apiKey);
+    } catch {
+      return false;
+    }
+    try {
       const cleanKey = apiKey.trim();
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('vertex_gemini_api_key', cleanKey);
@@ -97,6 +103,7 @@ export class GeminiService {
     model?: string;
     apiKey?: string;
   }): Promise<AIPlanResponse> {
+    AIPlanRequestSchema.parse(params);
     const key = params.apiKey || this.getApiKey();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (key) headers['x-api-key'] = key;
@@ -120,6 +127,7 @@ export class GeminiService {
     model?: string;
     apiKey?: string;
   }): Promise<AICodeResponse> {
+    AICodeRequestSchema.parse(params);
     const key = params.apiKey || this.getApiKey();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (key) headers['x-api-key'] = key;
@@ -143,6 +151,7 @@ export class GeminiService {
     apiKey?: string;
     images?: Array<{ data: string; mimeType: string } | string>;
   }): Promise<{ reply: string; agent?: string }> {
+    AIChatRequestSchema.parse(params);
     const key = params.apiKey || this.getApiKey();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (key) headers['x-api-key'] = key;
