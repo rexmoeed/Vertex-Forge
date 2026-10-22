@@ -1,3 +1,5 @@
+import { AddProviderWizardTab } from './providers/AddProviderWizardTab';
+import { ModelCatalogTab } from './providers/ModelCatalogTab';
 import React, { useState } from 'react';
 import {
   Sparkles,
@@ -503,372 +505,38 @@ export const AIProviderHubView: React.FC<{ onClose?: () => void }> = ({ onClose 
 
           {/* TAB 2: ADD PROVIDER WIZARD */}
           {activeTab === 'add' && (
-            <div className="max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col gap-6">
-              <div>
-                <h2 className="text-base font-bold text-white">Add or Connect LLM Provider (BYOK)</h2>
-                <p className="text-xs text-slate-400">
-                  Connect your own API key to unlock Claude, OpenAI, or local inference models across the IDE.
-                </p>
-              </div>
-
-              {/* Wizard Steps Indicator */}
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                {[
-                  { num: 1, label: 'Select Provider' },
-                  { num: 2, label: 'Credentials & URL' },
-                  { num: 3, label: 'Test Connection' },
-                  { num: 4, label: 'Confirm & Activate' },
-                ].map(step => (
-                  <div key={step.num} className="flex items-center gap-2">
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                        wizardStep === step.num
-                          ? 'bg-indigo-600 text-white'
-                          : wizardStep > step.num
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-slate-800 text-slate-400'
-                      }`}
-                    >
-                      {wizardStep > step.num ? <Check className="w-3.5 h-3.5" /> : step.num}
-                    </div>
-                    <span
-                      className={`text-xs ${
-                        wizardStep === step.num ? 'font-bold text-white' : 'text-slate-400'
-                      }`}
-                    >
-                      {step.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Step 1: Choose provider */}
-              {wizardStep === 1 && (
-                <div className="flex flex-col gap-3">
-                  <span className="text-xs font-bold text-slate-300">Choose Provider to Connect:</span>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      {
-                        id: 'anthropic',
-                        name: 'Anthropic Claude',
-                        desc: 'Claude 3.7 Sonnet, 3.5 Sonnet & Haiku with tool calling',
-                      },
-                      { id: 'openai', name: 'OpenAI', desc: 'GPT-4o, GPT-4o Mini, and o3-mini reasoning' },
-                      {
-                        id: 'custom',
-                        name: 'OpenAI-Compatible Endpoint',
-                        desc: 'Groq, Together AI, DeepSeek, or OpenRouter',
-                      },
-                      {
-                        id: 'local',
-                        name: 'Local Model Server',
-                        desc: 'Ollama or LM Studio running on localhost',
-                      },
-                    ].map(opt => (
-                      <div
-                        key={opt.id}
-                        onClick={() => setSelectedProviderToAdd(opt.id as ProviderId)}
-                        className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                          selectedProviderToAdd === opt.id
-                            ? 'bg-indigo-600/10 border-indigo-500 text-white'
-                            : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
-                        }`}
-                      >
-                        <h4 className="font-bold text-sm text-white">{opt.name}</h4>
-                        <p className="text-[11px] text-slate-400 mt-1">{opt.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex justify-end pt-3">
-                    <button
-                      onClick={() => setWizardStep(2)}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
-                    >
-                      <span>Continue to Credentials</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2: Configure Credentials */}
-              {wizardStep === 2 && (
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-slate-200">
-                      API Key for {selectedProviderToAdd.toUpperCase()}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showKeyPlaintext ? 'text' : 'password'}
-                        value={apiKeyInput}
-                        onChange={e => setApiKeyInput(e.target.value)}
-                        placeholder={
-                          selectedProviderToAdd === 'anthropic'
-                            ? 'sk-ant-api03-...'
-                            : selectedProviderToAdd === 'openai'
-                            ? 'sk-proj-...'
-                            : 'Enter API key or leave blank for local'
-                        }
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500 pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowKeyPlaintext(!showKeyPlaintext)}
-                        className="absolute right-3 top-2.5 text-slate-400 hover:text-white"
-                      >
-                        {showKeyPlaintext ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    <span className="text-[11px] text-slate-400">
-                      Credentials are kept in-memory and masked in UI. Never committed to Git.
-                    </span>
-                  </div>
-
-                  {(selectedProviderToAdd === 'custom' || selectedProviderToAdd === 'local') && (
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-slate-200">API Base URL</label>
-                      <input
-                        type="text"
-                        value={baseUrlInput}
-                        onChange={e => setBaseUrlInput(e.target.value)}
-                        placeholder={
-                          selectedProviderToAdd === 'local'
-                            ? 'http://localhost:11434/v1'
-                            : 'https://api.deepseek.com/v1'
-                        }
-                        className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex justify-between pt-3">
-                    <button
-                      onClick={() => setWizardStep(1)}
-                      className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium"
-                    >
-                      Back
-                    </button>
-                    <button
-                      onClick={async () => {
-                        setWizardStep(3);
-                        // trigger automated verification
-                        setIsTestingConnection(true);
-                        const res = await AIProviderService.testConnection(selectedProviderToAdd);
-                        setIsTestingConnection(false);
-                        setWizardTestResult(res);
-                      }}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"
-                    >
-                      <span>Verify Connection</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Test connection */}
-              {wizardStep === 3 && (
-                <div className="flex flex-col gap-4">
-                  <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-200">Connection Diagnostics</span>
-                      {isTestingConnection ? (
-                        <span className="text-xs text-indigo-400 flex items-center gap-1 animate-pulse">
-                          <RotateCw className="w-3.5 h-3.5 animate-spin" /> Verifying...
-                        </span>
-                      ) : wizardTestResult?.success ? (
-                        <span className="text-xs text-emerald-400 flex items-center gap-1 font-semibold">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Verified
-                        </span>
-                      ) : (
-                        <span className="text-xs text-amber-400 flex items-center gap-1 font-semibold">
-                          <AlertCircle className="w-3.5 h-3.5" /> Check Notice
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="text-xs font-mono p-3 bg-slate-900 border border-slate-800 rounded-lg text-slate-300">
-                      {isTestingConnection
-                        ? 'Sending diagnostic probe request...'
-                        : wizardTestResult?.message || 'Ready for test.'}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between pt-3">
-                    <button
-                      onClick={() => setWizardStep(2)}
-                      className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium"
-                    >
-                      Back
-                    </button>
-                    <button
-                      onClick={() => setWizardStep(4)}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"
-                    >
-                      <span>Proceed to Confirm</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 4: Confirm and Activate */}
-              {wizardStep === 4 && (
-                <div className="flex flex-col gap-4">
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
-                    <div>
-                      <h4 className="text-xs font-bold text-emerald-300">Ready to Activate Provider</h4>
-                      <p className="text-[11px] text-emerald-400/80">
-                        {selectedProviderToAdd.toUpperCase()} will be enabled as an active model provider across all IDE
-                        agents.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between pt-3">
-                    <button
-                      onClick={() => setWizardStep(3)}
-                      className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium"
-                    >
-                      Back
-                    </button>
-                    <button
-                      onClick={handleSaveWizardProvider}
-                      className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow"
-                    >
-                      Activate Provider in Studio
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <AddProviderWizardTab
+              wizardStep={wizardStep}
+              setWizardStep={setWizardStep}
+              selectedProviderToAdd={selectedProviderToAdd}
+              setSelectedProviderToAdd={setSelectedProviderToAdd}
+              apiKeyInput={apiKeyInput}
+              setApiKeyInput={setApiKeyInput}
+              baseUrlInput={baseUrlInput}
+              setBaseUrlInput={setBaseUrlInput}
+              showKeyPlaintext={showKeyPlaintext}
+              setShowKeyPlaintext={setShowKeyPlaintext}
+              isTestingConnection={isTestingConnection}
+              setIsTestingConnection={setIsTestingConnection}
+              wizardTestResult={wizardTestResult}
+              setWizardTestResult={setWizardTestResult}
+              onSave={handleSaveWizardProvider}
+            />
           )}
 
           {/* TAB 3: MODEL CATALOG */}
           {activeTab === 'catalog' && (
-            <div className="max-w-5xl flex flex-col gap-5">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-base font-bold text-white">Model Catalog</h2>
-                  <p className="text-xs text-slate-400">
-                    Filter and inspect model capabilities (context size, reasoning, coding, vision, tool calling).
-                  </p>
-                </div>
-
-                {/* Filters */}
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-                    <input
-                      type="text"
-                      value={catalogQuery}
-                      onChange={e => setCatalogQuery(e.target.value)}
-                      placeholder="Search models..."
-                      className="bg-slate-900 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 w-48"
-                    />
-                  </div>
-
-                  <select
-                    value={catalogProviderFilter}
-                    onChange={e => setCatalogProviderFilter(e.target.value as any)}
-                    className="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
-                  >
-                    <option value="all">All Providers</option>
-                    <option value="openrouter">OpenRouter (100+ Models)</option>
-                    <option value="gemini">Google Gemini</option>
-                    <option value="anthropic">Anthropic Claude</option>
-                    <option value="openai">OpenAI</option>
-                    <option value="deepseek">DeepSeek</option>
-                    <option value="mistral">Mistral</option>
-                    <option value="groq">Groq</option>
-                    <option value="ollama">Ollama (Local)</option>
-                    <option value="lmstudio">LM Studio (Local)</option>
-                    <option value="custom">Custom OpenAI-Compatible</option>
-                  </select>
-
-                  <select
-                    value={catalogCapabilityFilter}
-                    onChange={e => setCatalogCapabilityFilter(e.target.value as any)}
-                    className="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
-                  >
-                    <option value="all">All Capabilities</option>
-                    <option value="coding">Coding Optimized</option>
-                    <option value="reasoning">Reasoning</option>
-                    <option value="tool_calling">Tool Calling</option>
-                    <option value="fast">Fast / High Concurrency</option>
-                    <option value="vision">Vision Capable</option>
-                  </select>
-
-                  <button
-                    onClick={handleRefreshCatalog}
-                    disabled={isRefreshingCatalog}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-xs font-medium text-white transition cursor-pointer shadow-sm"
-                    title="Fetch latest models catalog from provider API"
-                  >
-                    <RotateCw className={`w-3.5 h-3.5 ${isRefreshingCatalog ? 'animate-spin' : ''}`} />
-                    <span>{isRefreshingCatalog ? 'Fetching...' : 'Refresh Catalog'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Models Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredModels.map(m => (
-                  <div
-                    key={m.id}
-                    className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex flex-col justify-between gap-3 shadow transition"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs text-white">{m.name}</span>
-                          <span className="text-[10px] font-mono uppercase px-1.5 py-0.2 bg-slate-800 text-indigo-300 rounded border border-slate-700">
-                            {m.providerId}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-                          {m.status}
-                        </span>
-                      </div>
-
-                      <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">{m.description}</p>
-                    </div>
-
-                    <div className="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-[10px]">
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <span>Context:</span>
-                        <span className="font-mono text-slate-200">
-                          {m.contextWindow >= 1000000
-                            ? `${(m.contextWindow / 1000000).toFixed(1)}M`
-                            : `${(m.contextWindow / 1000).toFixed(0)}k`}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        {m.supportsToolCalling && (
-                          <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 font-mono">
-                            Tools
-                          </span>
-                        )}
-                        {m.isReasoning && (
-                          <span className="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-300 font-mono">
-                            Reasoning
-                          </span>
-                        )}
-                        {m.supportsStreaming && (
-                          <span className="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 font-mono">
-                            Stream
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ModelCatalogTab
+              catalogQuery={catalogQuery}
+              setCatalogQuery={setCatalogQuery}
+              catalogProviderFilter={catalogProviderFilter}
+              setCatalogProviderFilter={setCatalogProviderFilter}
+              catalogCapabilityFilter={catalogCapabilityFilter}
+              setCatalogCapabilityFilter={setCatalogCapabilityFilter}
+              filteredModels={filteredModels}
+              handleRefreshCatalog={handleRefreshCatalog}
+              isRefreshingCatalog={isRefreshingCatalog}
+            />
           )}
 
           {/* TAB 4: DEFAULT MODEL CONFIG */}
