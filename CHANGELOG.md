@@ -5,6 +5,17 @@ All notable changes to Vertex Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-10-22
+
+### Added
+- **Boundary Schema Validation (Zod)**: Introduced runtime Zod schemas (`src/schemas/`) for AI provider requests, GitHub workflows, and environment configuration with unit tests asserting rejection of malformed inputs.
+- **Modular Sub-Component Test Suites**: Added unit test coverage for newly extracted Git sub-tabs (`GitChangesTab.test.tsx`, `GitStashesTab.test.tsx`, `GitTagsTab.test.tsx`, `GitIgnoreTab.test.tsx`) and agent hierarchy domain engines (`agentHierarchy.leads.test.ts`, `agentHierarchy.tasks.test.ts`, `agentHierarchy.swarms.test.ts`).
+
+### Refactored
+- **Strict Strong Typing on Context Hooks**: Eliminated all `useIDE() as any` casts across `EditorArea.tsx`, `Sidebar.tsx`, `AgentWorkspaceView.tsx`, and `AIOrchestratorPanel.tsx`, enforcing strong typing on tab identifiers, inspection results, and autonomy modes.
+- **God-File Modularization (`agentHierarchyService.ts`)**: Decomposed 1,353 LOC service monolith into dedicated modules (`agentHierarchyService.leads.ts`, `agentHierarchyService.tasks.ts`, `agentHierarchyService.swarms.ts`) re-exported via a lightweight facade.
+- **GitSidebar Tab Extraction**: Modularized 1,285 LOC `GitSidebar.tsx` by extracting tab logic into `GitChangesTab.tsx`, `GitStashesTab.tsx`, `GitTagsTab.tsx`, and `GitIgnoreTab.tsx`, eliminating duplicated state.
+
 ## [1.2.0] - 2026-10-21
 
 ### Added
