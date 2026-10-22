@@ -2,6 +2,8 @@ import { logger } from '../../services/logger';
 import React, { useEffect, useRef, useState } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import { useLayout } from '../../context/LayoutContext';
+import { EditorTabBar } from '../editor/EditorTabBar';
+import { FindReplaceOverlay } from '../editor/FindReplaceOverlay';
 import {
   X,
   Save,
@@ -365,195 +367,37 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
         </div>
       )}
 
-      {/* 1. TAB BAR */}
-      <div
-        onDragOver={handleDragOver}
-        onDrop={(e) => handleDrop(e)}
-        style={{
-          backgroundColor: 'var(--ide-surface)',
-          borderColor: 'var(--ide-border)',
-        }}
-        className="h-9 border-b flex items-center justify-between px-2 overflow-x-auto select-none no-scrollbar"
-      >
-        <div className="flex items-center gap-1 min-w-0">
-          {openTabs.map((tab: OpenTab) => {
-            const isTabActive = tab.id === activeTabId;
-            return (
-              <div
-                key={tab.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openFile(tab.filePath);
-                }}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setTabContextMenu({
-                    x: Math.min(e.clientX, window.innerWidth - 180),
-                    y: Math.min(e.clientY, window.innerHeight - 200),
-                    tab,
-                  });
-                }}
-                onDragOver={handleDragOver}
-                onDrop={(e) => {
-                  e.stopPropagation();
-                  handleDrop(e, tab.filePath);
-                }}
-                className={`group h-7 px-3 rounded-t-md flex items-center gap-2 cursor-pointer text-xs transition-colors border-t-2 ${
-                  isTabActive
-                    ? 'antigravity-tab-active font-semibold shadow-xs'
-                    : 'border-transparent opacity-75 hover:opacity-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                }`}
-                style={{
-                  backgroundColor: isTabActive ? 'var(--ide-editor-bg)' : 'transparent',
-                  color: isTabActive ? 'var(--ide-text)' : 'var(--ide-text-muted)',
-                  borderTopColor: isTabActive ? 'var(--ide-accent)' : 'transparent',
-                }}
-              >
-                {getFileIcon(tab.filePath)}
-                <span className="truncate max-w-[140px]">{tab.title}</span>
-
-                {/* Dirty Indicator (Unsaved) */}
-                {tab.isDirty && (
-                  <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" title="Unsaved changes" />
-                )}
-
-                {/* Close Tab Button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    closeTab(tab.id);
-                  }}
-                  className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 opacity-60 group-hover:opacity-100 transition-opacity"
-                  style={{ color: 'var(--ide-text-muted)' }}
-                  title="Close Tab (Cmd+W)"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Tab Bar Action Icons */}
-        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 pl-2">
-          {/* Cursor Inline AI Assistant Trigger */}
-          <button
-            onClick={() => setIsInlineAIOpen(!isInlineAIOpen)}
-            className={`px-2 py-0.5 rounded-md text-[11px] font-semibold flex items-center gap-1.5 transition-all border cursor-pointer ${
-              isInlineAIOpen
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.5)]'
-                : 'bg-indigo-50 dark:bg-slate-900/90 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-400 hover:text-indigo-900 dark:hover:text-white'
-            }`}
-            title="Cursor Inline Edit (Cmd+K)"
-          >
-            <Sparkles className="w-3 h-3 text-indigo-500 dark:text-cyan-300 animate-pulse" />
-            <span className="hidden sm:inline">Edit</span>
-            <kbd className="text-[9px] px-1 py-0.2 bg-indigo-100 dark:bg-black/40 text-indigo-800 dark:text-indigo-200 rounded font-mono">⌘K</kbd>
-          </button>
-
-          {/* Cursor Tab (Copilot++) Indicator Toggle */}
-          <button
-            onClick={() => setIsCursorTabEnabled(!isCursorTabEnabled)}
-            className={`px-1.5 py-0.5 rounded text-[10px] font-mono flex items-center gap-1 transition-colors border cursor-pointer ${
-              isCursorTabEnabled
-                ? 'bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-500/30'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-800'
-            }`}
-            title="Toggle Cursor Tab Autocomplete (Tab to accept)"
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${isCursorTabEnabled ? 'bg-cyan-500 dark:bg-cyan-400' : 'bg-slate-400 dark:bg-slate-600'}`} />
-            <span className="hidden md:inline">Tab</span>
-          </button>
-
-          {/* Split Editor Right */}
-          <button
-            onClick={onSplitRight}
-            className="p-1 hover:text-slate-900 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            title="Split Editor Right (Cmd+\)"
-          >
-            <Columns className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Split Editor Down */}
-          <button
-            onClick={onSplitDown}
-            className="p-1 hover:text-slate-900 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            title="Split Editor Down"
-          >
-            <Rows className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Close Split Group if available */}
-          {canCloseSplit && (
-            <button
-              onClick={onCloseSplit}
-              className="p-1 hover:text-slate-900 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Close This Editor Split"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-
-          {/* Visual Side-by-Side Diff Toggle */}
-          {activeFile && (
-            <button
-              onClick={() => setDiffMode(!diffMode)}
-              className={`px-2.5 py-0.5 rounded text-[10px] font-mono flex items-center gap-1.5 border transition-all cursor-pointer shadow-xs ${
-                diffMode
-                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-indigo-600/30'
-                  : 'bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-indigo-600/10 hover:text-indigo-400 dark:hover:border-indigo-500/50'
-              }`}
-              title={diffMode ? 'Return to Code Editor' : 'Open Visual Side-by-Side Diff against Git HEAD'}
-            >
-              <SplitSquareVertical className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{currentDiff ? `+${currentDiff.additions} -${currentDiff.deletions}` : 'Side-by-Side Diff'}</span>
-            </button>
-          )}
-
-          {/* Save Button & Auto-Save Badge */}
-          {autoSave ? (
-            <div
-              className="px-2 py-0.5 rounded text-[10px] font-mono flex items-center gap-1.5 transition-all bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 select-none"
-              title="Auto-Save is active: saves on file change and focus loss"
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${isAutoSaving ? 'bg-amber-400 animate-pulse' : activeTab?.isDirty ? 'bg-amber-400' : 'bg-emerald-500 dark:bg-emerald-400'}`} />
-              <span>{isAutoSaving ? 'Saving...' : activeTab?.isDirty ? 'Auto-saving' : 'Auto-Saved'}</span>
-            </div>
-          ) : (
-            activeTab?.isDirty && (
-              <button
-                onClick={saveCurrentFile}
-                className="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[10px] font-medium flex items-center gap-1 shadow-sm transition-colors"
-                title="Save File (Cmd+S)"
-              >
-                <Save className="w-3 h-3" />
-                <span>Save</span>
-              </button>
-            )
-          )}
-
-          {/* Copy Code */}
-          <button
-            onClick={handleCopyCode}
-            className="p-1 hover:text-slate-900 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            title="Copy Code"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-          </button>
-
-          {/* Find in File Trigger */}
-          <button
-            onClick={() => setIsFindOpen(!isFindOpen)}
-            className={`p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer ${
-              isFindOpen ? 'text-[var(--ide-accent,#00ff88)]' : 'hover:text-slate-900 dark:hover:text-slate-200'
-            }`}
-            title="Find & Replace in File (Ctrl+F)"
-          >
-            <Search className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
+      {/* 1. TAB BAR (Modularized) */}
+      <EditorTabBar
+        openTabs={openTabs}
+        activeTabId={activeTabId}
+        openFile={openFile}
+        closeTab={closeTab}
+        setTabContextMenu={setTabContextMenu}
+        handleDragOver={handleDragOver}
+        handleDrop={handleDrop}
+        getFileIcon={getFileIcon}
+        isInlineAIOpen={isInlineAIOpen}
+        setIsInlineAIOpen={setIsInlineAIOpen}
+        isCursorTabEnabled={isCursorTabEnabled}
+        setIsCursorTabEnabled={setIsCursorTabEnabled}
+        onSplitRight={onSplitRight}
+        onSplitDown={onSplitDown}
+        canCloseSplit={canCloseSplit}
+        onCloseSplit={onCloseSplit}
+        activeFile={activeFile}
+        diffMode={diffMode}
+        setDiffMode={setDiffMode}
+        currentDiff={currentDiff}
+        autoSave={autoSave}
+        isAutoSaving={isAutoSaving}
+        activeTab={activeTab}
+        saveCurrentFile={saveCurrentFile}
+        handleCopyCode={handleCopyCode}
+        copied={copied}
+        isFindOpen={isFindOpen}
+        setIsFindOpen={setIsFindOpen}
+      />
 
       {/* 2. BREADCRUMB BAR (Rendered if file is open) */}
       {currentFile && (
@@ -579,100 +423,21 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
         </div>
       )}
 
-      {/* Floating Find & Replace Overlay */}
-      {isFindOpen && (
-        <div
-          style={{
-            backgroundColor: 'var(--ide-surface-elevated, #121214)',
-            borderColor: 'var(--ide-border, #27272a)',
-          }}
-          className="absolute top-10 right-4 z-40 border rounded-xl shadow-2xl p-2.5 flex flex-col gap-2 min-w-[320px] text-xs backdrop-blur-xl animate-fadeIn"
-        >
-          {/* Find Row */}
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setShowReplaceRow(!showReplaceRow)}
-              className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white transition cursor-pointer"
-              title="Toggle Replace"
-            >
-              {showReplaceRow ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-            </button>
-            <div className="relative flex-1">
-              <input
-                type="text"
-                autoFocus
-                placeholder="Find in file..."
-                value={findText}
-                onChange={e => setFindText(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    if (e.shiftKey) handlePrevMatch();
-                    else handleNextMatch();
-                  } else if (e.key === 'Escape') {
-                    setIsFindOpen(false);
-                  }
-                }}
-                className="w-full bg-black/60 border border-white/15 focus:border-[var(--ide-accent,#00ff88)] rounded px-2 py-1 text-xs text-white placeholder:text-slate-500 outline-none pr-16"
-              />
-              <span className="absolute right-2 top-1 text-[10px] text-slate-400 font-mono">
-                {findMatches.length > 0 ? `${findMatchIndex + 1}/${findMatches.length}` : findText ? '0/0' : ''}
-              </span>
-            </div>
-            <button
-              onClick={handlePrevMatch}
-              disabled={findMatches.length === 0}
-              className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer"
-              title="Previous Match (Shift+Enter)"
-            >
-              <ChevronUp className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={handleNextMatch}
-              disabled={findMatches.length === 0}
-              className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer"
-              title="Next Match (Enter)"
-            >
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setIsFindOpen(false)}
-              className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white cursor-pointer"
-              title="Close (Escape)"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Replace Row */}
-          {showReplaceRow && (
-            <div className="flex items-center gap-1.5 pl-6 pt-1 border-t border-white/10">
-              <input
-                type="text"
-                placeholder="Replace with..."
-                value={replaceText}
-                onChange={e => setReplaceText(e.target.value)}
-                className="flex-1 bg-black/60 border border-white/15 focus:border-[var(--ide-accent,#00ff88)] rounded px-2 py-1 text-xs text-white placeholder:text-slate-500 outline-none"
-              />
-              <button
-                onClick={handleReplaceOne}
-                disabled={findMatches.length === 0}
-                className="px-2 py-1 bg-white/10 hover:bg-white/20 text-white rounded text-[10px] font-medium disabled:opacity-30 cursor-pointer"
-                title="Replace Next"
-              >
-                Replace
-              </button>
-              <button
-                onClick={handleReplaceAll}
-                disabled={findMatches.length === 0}
-                className="px-2 py-1 bg-[var(--ide-accent,#00ff88)]/20 hover:bg-[var(--ide-accent,#00ff88)]/30 text-[var(--ide-accent,#00ff88)] border border-[var(--ide-accent,#00ff88)]/40 rounded text-[10px] font-bold disabled:opacity-30 cursor-pointer"
-                title="Replace All"
-              >
-                All
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Floating Find & Replace Overlay (Modularized) */}
+      <FindReplaceOverlay
+        isFindOpen={isFindOpen}
+        setIsFindOpen={setIsFindOpen}
+        findText={findText}
+        setFindText={setFindText}
+        replaceText={replaceText}
+        setReplaceText={setReplaceText}
+        findMatches={findMatches}
+        findMatchIndex={findMatchIndex}
+        handlePrevMatch={handlePrevMatch}
+        handleNextMatch={handleNextMatch}
+        handleReplaceOne={handleReplaceOne}
+        handleReplaceAll={handleReplaceAll}
+      />
 
       {/* Floating Tab Context Menu */}
       {tabContextMenu && (
