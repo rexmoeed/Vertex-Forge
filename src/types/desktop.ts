@@ -80,6 +80,8 @@ export interface InspectionResult {
   primaryLine?: number;
   relatedFiles: string[];
   architectureSummary?: string;
+  steps?: Array<{ action?: string; file?: string; detail?: string; line?: number }>;
+  filesInspected?: string[];
 }
 
 export interface CommandExecutionOptions {

@@ -117,7 +117,7 @@ export const AIOrchestratorPanel: React.FC = () => {
     modifiedFiles,
     setIsMultiFileReviewOpen,
     setIsVoiceModalOpen,
-  } = useIDE() as any;
+  } = useIDE();
 
   const [showToolActivity, setShowToolActivity] = useState(false);
 
@@ -464,7 +464,7 @@ export const AIOrchestratorPanel: React.FC = () => {
           images: imagePayloads.length > 0 ? imagePayloads : undefined,
         });
         replyText = res.reply;
-        replyAgent = res.agent || activeAgent;
+        replyAgent = (res.agent as AgentRole) || activeAgent;
       }
 
       // Record telemetry usage
