@@ -41,13 +41,16 @@ import {
   GitHubPullRequest,
   GitHubIssue,
 } from '../../types/gitWorkflow';
+import { GitHistoryTab } from './GitHistoryTab';
+import { GitBranchesTab } from './GitBranchesTab';
+import { GitHubIntegrationTab } from './GitHubIntegrationTab';
 import { GitWorkflowService } from '../../services/gitWorkflowService';
 import { useIDE } from '../../context/IDEContext';
 import { MergeConflictModal } from '../modals/MergeConflictModal';
 import { ConfirmDialogModal } from '../modals/ConfirmDialogModal';
 
 export const GitSidebar: React.FC = () => {
-  const { openFile, refreshGit } = useIDE() as any;
+  const { openFile, refreshGit } = useIDE();
 
   // Working tree status state
   const [status, setStatus] = useState<GitWorkingTreeStatus>({
@@ -992,131 +995,40 @@ export const GitSidebar: React.FC = () => {
 
           {/* TAB 2: COMMIT HISTORY */}
           {activeTab === 'history' && (
-            <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs text-slate-400 px-1 py-1 font-semibold">
-                <span>Recent Commits ({commits.length})</span>
-                <button onClick={() => GitWorkflowService.getLog(40).then(setCommits)} className="hover:text-white">
-                  <RefreshCw className="w-3 h-3" />
-                </button>
-              </div>
-
-              {commits.map(commit => (
-                <div
-                  key={commit.hash}
-                  className="p-2.5 rounded-lg bg-slate-800/50 border border-slate-700/60 flex flex-col gap-1.5 text-xs hover:border-slate-600 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] text-indigo-400 font-bold bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/40">
-                      {commit.shortHash}
-                    </span>
-                    <span className="text-[10px] text-slate-400">{commit.relativeTime}</span>
-                  </div>
-
-                  <p className="text-slate-200 font-medium line-clamp-2 leading-tight">
-                    {commit.message}
-                  </p>
-
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-800/80">
-                    <span className="truncate">{commit.author}</span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        onClick={() => handleCherryPick(commit.hash)}
-                        className="px-1.5 py-0.5 rounded bg-slate-700/60 hover:bg-indigo-600 hover:text-white text-slate-300 transition-colors"
-                        title="Cherry-pick this commit"
-                      >
-                        Cherry-pick
-                      </button>
-                      <button
-                        onClick={() => handleRevert(commit.hash)}
-                        className="px-1.5 py-0.5 rounded bg-slate-700/60 hover:bg-rose-600 hover:text-white text-slate-300 transition-colors"
-                        title="Revert this commit"
-                      >
-                        Revert
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <GitHistoryTab
+              commits={commits}
+              onRefresh={() => GitWorkflowService.getLog(40).then(setCommits)}
+              onCherryPick={handleCherryPick}
+              onRevert={handleRevert}
+            />
           )}
 
           {/* TAB 3: BRANCHES & REMOTES */}
           {activeTab === 'branches' && (
-            <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-4 text-xs">
-              {/* Create Branch */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Create Branch</span>
-                <div className="flex gap-1.5">
-                  <input
-                    type="text"
-                    placeholder="branch-name..."
-                    value={newBranchName}
-                    onChange={e => setNewBranchName(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleCreateBranch()}
-                    className="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-                  />
-                  <button
-                    onClick={handleCreateBranch}
-                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-medium shadow"
-                  >
-                    Create
-                  </button>
-                </div>
-              </div>
-
-              {/* Local Branches List */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Branches ({branches.length})
-                </span>
-                <div className="flex flex-col divide-y divide-slate-800 bg-slate-800/40 rounded-lg border border-slate-700/60 overflow-hidden">
-                  {branches.map(b => (
-                    <div
-                      key={b.name}
-                      className="p-2 flex items-center justify-between hover:bg-slate-800/80 transition-colors"
-                    >
-                      <div
-                        onClick={() => !b.isCurrent && handleCheckoutBranch(b.name)}
-                        className={`flex items-center gap-1.5 font-mono cursor-pointer truncate ${
-                          b.isCurrent ? 'text-indigo-300 font-bold' : 'text-slate-300 hover:text-white'
-                        }`}
-                      >
-                        <GitBranch className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                        <span className="truncate">{b.name}</span>
-                        {b.isCurrent && (
-                          <span className="px-1.5 py-0.2 bg-indigo-600/30 text-indigo-300 text-[10px] rounded font-sans">
-                            active
-                          </span>
-                        )}
-                      </div>
-
-                      {!b.isCurrent && (
-                        <button
-                          onClick={() => handleDeleteBranch(b.name)}
-                          className="p-1 hover:text-rose-400 text-slate-500 rounded hover:bg-slate-700"
-                          title="Delete branch (Safeguarded)"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Remotes */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Remotes ({remotes.length})
-                </span>
-                {remotes.map(r => (
-                  <div key={r.name} className="p-2 bg-slate-800/40 rounded border border-slate-700/60 flex flex-col gap-0.5">
-                    <span className="font-bold text-slate-200 font-mono">{r.name}</span>
-                    <span className="text-[10px] text-slate-400 font-mono truncate">{r.fetchUrl}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <GitBranchesTab
+              branches={branches}
+              currentBranch={status.branch}
+              onCreateBranch={async (name: string) => {
+                setNewBranchName(name);
+                const res = await GitWorkflowService.createBranch(name, true);
+                if (res.success) {
+                  showToast(`Created & checked out branch "${name}"`, 'success');
+                  GitWorkflowService.getBranches().then(setBranches);
+                } else {
+                  showToast(res.error || 'Failed to create branch', 'error');
+                }
+              }}
+              onSwitchBranch={handleCheckoutBranch}
+              onDeleteBranch={handleDeleteBranch}
+              onMerge={async (sourceBranch: string) => {
+                const res = await GitWorkflowService.merge(sourceBranch);
+                if (res.success) {
+                  showToast(`Merged ${sourceBranch}`, 'success');
+                } else if (!res.success) {
+                  setIsConflictModalOpen(true);
+                }
+              }}
+            />
           )}
 
           {/* TAB 4: STASHES */}
@@ -1288,157 +1200,57 @@ export const GitSidebar: React.FC = () => {
 
           {/* TAB 7: GITHUB INTEGRATION */}
           {activeTab === 'github' && (
-            <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 text-xs">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <div className="flex items-center gap-1.5 font-bold text-slate-200">
-                  <Github className="w-4 h-4 text-white" />
-                  <span>GitHub Integration</span>
-                </div>
-                {gitHubAuthed && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    Connected
-                  </span>
-                )}
-              </div>
-
-              {!gitHubAuthed ? (
-                <div className="flex flex-col gap-2.5 bg-slate-800/40 p-3 rounded-lg border border-slate-700">
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Authenticate with a GitHub Personal Access Token (classic or fine-grained with <code className="text-indigo-300">repo</code> scope) to inspect PRs, view issues, and create pull requests.
-                  </p>
-                  <input
-                    type="password"
-                    placeholder="ghp_... (never logged or persisted to disk)"
-                    value={gitHubTokenInput}
-                    onChange={e => setGitHubTokenInput(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-                  />
-                  <button
-                    onClick={handleSaveGitHubToken}
-                    className="py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-medium shadow text-xs transition-colors"
-                  >
-                    Authenticate with GitHub
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {/* User Profile */}
-                  <div className="flex items-center gap-2.5 p-2 bg-slate-800/60 rounded-lg border border-slate-700">
-                    {gitHubUser?.avatarUrl ? (
-                      <img src={gitHubUser.avatarUrl} alt="" className="w-8 h-8 rounded-full" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white">
-                        {gitHubUser?.login?.[0]?.toUpperCase()}
-                      </div>
-                    )}
-                    <div className="truncate">
-                      <div className="font-bold text-white leading-tight">{gitHubUser?.login}</div>
-                      <div className="text-[10px] text-slate-400">{gitHubUser?.name || 'GitHub User'}</div>
-                    </div>
-                  </div>
-
-                  {/* Target Repo Config */}
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="owner (e.g. facebook)"
-                      value={gitHubOwner}
-                      onChange={e => setGitHubOwner(e.target.value)}
-                      className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white font-mono"
-                    />
-                    <input
-                      type="text"
-                      placeholder="repo (e.g. react)"
-                      value={gitHubRepo}
-                      onChange={e => setGitHubRepo(e.target.value)}
-                      className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white font-mono"
-                    />
-                  </div>
-
-                  {/* Pull Requests */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                        Pull Requests ({pullRequests.length})
-                      </span>
-                      <button
-                        onClick={() => setIsCreatingPr(!isCreatingPr)}
-                        className="text-[10px] text-indigo-400 hover:text-indigo-300 font-medium"
-                      >
-                        {isCreatingPr ? 'Cancel' : '+ New PR'}
-                      </button>
-                    </div>
-
-                    {isCreatingPr && (
-                      <div className="p-3 bg-slate-800 rounded-lg border border-slate-700 flex flex-col gap-2">
-                        <input
-                          type="text"
-                          placeholder="PR Title..."
-                          value={prTitle}
-                          onChange={e => setPrTitle(e.target.value)}
-                          className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white"
-                        />
-                        <textarea
-                          placeholder="PR Description / Summary..."
-                          value={prBody}
-                          onChange={e => setPrBody(e.target.value)}
-                          className="bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white h-16 resize-none"
-                        />
-                        <button
-                          onClick={handleCreatePullRequest}
-                          className="py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-semibold"
-                        >
-                          Submit Pull Request
-                        </button>
-                      </div>
-                    )}
-
-                    {pullRequests.map(pr => (
-                      <a
-                        key={pr.number}
-                        href={pr.htmlUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 rounded bg-slate-800/40 border border-slate-700 hover:border-slate-500 flex flex-col gap-1 transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-slate-200 line-clamp-1">
-                            #{pr.number} {pr.title}
-                          </span>
-                          <ExternalLink className="w-3 h-3 text-slate-400 shrink-0" />
-                        </div>
-                        <div className="text-[10px] text-slate-400 flex items-center gap-2">
-                          <span>by {pr.author?.login}</span>
-                          <span>•</span>
-                          <span className="font-mono">{pr.headBranch} → {pr.baseBranch}</span>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-
-                  {/* Issues */}
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      Issues ({issues.length})
-                    </span>
-                    {issues.map(issue => (
-                      <a
-                        key={issue.number}
-                        href={issue.htmlUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 rounded bg-slate-800/40 border border-slate-700 hover:border-slate-500 flex items-center justify-between text-xs transition-colors"
-                      >
-                        <span className="truncate flex-1 text-slate-300">
-                          #{issue.number} {issue.title}
-                        </span>
-                        <ExternalLink className="w-3 h-3 text-slate-400 shrink-0 ml-2" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <GitHubIntegrationTab
+              gitHubAuthed={gitHubAuthed}
+              gitHubUser={gitHubUser}
+              gitHubOwner={gitHubOwner}
+              gitHubRepo={gitHubRepo}
+              pullRequests={pullRequests}
+              issues={issues}
+              onSaveToken={async (token) => {
+                setGitHubTokenInput(token);
+                const res = await GitWorkflowService.setGitHubToken(token);
+                if (res.authenticated) {
+                  setGitHubAuthed(true);
+                  setGitHubUser(res.user);
+                  showToast(`Authenticated as ${res.user?.login || 'GitHub user'}`, 'success');
+                  if (gitHubOwner && gitHubRepo) {
+                    GitWorkflowService.getGitHubPullRequests(gitHubOwner, gitHubRepo).then(setPullRequests);
+                    GitWorkflowService.getGitHubIssues(gitHubOwner, gitHubRepo).then(setIssues);
+                  }
+                } else {
+                  showToast('GitHub token verification failed', 'error');
+                }
+              }}
+              onUpdateRepo={(owner, repo) => {
+                setGitHubOwner(owner);
+                setGitHubRepo(repo);
+                if (gitHubAuthed && owner && repo) {
+                  GitWorkflowService.getGitHubPullRequests(owner, repo).then(setPullRequests);
+                  GitWorkflowService.getGitHubIssues(owner, repo).then(setIssues);
+                }
+              }}
+              onCreatePR={async (title, body, base) => {
+                if (!gitHubOwner || !gitHubRepo) return;
+                try {
+                  const res = await GitWorkflowService.createGitHubPullRequest({
+                    owner: gitHubOwner,
+                    repo: gitHubRepo,
+                    title,
+                    body,
+                    head: status.branch,
+                    base,
+                  });
+                  showToast(`Pull request created #${res.number}`, 'success');
+                  if (gitHubOwner && gitHubRepo) {
+                    GitWorkflowService.getGitHubPullRequests(gitHubOwner, gitHubRepo).then(setPullRequests);
+                  }
+                } catch (e: any) {
+                  showToast(`Failed to create PR: ${e?.message || 'Error'}`, 'error');
+                  logger.error('Failed to create GitHub pull request', { owner: gitHubOwner, repo: gitHubRepo }, e);
+                }
+              }}
+            />
           )}
         </>
       )}

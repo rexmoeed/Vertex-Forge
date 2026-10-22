@@ -251,6 +251,23 @@ export class GitWorkflowService {
   }
 
   // ==========================================
+
+  public static async merge(branch: string, cwd?: string): Promise<{ success: boolean; error?: string }> {
+    const targetCwd = cwd || this.getCwd();
+    try {
+      const res = await fetch('/api/git/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cwd: targetCwd, branch }),
+      });
+      if (res.ok) return { success: true };
+      const err = await res.json().catch(() => ({}));
+      return { success: false, error: err.error || 'Merge failed' };
+    } catch (e: any) {
+      return { success: false, error: e?.message || 'Merge failed' };
+    }
+  }
+
   // REMOTES, FETCH, PULL, PUSH
   // ==========================================
 
