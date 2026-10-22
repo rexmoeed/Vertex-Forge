@@ -819,7 +819,7 @@ export const GitSidebar: React.FC = () => {
                       <div className="flex flex-col divide-y divide-slate-800/50">
                         {status.staged.map(file => (
                           <div
-                            key={file.filePath}
+                            key={file.filePath || (file as any).path}
                             className="flex items-center justify-between p-2 hover:bg-slate-800/40 text-xs transition-colors group"
                           >
                             <div
@@ -896,7 +896,7 @@ export const GitSidebar: React.FC = () => {
                       ) : (
                         status.unstaged.map(file => (
                           <div
-                            key={file.filePath}
+                            key={file.filePath || (file as any).path}
                             className="flex items-center justify-between p-2 hover:bg-slate-800/40 text-xs transition-colors group"
                           >
                             <div
@@ -963,7 +963,7 @@ export const GitSidebar: React.FC = () => {
                       <div className="flex flex-col divide-y divide-slate-800/50">
                         {status.untracked.map(file => (
                           <div
-                            key={file.filePath}
+                            key={file.filePath || (file as any).path}
                             className="flex items-center justify-between p-2 hover:bg-slate-800/40 text-xs transition-colors group"
                           >
                             <div

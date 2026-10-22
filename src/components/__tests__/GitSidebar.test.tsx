@@ -115,7 +115,7 @@ describe('GitSidebar Component', () => {
     const input = screen.getAllByPlaceholderText(/Commit message/i)[0];
     fireEvent.change(input, { target: { value: 'feat: add user authentication' } });
 
-    const commitBtn = screen.getAllByRole('button', { name: /Commit/i })[0];
+    const commitBtn = screen.getByRole('button', { name: /Commit \(1\)/i });
     await waitFor(() => {
       expect((commitBtn as HTMLButtonElement).disabled).toBe(false);
     });
