@@ -74,4 +74,38 @@ describe('CursorService', () => {
     const nullSuggestion = CursorService.getGhostTextSuggestion('let x = 1;', 'ts');
     expect(nullSuggestion).toBeNull();
   });
+  it('composes multi-file auth changes when prompt mentions authentication', async () => {
+    const result = await CursorService.composeMultiFileChanges(
+      'Implement user authentication with JWT session context',
+      vfs,
+      []
+    );
+
+    expect(result.changes.length).toBeGreaterThanOrEqual(2);
+    expect(result.changes.some(c => c.filePath === 'src/types/auth.ts')).toBe(true);
+    expect(result.changes.some(c => c.filePath === 'src/context/AuthContext.tsx')).toBe(true);
+    expect(result.message).toContain('Composer');
+  });
+
+  it('composes test suite when prompt mentions test creation', async () => {
+    const result = await CursorService.composeMultiFileChanges(
+      'Write comprehensive unit tests for core service',
+      vfs,
+      []
+    );
+
+    expect(result.changes.length).toBeGreaterThanOrEqual(1);
+    expect(result.changes.some(c => c.filePath.includes('.test.ts'))).toBe(true);
+  });
+
+  it('composes feature enhancement modifying primary workspace file', async () => {
+    const result = await CursorService.composeMultiFileChanges(
+      'Add dark theme toggle to dashboard',
+      vfs,
+      []
+    );
+
+    expect(result.changes.length).toBeGreaterThanOrEqual(1);
+    expect(result.changes[0].action).toBe('modify');
+  });
 });
