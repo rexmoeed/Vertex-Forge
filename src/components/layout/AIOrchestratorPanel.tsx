@@ -59,6 +59,8 @@ import { CodebaseIntelligenceEngine, GroundedAIResponse, DataFlowTrace, ProjectM
 import { InspectionStep } from '../../types/desktop';
 import { ModelSelectorBar } from './orchestrator/ModelSelectorBar';
 import { AutonomousProgressCard } from './orchestrator/AutonomousProgressCard';
+import { ChatStreamView } from './orchestrator/ChatStreamView';
+import { ChatComposerCard } from './orchestrator/ChatComposerCard';
 import { OrchestratorModals } from './orchestrator/OrchestratorModals';
 
 export type ContextAttachmentType = 'file' | 'image' | 'terminal' | 'lines';
@@ -146,11 +148,7 @@ export const AIOrchestratorPanel: React.FC = () => {
   const [lineStartInput, setLineStartInput] = useState<number>(1);
   const [lineEndInput, setLineEndInput] = useState<number>(30);
   const [imageModalUrl, setImageModalUrl] = useState<string | null>(null);
-  const [showAtMenu, setShowAtMenu] = useState(false);
-  const [showSlashMenu, setShowSlashMenu] = useState(false);
-  const [slashFilter, setSlashFilter] = useState('');
   const [expandedTerminalMessageId, setExpandedTerminalMessageId] = useState<string | null>(null);
-  const [isDragOver, setIsDragOver] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -350,7 +348,6 @@ export const AIOrchestratorPanel: React.FC = () => {
     setAttachedContexts([]);
     setShowFilePicker(false);
     setShowLinePicker(false);
-    setShowAtMenu(false);
 
     // Append user message with attachments
     const updatedMessages = [
@@ -641,292 +638,35 @@ export const AIOrchestratorPanel: React.FC = () => {
         </div>
       )}
 
-      {/* 1. TOP COMPOSER CARD (Cursor Grok / Antigravity Style - Screenshot 2) */}
-      <div className="p-2 border-b border-white/10 bg-[#0e0e11] relative shrink-0">
-        <div
-          onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-          onDragLeave={() => setIsDragOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setIsDragOver(false);
-            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-              for (let i = 0; i < e.dataTransfer.files.length; i++) {
-                const file = e.dataTransfer.files[i];
-                if (file.type.startsWith('image/')) {
-                  handleAttachImage(file);
-                }
-              }
-            }
-          }}
-          className={`relative rounded-xl border border-white/10 bg-[#121214] p-2.5 transition-all focus-within:border-white/25 shadow-inner ${
-            isDragOver ? 'ring-1 ring-cyan-500/50 border-cyan-500/60' : ''
-          }`}
-        >
-          {/* Textarea */}
-          <textarea
-            ref={textareaRef}
-            value={chatInput}
-            onChange={e => {
-              const val = e.target.value;
-              setChatInput(val);
-              if (val.endsWith('@')) {
-                setShowAtMenu(true);
-                setShowSlashMenu(false);
-              } else if (!val.includes('@')) {
-                setShowAtMenu(false);
-              }
-
-              if (val.endsWith('/') || (val.startsWith('/') && !val.includes(' '))) {
-                setShowSlashMenu(true);
-                setShowAtMenu(false);
-                setSlashFilter(val.startsWith('/') ? val.slice(1).toLowerCase() : '');
-              } else {
-                setShowSlashMenu(false);
-              }
-            }}
-            onKeyDown={e => {
-              if (e.key === 'Escape') {
-                setShowSlashMenu(false);
-                setShowAtMenu(false);
-              } else if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                setShowSlashMenu(false);
-                setShowAtMenu(false);
-                handleSendQuery();
-              }
-            }}
-            onPaste={handlePaste}
-            rows={2}
-            placeholder="Plan, Build, / for skills, @ for context"
-            className="w-full resize-none bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none leading-relaxed min-h-[46px] font-sans"
-          />
-
-          {/* Attached Context Chips Bar */}
-          {attachedContexts.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 py-1.5 border-t border-white/5 my-1">
-              {attachedContexts.map(ctx => (
-                <div
-                  key={ctx.id}
-                  className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium border shadow-xs transition ${
-                    ctx.type === 'file'
-                      ? 'bg-indigo-950/60 border-indigo-800 text-indigo-300'
-                      : ctx.type === 'image'
-                      ? 'bg-purple-950/60 border-purple-800 text-purple-300'
-                      : ctx.type === 'terminal'
-                      ? 'bg-emerald-950/60 border-emerald-800 text-emerald-300'
-                      : 'bg-amber-950/60 border-amber-800 text-amber-300'
-                  }`}
-                >
-                  {ctx.type === 'file' && <FileText className="w-3 h-3 text-indigo-400" />}
-                  {ctx.type === 'image' && (
-                    ctx.dataUrl ? (
-                      <img src={ctx.dataUrl} alt="thumb" className="w-3.5 h-3.5 rounded object-cover" />
-                    ) : (
-                      <ImageIcon className="w-3 h-3 text-purple-400" />
-                    )
-                  )}
-                  {ctx.type === 'terminal' && <Terminal className="w-3 h-3 text-emerald-400" />}
-                  {ctx.type === 'lines' && <Code2 className="w-3 h-3 text-amber-400" />}
-
-                  <span className="max-w-[120px] truncate font-mono">{ctx.title}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveContext(ctx.id)}
-                    className="p-0.5 rounded hover:bg-white/10 text-slate-400 hover:text-white cursor-pointer"
-                    title="Remove context item"
-                  >
-                    <X className="w-2.5 h-2.5" />
-                  </button>
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={() => setAttachedContexts([])}
-                className="text-[9px] text-slate-500 hover:text-rose-400 ml-auto cursor-pointer font-medium"
-              >
-                Clear
-              </button>
-            </div>
-          )}
-
-          {/* Bottom Bar inside Composer Card */}
-          <ModelSelectorBar
-            cursorMode={cursorMode}
-            setCursorMode={setCursorMode}
-            selectedModel={selectedModel}
-            setSelectedModel={setSelectedModel}
-            isModelDropdownOpen={isModelDropdownOpen}
-            setIsModelDropdownOpen={setIsModelDropdownOpen}
-            setActiveView={setActiveView}
-            showAtMenu={showAtMenu}
-            setShowAtMenu={setShowAtMenu}
-            setIsVoiceModalOpen={setIsVoiceModalOpen}
-            chatInput={chatInput}
-            isChatLoading={isChatLoading}
-            setIsChatLoading={setIsChatLoading}
-            handleSendQuery={handleSendQuery}
-          />
-        </div>
-
-        {/* Floating '/' Slash Command Skills Autocomplete Menu */}
-        {showSlashMenu && (
-          <div className="absolute top-full left-3 mt-1 w-80 bg-[#141416] border border-indigo-500/30 rounded-xl shadow-2xl overflow-hidden z-40 animate-in fade-in duration-100 max-h-72 flex flex-col">
-            <div className="p-2 border-b border-white/10 text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center justify-between bg-black/50">
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Specialized Coding Skills (/)</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowSlashMenu(false)}
-                className="text-slate-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="p-1 space-y-0.5 text-xs overflow-y-auto">
-              {SkillSetService.listSkills()
-                .filter(s => s.enabled)
-                .filter(s => {
-                  if (!slashFilter) return true;
-                  const q = slashFilter.toLowerCase().trim();
-                  return (
-                    s.name.toLowerCase().includes(q) ||
-                    s.description.toLowerCase().includes(q) ||
-                    s.triggers.some(t => t.pattern.toLowerCase().includes(q))
-                  );
-                })
-                .map(skill => (
-                  <button
-                    key={skill.id}
-                    type="button"
-                    onClick={() => {
-                      const trigger = skill.triggers.find(t => t.type === 'slash_command')?.pattern || `/${skill.name}`;
-                      setChatInput(`${trigger} `);
-                      setShowSlashMenu(false);
-                      textareaRef.current?.focus();
-                    }}
-                    className="w-full flex items-start gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-200 hover:bg-indigo-600/20 hover:text-white text-left transition cursor-pointer group"
-                  >
-                    <Code2 className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5 group-hover:text-cyan-300" />
-                    <div className="flex flex-col min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-bold text-xs text-indigo-300 group-hover:text-cyan-300">
-                          {skill.triggers.find(t => t.type === 'slash_command')?.pattern || `/${skill.name}`}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-sans">({skill.name})</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400 leading-tight line-clamp-1 group-hover:text-slate-200">
-                        {skill.description}
-                      </span>
-                    </div>
-                  </button>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {/* Floating '@' Mention Autocomplete Menu */}
-        {showAtMenu && (
-          <div className="absolute top-full left-3 mt-1 w-64 bg-[#141416] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-40 animate-in fade-in duration-100">
-            <div className="p-2 border-b border-white/10 text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
-              <span>Insert Context (@)</span>
-              <button
-                type="button"
-                onClick={() => setShowAtMenu(false)}
-                className="text-slate-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="p-1 space-y-0.5 text-xs">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAtMenu(false);
-                  setShowFilePicker(true);
-                  setChatInput(prev => prev.replace(/@$/, ''));
-                }}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-200 hover:bg-white/5 text-left transition cursor-pointer"
-              >
-                <FileText className="w-3.5 h-3.5 text-indigo-400" />
-                <div className="flex flex-col">
-                  <span className="font-medium text-[11px]">@ File</span>
-                  <span className="text-[9px] text-slate-400">Search & attach workspace file</span>
-                </div>
-              </button>
-
-              {activeFile && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAtMenu(false);
-                    handleAttachFile(activeFile);
-                    setChatInput(prev => prev.replace(/@$/, ''));
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-200 hover:bg-white/5 text-left transition cursor-pointer"
-                >
-                  <FileCode className="w-3.5 h-3.5 text-cyan-400" />
-                  <div className="flex flex-col">
-                    <span className="font-medium text-[11px]">@ Active File ({activeFile.split('/').pop()})</span>
-                    <span className="text-[9px] text-slate-400">Attach current editor file</span>
-                  </div>
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAtMenu(false);
-                  handleToggleTerminalContext();
-                  setChatInput(prev => prev.replace(/@$/, ''));
-                }}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-200 hover:bg-white/5 text-left transition cursor-pointer"
-              >
-                <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-                <div className="flex flex-col">
-                  <span className="font-medium text-[11px]">@ Terminal</span>
-                  <span className="text-[9px] text-slate-400">Include recent shell logs & errors</span>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAtMenu(false);
-                  setSelectedFileForLines(activeFile || 'src/App.tsx');
-                  setShowLinePicker(true);
-                  setChatInput(prev => prev.replace(/@$/, ''));
-                }}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-200 hover:bg-white/5 text-left transition cursor-pointer"
-              >
-                <Code2 className="w-3.5 h-3.5 text-amber-400" />
-                <div className="flex flex-col">
-                  <span className="font-medium text-[11px]">@ Line References</span>
-                  <span className="text-[9px] text-slate-400">Reference specific line range</span>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAtMenu(false);
-                  imageInputRef.current?.click();
-                  setChatInput(prev => prev.replace(/@$/, ''));
-                }}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-200 hover:bg-white/5 text-left transition cursor-pointer"
-              >
-                <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
-                <div className="flex flex-col">
-                  <span className="font-medium text-[11px]">@ Image</span>
-                  <span className="text-[9px] text-slate-400">Upload screenshot or mockup</span>
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* 1. TOP COMPOSER CARD (Modularized) */}
+      <ChatComposerCard
+        chatInput={chatInput}
+        setChatInput={setChatInput}
+        textareaRef={textareaRef}
+        attachedContexts={attachedContexts}
+        setAttachedContexts={setAttachedContexts}
+        handleRemoveContext={handleRemoveContext}
+        handleAttachImage={handleAttachImage}
+        handlePaste={handlePaste}
+        handleSendQuery={handleSendQuery}
+        cursorMode={cursorMode}
+        setCursorMode={setCursorMode}
+        selectedModel={selectedModel}
+        setSelectedModel={setSelectedModel}
+        isModelDropdownOpen={isModelDropdownOpen}
+        setIsModelDropdownOpen={setIsModelDropdownOpen}
+        setActiveView={setActiveView}
+        setIsVoiceModalOpen={setIsVoiceModalOpen}
+        isChatLoading={isChatLoading}
+        setIsChatLoading={setIsChatLoading}
+        activeFile={activeFile}
+        handleAttachFile={handleAttachFile}
+        handleToggleTerminalContext={handleToggleTerminalContext}
+        setSelectedFileForLines={setSelectedFileForLines}
+        setShowLinePicker={setShowLinePicker}
+        setShowFilePicker={setShowFilePicker}
+        imageInputRef={imageInputRef}
+      />
 
       {/* 2. CHAT FEED & MESSAGE AREA */}
       <div className="flex-1 p-3 overflow-y-auto space-y-3 min-h-0 select-text">
@@ -980,249 +720,25 @@ export const AIOrchestratorPanel: React.FC = () => {
           />
         )}
 
-        {/* Message Stream */}
-        {chatMessages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex flex-col gap-1 text-xs w-full min-w-0 ${
-              msg.role === 'user' ? 'items-end' : 'items-start'
-            }`}
-          >
-            <div
-              className={`p-3 rounded-2xl max-w-[98%] min-w-0 break-words leading-relaxed overflow-hidden chat-bubble-contain ${
-                msg.role === 'user'
-                  ? 'bg-[#18181b] text-white border border-slate-800 shadow-sm'
-                  : 'bg-black/60 border border-slate-800 text-slate-200 shadow-xs'
-              }`}
-            >
-              {/* Attached Context Badges for User Message */}
-              {msg.attachments && msg.attachments.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-2.5 pb-2 border-b border-white/20">
-                  {msg.attachments.map(att => (
-                    <div key={att.id} className="inline-flex items-center">
-                      {att.type === 'file' && (
-                        <button
-                          type="button"
-                          onClick={() => att.filePath && openFile(att.filePath)}
-                          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/20 hover:bg-white/30 text-white text-[10px] font-mono transition cursor-pointer"
-                          title={`Click to open ${att.filePath} in editor`}
-                        >
-                          <FileText className="w-3 h-3 text-cyan-200" />
-                          <span>{att.title}</span>
-                        </button>
-                      )}
-
-                      {att.type === 'image' && att.dataUrl && (
-                        <div
-                          onClick={() => setImageModalUrl(att.dataUrl!)}
-                          className="relative group cursor-pointer rounded-lg overflow-hidden border border-white/30 max-w-[120px]"
-                          title="Click to view image"
-                        >
-                          <img src={att.dataUrl} alt={att.title} className="w-full h-14 object-cover" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
-                            <Maximize2 className="w-3.5 h-3.5 text-white" />
-                          </div>
-                        </div>
-                      )}
-
-                      {att.type === 'lines' && (
-                        <button
-                          type="button"
-                          onClick={() => att.filePath && openFile(att.filePath)}
-                          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-400/25 hover:bg-amber-400/35 text-amber-100 border border-amber-300/30 text-[10px] font-mono transition cursor-pointer"
-                          title="Click to open file in editor"
-                        >
-                          <Code2 className="w-3 h-3 text-amber-300" />
-                          <span>{att.title}</span>
-                        </button>
-                      )}
-
-                      {att.type === 'terminal' && (
-                        <div className="text-[10px]">
-                          <button
-                            type="button"
-                            onClick={() => setExpandedTerminalMessageId(prev => prev === att.id ? null : att.id)}
-                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-400/25 hover:bg-emerald-400/35 text-emerald-100 border border-emerald-300/30 font-mono transition cursor-pointer"
-                          >
-                            <Terminal className="w-3 h-3 text-emerald-300" />
-                            <span>{att.title}</span>
-                            <ChevronDown className={`w-2.5 h-2.5 transition-transform ${expandedTerminalMessageId === att.id ? 'rotate-180' : ''}`} />
-                          </button>
-                          {expandedTerminalMessageId === att.id && (
-                            <pre className="mt-1.5 p-2 rounded bg-slate-950/90 text-emerald-300 font-mono text-[9px] max-h-36 overflow-y-auto whitespace-pre-wrap select-text border border-emerald-500/20">
-                              {att.contentSnippet}
-                            </pre>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <p className="whitespace-pre-wrap break-words break-all max-w-full overflow-hidden leading-relaxed">{msg.content}</p>
-
-              {/* Data Flow Trace Visualization */}
-              {msg.dataFlow && (
-                <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-900/90 border border-indigo-200 dark:border-indigo-500/30 rounded-xl flex flex-col gap-2">
-                  <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-300 font-bold text-[11px]">
-                    <Layers className="w-3.5 h-3.5" />
-                    <span>Traced Architecture Data Flow:</span>
-                  </div>
-
-                  <div className="space-y-2 pl-2 border-l border-indigo-300 dark:border-indigo-500/30">
-                    {msg.dataFlow.steps.map((st, idx) => (
-                      <div key={idx} className="flex flex-col gap-0.5 text-[11px]">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-slate-900 dark:text-white">{st.layer}:</span>
-                          <button
-                            onClick={() => openFile(st.filePath)}
-                            className="font-mono text-indigo-600 dark:text-cyan-400 hover:underline cursor-pointer"
-                          >
-                            {st.filePath}
-                          </button>
-                        </div>
-                        <p className="text-slate-600 dark:text-slate-400 text-[10px]">{st.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Grounded Codebase Evidence Citations */}
-              {msg.groundedResponse && msg.groundedResponse.evidence.length > 0 && (
-                <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-800/80 flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>Verified Project Evidence:</span>
-                  </span>
-
-                  <div className="grid grid-cols-1 gap-1">
-                    {msg.groundedResponse.evidence.map((ev, evIdx) => (
-                      <div
-                        key={evIdx}
-                        onClick={() => openFile(ev.filePath)}
-                        className="p-1.5 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 cursor-pointer flex items-center justify-between text-[10px] transition"
-                        title="Click to open verified file in editor"
-                      >
-                        <span className="font-mono text-indigo-600 dark:text-cyan-300 truncate max-w-[200px]">
-                          {ev.filePath}
-                        </span>
-                        <ExternalLink className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-
-        {/* Real Reasoning & Exploration Steps (Rendered Only when Real Steps Exist) */}
-        {lastInspectionResult && lastInspectionResult.steps && lastInspectionResult.steps.length > 0 && (
-          <div className="flex flex-col gap-1.5 my-2 text-xs font-mono select-none">
-            <button
-              type="button"
-              onClick={() => setIsReasoningOpen(!isReasoningOpen)}
-              className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 transition cursor-pointer text-[11px]"
-            >
-              <span>Exploring {lastInspectionResult.filesInspected?.length || 0} files, {lastInspectionResult.steps.length} searches</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isReasoningOpen ? '' : '-rotate-90'}`} />
-            </button>
-
-            {isReasoningOpen && (
-              <div className="flex flex-col gap-1 pl-2 text-[10px] text-slate-400 border-l border-white/10 animate-fadeIn">
-                {lastInspectionResult.steps.map((st: any, idx: number) => (
-                  <div
-                    key={idx}
-                    onClick={() => st.file && openFile(st.file)}
-                    className="flex items-center gap-1.5 hover:text-[#00ff88] transition cursor-pointer truncate"
-                  >
-                    <span className="opacity-60">{st.action || 'Analyzed'}</span>
-                    <span className="text-slate-300">{st.file || st.detail}</span>
-                    {st.line && <span className="text-slate-500">#L{st.line}</span>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Action Bar: Files status & Review Changes */}
-        <div className="flex items-center justify-between py-1 text-xs select-none">
-          <div className="flex items-center gap-1.5 text-slate-400 text-[11px] font-mono">
-            <span>←</span>
-            <span className="truncate max-w-[130px]">{modifiedFiles?.length || 0} Files With ...</span>
-          </div>
-          <button
-            onClick={() => setIsMultiFileReviewOpen?.(true)}
-            className="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-[11px] font-medium transition cursor-pointer flex items-center gap-1"
-          >
-            <span>Review Changes</span>
-          </button>
-        </div>
-
-        {/* Queued Messages Section (Matching Screenshot) */}
-        {queuedMessages.length > 0 && (
-          <div className="p-2.5 rounded-xl bg-[#121214] border border-slate-800 flex flex-col gap-2 my-2 select-none shadow-sm">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-200 text-xs">Queued Messages</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 font-mono text-[10px] font-bold">
-                  {queuedMessages.length}
-                </span>
-              </div>
-              <span className="text-[10px] text-slate-500 truncate max-w-[130px]">Sends after agent fi...</span>
-            </div>
-
-            <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto pr-0.5">
-              {queuedMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="p-2 rounded-lg bg-black/70 border border-slate-800/80 hover:border-slate-700 transition flex items-center justify-between gap-2 group"
-                >
-                  <span className="text-[11px] text-slate-300 font-sans truncate flex-1 leading-snug">
-                    {msg.text}
-                  </span>
-                  <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover:opacity-100">
-                    <button
-                      onClick={() => handleSendQueuedMessage(msg.id)}
-                      className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-[#00ff88] transition cursor-pointer"
-                      title="Send Now"
-                    >
-                      <Send className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => handleEditQueuedMessage(msg.id)}
-                      className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
-                      title="Edit Prompt"
-                    >
-                      <Wrench className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteQueuedMessage(msg.id)}
-                      className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition cursor-pointer"
-                      title="Delete from Queue"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Live Investigation Progress Pill */}
-        {isChatLoading && (
-          <div className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400 p-2.5 bg-indigo-50 dark:bg-slate-950 border border-indigo-200 dark:border-indigo-500/30 rounded-xl animate-pulse">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-600 dark:text-indigo-400 shrink-0" />
-            <span>{currentInvestigationStep || 'Analyzing workspace context...'}</span>
-          </div>
-        )}
-        <div ref={chatBottomRef} />
+        {/* Modular Chat Stream View */}
+        <ChatStreamView
+          chatMessages={chatMessages}
+          lastInspectionResult={lastInspectionResult}
+          isReasoningOpen={isReasoningOpen}
+          setIsReasoningOpen={setIsReasoningOpen}
+          modifiedFiles={modifiedFiles}
+          setIsMultiFileReviewOpen={setIsMultiFileReviewOpen}
+          queuedMessages={queuedMessages}
+          handleSendQueuedMessage={handleSendQueuedMessage}
+          handleEditQueuedMessage={handleEditQueuedMessage}
+          handleDeleteQueuedMessage={handleDeleteQueuedMessage}
+          isChatLoading={isChatLoading}
+          currentInvestigationStep={currentInvestigationStep}
+          chatBottomRef={chatBottomRef}
+          openFile={openFile}
+          setImageModalUrl={setImageModalUrl}
+        />
       </div>
-
       {/* 3. BOTTOM STATUS FOOTER (Exact Match to Screenshot 2) */}
       <div className="h-7 border-t border-white/10 bg-[#0e0e11] px-3 flex items-center justify-between text-[11px] font-mono text-slate-400 select-none shrink-0 overflow-hidden min-w-0">
         <div className="flex items-center gap-2 min-w-0 truncate">
