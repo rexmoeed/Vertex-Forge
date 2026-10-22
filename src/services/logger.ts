@@ -1,8 +1,24 @@
 /* eslint-disable no-console */
 /**
- * Structured Logging Framework for Vertex Forge
- * Provides structured log levels, metadata context, error cause preservation,
- * in-memory ring-buffer history, and real-time subscriber channels.
+ * ==============================================================================
+ * Vertex Forge Structured Logging & Observability Framework
+ * ==============================================================================
+ * Logging Contract & Specification:
+ * - Levels:
+ *     - 'debug': Verbose diagnostic information for development and tracing.
+ *     - 'info':  Milestone events (workspace load, server ready, agent dispatch).
+ *     - 'warn':  Degraded states, recoverable network errors, and fallback paths.
+ *     - 'error': Fatal operations, uncaught exceptions, and unrecoverable failures.
+ * - Structured Fields:
+ *     - timestamp: Strict ISO 8601 UTC timestamp format.
+ *     - level: Strict LogLevel union ('debug' | 'info' | 'warn' | 'error').
+ *     - message: Human-readable description of the log event.
+ *     - context: Record<string, unknown> carrying metadata envelopes (workspace, ids).
+ *     - cause: Optional unredacted underlying Error object or reason.
+ * - Subscriptions & History:
+ *     - Fixed-capacity circular ring-buffer (default: 200 entries) preventing leaks.
+ *     - Real-time pub/sub listeners for terminal views and diagnostics panels.
+ * ==============================================================================
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';

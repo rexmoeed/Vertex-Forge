@@ -277,16 +277,18 @@ Vertex Forge also ships with `.devcontainer` configuration for instantaneous zer
 
 Copy `.env.example` to `.env` to configure runtime options:
 
-| Variable | Default | Purpose |
-|:---|:---|:---|
-| `PORT` | `3000` | Port for Express API server & static UI bundle |
-| `NODE_ENV` | `development` | Runtime environment mode (`development` or `production`) |
-| `DISABLE_HMR` | `false` | Disable Vite Hot Module Reloading for headless environments |
-| `VITE_API_URL` | `http://localhost:3000` | Backend API gateway destination |
-| `VITE_DEV_SERVER_URL` | `http://localhost:5173` | Internal dev server link for Vite client proxy |
-| `APP_URL` | `http://localhost:3000` | Base public URL for OAuth callbacks & self-referential links |
-| `GEMINI_API_KEY` | *(Optional)* | Cloud AI provider token (not required for offline/local LLMs or test suites) |
-| `JULES_API_KEY` | *(Optional)* | Google Jules Cloud Agent token for autonomous missions, VM tasks & GitHub PRs |
+| Variable | Requirement | Default | Description & Observability Purpose |
+|:---|:---:|:---|:---|
+| `PORT` | Optional | `3000` | Port for Express HTTP server, WebSocket bridge & static asset host |
+| `NODE_ENV` | Optional | `development` | Runtime operational mode (`development`, `production`, or `test`) |
+| `DISABLE_HMR` | Optional | `false` | Disable Vite Hot Module Reloading when running in constrained headless containers |
+| `VITE_API_URL` | Optional | `http://localhost:3000` | Client API destination gateway used by frontend fetch clients |
+| `VITE_DEV_SERVER_URL` | Optional | `http://localhost:5173` | Internal dev server link for Vite client development proxy |
+| `APP_URL` | Optional | `http://localhost:3000` | Public origin URL used for OAuth redirects and self-referential links |
+| `API_KEY` | Optional | *(None)* | Generic AI provider or upstream gateway authentication token |
+| `GEMINI_API_KEY` | Optional | *(None)* | Google Gemini AI token (offline/local Ollama & DeepSeek models operate without it) |
+| `JULES_API_KEY` | Optional | *(None)* | Google Jules Cloud Agent token for autonomous missions, VM tasks & GitHub PRs |
+| `GITHUB_TOKEN` | Optional | *(None)* | GitHub Personal Access Token for remote repository sync, branch pushing & PR creation |
 
 ---
 
