@@ -71,7 +71,7 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
     toggleBreakpoint,
     cursorPosition,
     setCursorPosition,
-  } = useIDE() as any;
+  } = useIDE();
 
   const [diffMode, setDiffMode] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -1123,7 +1123,7 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
 
 export const EditorArea: React.FC = () => {
   const layout = useLayout();
-  const { saveCurrentFile } = useIDE() as any;
+  const { saveCurrentFile } = useIDE();
 
   // Keyboard shortcut Cmd/Ctrl + S
   useEffect(() => {
