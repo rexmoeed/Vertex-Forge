@@ -34,9 +34,9 @@ export const ActivityBar: React.FC = () => {
     setBottomPanelTab,
     isBottomPanelOpen,
     toggleBottomPanel,
-  } = useIDE() as any;
+  } = useIDE();
 
-  const failedTests = testResults.filter((t: any) => t.status === 'failed').length;
+  const failedTests = testResults.filter((t) => t.status === 'failed').length;
 
   const handleTabClick = (tab: string) => {
     if (activeView === 'editor' && activeSidebarTab === tab && layout.config.primarySidebarVisible) {

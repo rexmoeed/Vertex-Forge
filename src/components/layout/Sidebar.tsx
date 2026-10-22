@@ -1,3 +1,4 @@
+import { AutonomyMode } from '../../types/ide';
 import { logger } from '../../services/logger';
 import React, { useState, useRef } from 'react';
 import { useIDE } from '../../context/IDEContext';
@@ -286,7 +287,7 @@ export const Sidebar: React.FC = () => {
             <label className="font-semibold text-slate-300">Autonomy Permission Level</label>
             <select
               value={autonomyMode}
-              onChange={e => setAutonomyMode(e.target.value as any)}
+              onChange={e => setAutonomyMode(e.target.value as AutonomyMode)}
               className="bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-white"
             >
               <option value="assist">Assist (Always ask human confirmation)</option>

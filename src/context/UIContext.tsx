@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 export type CursorMode = 'ask' | 'edit' | 'agent' | 'review';
 export type IDEActiveView = 'editor' | 'welcome' | 'agents' | 'design-system' | 'settings' | 'providers' | 'evolution' | 'bug-detective' | 'watchdog' | 'operator';
 
+export type BottomPanelTab = 'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security' | 'tests' | 'review' | 'audit' | 'debug' | 'ports';
 export type SidebarTabId = 'explorer' | 'search' | 'git' | 'debugger' | 'debug' | 'testing' | 'tests' | 'extensions' | 'security' | 'jules' | 'agents' | 'stack' | 'settings';
 
 export interface UIContextType {
@@ -10,8 +11,8 @@ export interface UIContextType {
   setActiveView: (view: IDEActiveView) => void;
   activeSidebarTab: SidebarTabId;
   setActiveSidebarTab: (tab: SidebarTabId) => void;
-  bottomPanelTab: 'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security';
-  setBottomPanelTab: (tab: 'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security') => void;
+  bottomPanelTab: BottomPanelTab;
+  setBottomPanelTab: (tab: BottomPanelTab) => void;
   isBottomPanelOpen: boolean;
   setIsBottomPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   toggleBottomPanel: () => void;
@@ -54,7 +55,7 @@ export const UIProvider: React.FC<UIProviderProps> = ({
 }) => {
   const [activeView, setActiveView] = useState<IDEActiveView>(initialView);
   const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTabId>('explorer');
-  const [bottomPanelTab, setBottomPanelTab] = useState<'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security'>('terminal');
+  const [bottomPanelTab, setBottomPanelTab] = useState<BottomPanelTab>('terminal');
   const [isBottomPanelOpen, setIsBottomPanelOpen] = useState<boolean>(true);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');

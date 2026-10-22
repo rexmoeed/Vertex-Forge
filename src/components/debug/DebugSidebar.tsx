@@ -34,7 +34,7 @@ export const DebugSidebar: React.FC = () => {
     aiDebugDiagnosis,
     applyAIDebugFix,
     openFile,
-  } = useIDE() as any;
+  } = useIDE();
 
   // Collapsible section state
   const [isVariablesOpen, setIsVariablesOpen] = useState(true);

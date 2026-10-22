@@ -32,7 +32,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({ onOpenNewProject, onOp
     setIsCloneModalOpen,
     setIsProjectWizardOpen,
     setActiveView,
-  } = useIDE() as any;
+  } = useIDE();
 
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
 

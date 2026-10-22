@@ -57,7 +57,7 @@ export const BottomPanel: React.FC = () => {
     vfs,
     debugConsoleMessages,
     debugSession,
-  } = useIDE() as any;
+  } = useIDE();
 
   // Multi-Session Terminal Management
   const workspaceCwd = DesktopBridge.currentWorkspacePath || ((typeof process !== 'undefined' && process.cwd) ? process.cwd() : 'E:\\Vertex Forge\\Vertex-Forge-main');
@@ -163,8 +163,8 @@ export const BottomPanel: React.FC = () => {
   };
 
   // Close terminal session
-  const handleCloseSession = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleCloseSession = (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (sessions.length <= 1) return;
     const remaining = sessions.filter(s => s.id !== id);
     setSessions(remaining);
@@ -373,7 +373,7 @@ export const BottomPanel: React.FC = () => {
 
           {/* Kill Session Trash */}
           <button
-            onClick={() => handleCloseSession(activeSessionId, { stopPropagation: () => {} } as any)}
+            onClick={(e) => handleCloseSession(activeSessionId, e)}
             className="hover:text-rose-400 p-1 rounded hover:bg-white/10 cursor-pointer"
             title="Kill Terminal Session"
           >
@@ -467,7 +467,7 @@ export const BottomPanel: React.FC = () => {
                   <span className="text-[10px] opacity-75">Shell:</span>
                   <select
                     value={activeSession?.shell || 'bash'}
-                    onChange={e => handleShellChange(e.target.value as any)}
+                    onChange={e => handleShellChange(e.target.value as 'bash' | 'zsh' | 'powershell' | 'cmd')}
                     style={{
                       backgroundColor: 'var(--ide-surface-elevated)',
                       borderColor: 'var(--ide-border)',
@@ -556,7 +556,7 @@ export const BottomPanel: React.FC = () => {
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold mr-2 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>{typeof window !== 'undefined' && (window as any).desktopAPI?.isElectron ? 'Native Shell (Win32)' : 'Native Bridge'}</span>
+                  <span>{DesktopBridge.isElectron ? 'Native Shell (Win32)' : 'Native Bridge'}</span>
                 </span>
                 <span className="text-[10px] uppercase font-sans font-semibold mr-1" style={{ color: 'var(--ide-text-muted)' }}>Quick:</span>
                 {['npm install', 'npm run dev', 'npm test', 'npm run build', 'git status', 'git diff', 'clear'].map(cmd => (

@@ -41,7 +41,7 @@ interface TestExplorerPanelProps {
 }
 
 export const TestExplorerPanel: React.FC<TestExplorerPanelProps> = ({ embedded = false }) => {
-  const { openFile, activeFile, logAgentAction, refreshGit } = useIDE() as any;
+  const { openFile, activeFile, logAgentAction, refreshGit } = useIDE();
 
   // Test Discovery state
   const [discovery, setDiscovery] = useState<TestDiscovery | null>(null);

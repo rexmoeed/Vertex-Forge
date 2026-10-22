@@ -25,7 +25,7 @@ import {
 } from '../../types/codeEvolution';
 
 export const CodeEvolutionView: React.FC = () => {
-  const { codeEvolutionService, openFile, setActiveView } = useIDE() as any;
+  const { codeEvolutionService, openFile, setActiveView } = useIDE();
 
   const [evolutionMap, setEvolutionMap] = useState<CodeEvolutionMap | null>(null);
   const [selectedCommit, setSelectedCommit] = useState<EvolutionCommit | null>(null);

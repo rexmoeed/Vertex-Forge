@@ -54,11 +54,11 @@ export const StatusBar: React.FC = () => {
     setIsMultiFileReviewOpen,
     setIsProjectIntelligenceOpen,
     cursorPosition,
-  } = useIDE() as any;
+  } = useIDE();
 
-  const errorCount = problems.filter((p: any) => p.severity === 'error').length;
+  const errorCount = problems.filter((p) => p.severity === 'error').length;
   const warningCount = problems.filter((p: any) => p.severity === 'warning').length;
-  const failedTests = testResults.filter((t: any) => t.status === 'failed').length;
+  const failedTests = testResults.filter((t) => t.status === 'failed').length;
   const passedTests = testResults.filter((t: any) => t.status === 'passed').length;
 
   // Compute lines in active file

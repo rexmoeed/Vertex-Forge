@@ -17,7 +17,7 @@ export const DebugToolbar: React.FC = () => {
     debugSession,
     debugThread,
     diagnoseCrashWithAI,
-  } = useIDE() as any;
+  } = useIDE();
 
   if (!debugSession || debugSession.status === 'stopped') {
     return null;

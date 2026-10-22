@@ -20,7 +20,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { activeProject, openFile, setActiveView, vfs } = useIDE() as any;
+  const { activeProject, openFile, setActiveView, vfs } = useIDE();
 
   const [search, setSearch] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);

@@ -22,7 +22,7 @@ import { THEME_REGISTRY } from '../../services/themeRegistry';
 import { ThemeDefinition, ThemeMode } from '../../types/theme';
 
 export const DesignSystemView: React.FC = () => {
-  const { theme, toggleTheme, setActiveView } = useIDE() as any;
+  const { theme, toggleTheme, setActiveView } = useIDE();
   const themeEngine = useTheme();
   const [activeTab, setActiveTab] = useState<'tokens' | 'components' | 'typography' | 'accessibility'>('tokens');
   const [themeFilter, setThemeFilter] = useState<'all' | 'dark' | 'light' | 'high-contrast'>('all');

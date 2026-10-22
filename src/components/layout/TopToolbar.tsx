@@ -55,7 +55,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
     setActiveView,
     setIsVoiceModalOpen,
     devServerProcess,
-  } = useIDE() as any;
+  } = useIDE();
 
   const layout = useLayout();
   const themeEngine = useTheme();
@@ -65,7 +65,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [activeModel, setActiveModel] = useState('gemini-3.8-flash');
 
-  const failedTests = testResults.filter((t: any) => t.status === 'failed').length;
+  const failedTests = testResults.filter((t) => t.status === 'failed').length;
 
   const models = [
     { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash (High)', desc: 'Next-Gen Multimodal Reasoning Engine', badge: 'Active' },

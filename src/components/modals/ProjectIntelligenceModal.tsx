@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import {
   BrainCircuit,
@@ -36,18 +36,19 @@ export const ProjectIntelligenceModal: React.FC<ProjectIntelligenceModalProps> =
     projectProfile,
     activeFile,
     activeFileContent,
-    dirtyFiles,
+    openTabs,
     cursorMode,
     vfs,
     testResults,
-  } = useIDE() as any;
+  } = useIDE();
 
   const [activeTab, setActiveTab] = useState<'profile' | 'context' | 'evidence' | 'tools'>('profile');
   const [isReanalyzing, setIsReanalyzing] = useState(false);
 
   if (!isOpen) return null;
 
-  const hasUnsaved = activeFile ? dirtyFiles?.has(activeFile) : false;
+  const dirtyFilePaths = useMemo(() => new Set(openTabs.filter(t => t.isDirty).map(t => t.filePath)), [openTabs]);
+  const hasUnsaved = activeFile ? dirtyFilePaths.has(activeFile) : false;
 
   const promptOptions: PromptContextOptions = {
     userPrompt: 'Inspect active project architecture',
@@ -63,7 +64,7 @@ export const ProjectIntelligenceModal: React.FC<ProjectIntelligenceModalProps> =
     },
     gitContext: {
       branch: 'main',
-      modifiedFiles: Array.from(dirtyFiles || []),
+      modifiedFiles: Array.from(dirtyFilePaths),
     },
     includeTools: true,
   };

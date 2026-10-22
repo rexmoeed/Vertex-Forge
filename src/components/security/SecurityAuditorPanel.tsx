@@ -37,7 +37,7 @@ import {
 import { SecurityAuditService } from '../../services/securityAuditService';
 
 export const SecurityAuditorPanel: React.FC = () => {
-  const { openFile, activeProject } = useIDE() as any;
+  const { openFile, activeProject } = useIDE();
 
   const [report, setReport] = useState<SecurityAuditReport | null>(null);
   const [loading, setLoading] = useState(false);

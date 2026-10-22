@@ -4,7 +4,7 @@ import { Terminal, Send, Trash2, Search, ArrowRight } from 'lucide-react';
 import { DebugConsoleMessage } from '../../types/debugger';
 
 export const DebugConsole: React.FC = () => {
-  const { debuggerEngine, debugConsoleMessages } = useIDE() as any;
+  const { debuggerEngine, debugConsoleMessages } = useIDE();
   const [input, setInput] = useState('');
   const [filter, setFilter] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
