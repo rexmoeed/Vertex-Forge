@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
   ProviderId,
   ProviderConfig,
@@ -37,6 +38,24 @@ function safeSetStorage(key: string, value: string): void {
   } catch (e) {}
   inMemoryStore[key] = value;
 }
+
+
+export class ProviderValidationError extends Error {
+  constructor(message: string, public readonly details?: unknown) {
+    super(message);
+    this.name = 'ProviderValidationError';
+  }
+}
+
+export const ProviderConfigUpdateSchema = z.object({
+  apiKey: z.string().optional(),
+  baseUrl: z.string().url('Invalid baseUrl format: must be a valid URL').optional().or(z.literal('')),
+  enabled: z.boolean().optional(),
+  selectedModel: z.string().optional(),
+  customModels: z.array(z.any()).optional(),
+  temperature: z.number().min(0, 'Temperature cannot be negative').max(2, 'Temperature cannot exceed 2.0').optional(),
+  maxTokens: z.number().positive('maxTokens must be positive').optional(),
+}).passthrough();
 
 export class AIProviderService {
   // Built-in verified model catalog
@@ -620,6 +639,10 @@ export class AIProviderService {
     ],
   };
 
+    public static resetToDefaults(): void {
+    this.saveProviders(this.getInitialProviders());
+  }
+
   public static getInitialProviders(): ProviderConfig[] {
     return [
       {
@@ -897,7 +920,21 @@ export class AIProviderService {
     return init;
   }
 
+  public static validateProviderConfigUpdate(updates: Partial<ProviderConfig>): void {
+    const result = ProviderConfigUpdateSchema.safeParse(updates);
+    if (!result.success) {
+      const issue = result.error.issues[0];
+      throw new ProviderValidationError(
+        `Invalid provider configuration: ${issue.path.join('.') || 'field'} - ${issue.message}`,
+        result.error.format()
+      );
+    }
+  }
+
   public static saveProviders(providers: ProviderConfig[]): void {
+    for (const p of providers) {
+      this.validateProviderConfigUpdate(p);
+    }
     try {
       safeSetStorage(STORAGE_KEY_PROVIDERS, JSON.stringify(providers));
     } catch (e) {
@@ -911,6 +948,7 @@ export class AIProviderService {
   }
 
   public static updateProvider(id: ProviderId, updates: Partial<ProviderConfig>): ProviderConfig {
+    this.validateProviderConfigUpdate(updates);
     const list = this.loadProviders();
     const idx = list.findIndex(p => p.id === id);
     if (idx === -1) throw new Error(`Provider not found: ${id}`);
