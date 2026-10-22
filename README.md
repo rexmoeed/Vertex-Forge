@@ -7,7 +7,8 @@
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.0+-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Electron](https://img.shields.io/badge/Electron-34+-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Tests](https://img.shields.io/badge/Tests-499%2F499%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-513%2F513%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Coverage](https://img.shields.io/badge/Coverage-73%25%20Functions-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Type Check](https://img.shields.io/badge/tsc-0%20Errors-brightgreen)](https://www.typescriptlang.org/)
 [![Parallel Swarms](https://img.shields.io/badge/Parallel%20Swarms-4%20Engines-cyan)](https://github.com/rexmoeed/Vertex-Forge)
 [![Engineering Skills](https://img.shields.io/badge/Engineering%20Skills-33%20Active-purple)](https://github.com/rexmoeed/Vertex-Forge)
@@ -307,7 +308,7 @@ npm run electron:build
 ### Verification & Quality Assurance
 
 ```bash
-# Run complete test suite (477 tests across 57 test suites (100% passing, coverage enforced))
+# Run complete test suite (513 tests across 69 test suites (100% passing, coverage enforced))
 npm test
 
 # Verify TypeScript type integrity (0 errors)

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.2] - 2026-10-22
+
+### Architecture & God-File Decoupling (Tier S Milestone)
+- **AIOrchestratorPanel Decoupled**: Trimmed from 1,280 LOC down to 797 LOC by extracting `ChatStreamView` and `ChatComposerCard`.
+- **AgentWorkspaceView Decoupled**: Trimmed from 1,238 LOC down to 792 LOC by extracting `AgentDeliverablesPanel`.
+- **KnowledgeGraph Engine Tested**: Added comprehensive behavioral test suite in `knowledgeGraphService.test.ts` (100% lines, 100% functions).
+- **CI/CD Pipeline Hardened**: Added pipeline concurrency cancellation and automated artifact uploads (`coverage-report` and `dist-bundle`) via `actions/upload-artifact@v4`.
+- **Coverage Thresholds Recalibrated**: Raised coverage gates in `vitest.config.ts` to 60% Lines, 70% Functions, 45% Branches, 60% Statements across production services. All 513 tests in 69 suites passing at 100%.
+
 All notable changes to Vertex Forge will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
