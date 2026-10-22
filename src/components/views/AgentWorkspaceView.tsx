@@ -72,7 +72,7 @@ export const AgentWorkspaceView: React.FC = () => {
     retryAutonomousTask,
     autonomyMode,
     setAutonomyMode,
-  } = useIDE() as any;
+  } = useIDE();
 
   const [autonomousInput, setAutonomousInput] = useState('');
   const [isLaunching, setIsLaunching] = useState(false);

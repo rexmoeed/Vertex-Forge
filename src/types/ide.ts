@@ -18,7 +18,7 @@ export type AgentRole =
   | 'Reviewer' 
   | 'DocGen';
 
-export type AutonomyMode = 'assist' | 'supervised' | 'autonomous';
+export type AutonomyMode = 'assist' | 'supervised' | 'autonomous' | 'strict';
 
 export type OrchestratorStatus = 
   | 'idle' 
