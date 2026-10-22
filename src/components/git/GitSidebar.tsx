@@ -2,37 +2,15 @@ import { logger } from '../../services/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   GitBranch,
-  GitCommit,
-  GitPullRequest,
-  RotateCcw,
   Plus,
-  Minus,
-  Check,
-  Sparkles,
-  Clock,
-  Tag,
-  Archive,
   AlertTriangle,
   RefreshCw,
-  FileCode,
-  Trash2,
-  ExternalLink,
-  ChevronRight,
-  ChevronDown,
-  Github,
-  PlusCircle,
-  FileX,
-  FileText,
   UploadCloud,
   DownloadCloud,
-  SplitSquareVertical,
-  ShieldAlert,
   GitMerge,
-  Info,
 } from 'lucide-react';
 import {
   GitWorkingTreeStatus,
-  GitFileStatus,
   GitBranch as GitBranchType,
   GitCommitInfo,
   GitRemote,
@@ -43,6 +21,10 @@ import {
 } from '../../types/gitWorkflow';
 import { GitHistoryTab } from './GitHistoryTab';
 import { GitBranchesTab } from './GitBranchesTab';
+import { GitChangesTab } from './GitChangesTab';
+import { GitStashesTab } from './GitStashesTab';
+import { GitTagsTab } from './GitTagsTab';
+import { GitIgnoreTab } from './GitIgnoreTab';
 import { GitHubIntegrationTab } from './GitHubIntegrationTab';
 import { GitWorkflowService } from '../../services/gitWorkflowService';
 import { useIDE } from '../../context/IDEContext';
@@ -85,14 +67,8 @@ export const GitSidebar: React.FC = () => {
   const [tags, setTags] = useState<GitTagType[]>([]);
   const [stashes, setStashes] = useState<GitStash[]>([]);
 
-  // Modals & inputs
+  // Modals & secondary state
   const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
-  const [newBranchName, setNewBranchName] = useState('');
-  const [isCreatingBranch, setIsCreatingBranch] = useState(false);
-  const [stashMessage, setStashMessage] = useState('');
-  const [tagName, setTagName] = useState('');
-  const [remoteName, setRemoteName] = useState('');
-  const [remoteUrl, setRemoteUrl] = useState('');
 
   // AI assistant states
   const [aiLoading, setAiLoading] = useState(false);
@@ -101,14 +77,10 @@ export const GitSidebar: React.FC = () => {
   // GitHub integration states
   const [gitHubAuthed, setGitHubAuthed] = useState(false);
   const [gitHubUser, setGitHubUser] = useState<any>(null);
-  const [gitHubTokenInput, setGitHubTokenInput] = useState('');
   const [gitHubOwner, setGitHubOwner] = useState('');
   const [gitHubRepo, setGitHubRepo] = useState('');
   const [pullRequests, setPullRequests] = useState<GitHubPullRequest[]>([]);
   const [issues, setIssues] = useState<GitHubIssue[]>([]);
-  const [prTitle, setPrTitle] = useState('');
-  const [prBody, setPrBody] = useState('');
-  const [isCreatingPr, setIsCreatingPr] = useState(false);
 
   const [notification, setNotification] = useState<{ text: string; type: 'info' | 'error' | 'success' } | null>(null);
 
@@ -372,20 +344,17 @@ export const GitSidebar: React.FC = () => {
   };
 
   // Branch handlers
-  const handleCreateBranch = async () => {
-    if (!newBranchName.trim()) return;
-    const res = await GitWorkflowService.createBranch(newBranchName.trim(), true);
+  const handleCreateBranch = async (name: string) => {
+    if (!name.trim()) return;
+    const res = await GitWorkflowService.createBranch(name.trim(), true);
     if (res.success) {
-      setNewBranchName('');
-      setIsCreatingBranch(false);
-      showToast(`Created & checked out branch "${newBranchName.trim()}"`, 'success');
+      showToast(`Created & checked out branch "${name.trim()}"`, 'success');
       loadAll();
       GitWorkflowService.getBranches().then(setBranches);
     } else {
       showToast(res.error || 'Failed to create branch', 'error');
     }
   };
-
   const handleCheckoutBranch = async (branchName: string) => {
     const res = await GitWorkflowService.checkoutBranch(branchName);
     if (res.success) {
@@ -422,10 +391,9 @@ export const GitSidebar: React.FC = () => {
   };
 
   // Stash handlers
-  const handleSaveStash = async () => {
-    const ok = await GitWorkflowService.saveStash(stashMessage || undefined);
+  const handleSaveStash = async (msg?: string) => {
+    const ok = await GitWorkflowService.saveStash(msg || undefined);
     if (ok) {
-      setStashMessage('');
       showToast('Changes stashed', 'success');
       loadAll();
       GitWorkflowService.getStashes().then(setStashes);
@@ -435,7 +403,7 @@ export const GitSidebar: React.FC = () => {
     }
   };
 
-  const handleApplyStash = async (index = 0, pop = true) => {
+  const handleApplyStash = async (index = 0, pop = false) => {
     const ok = await GitWorkflowService.applyStash(`stash@{${index}}`, pop);
     if (ok) {
       showToast(pop ? 'Popped stash' : 'Applied stash', 'success');
@@ -446,6 +414,26 @@ export const GitSidebar: React.FC = () => {
       showToast('Failed to apply stash', 'error');
     }
   };
+
+  const handleDropStash = async (index: number) => {
+    await GitWorkflowService.dropStash(`stash@{${index}}`);
+    GitWorkflowService.getStashes().then(setStashes);
+    showToast(`Dropped stash@{${index}}`, 'info');
+  };
+
+  const handleCreateTag = async (name: string) => {
+    await GitWorkflowService.createTag(name);
+    GitWorkflowService.getTags().then(setTags);
+    showToast(`Created tag "${name}"`, 'success');
+  };
+
+  const handleDeleteTag = async (name: string) => {
+    await GitWorkflowService.deleteTag(name);
+    GitWorkflowService.getTags().then(setTags);
+    showToast(`Deleted tag "${name}"`, 'info');
+  };
+
+
 
   // Cherry-pick & Revert
   const handleCherryPick = async (hash: string) => {
@@ -477,51 +465,6 @@ export const GitSidebar: React.FC = () => {
         }
       },
     });
-  };
-
-  // GitHub Auth & Token Handler
-  const handleSaveGitHubToken = async () => {
-    if (!gitHubTokenInput.trim()) return;
-    const res = await GitWorkflowService.setGitHubToken(gitHubTokenInput.trim());
-    if (res.authenticated) {
-      setGitHubAuthed(true);
-      setGitHubUser(res.user);
-      setGitHubTokenInput('');
-      showToast(`Authenticated as ${res.user?.login || 'GitHub user'}`, 'success');
-      if (gitHubOwner && gitHubRepo) {
-        GitWorkflowService.getGitHubPullRequests(gitHubOwner, gitHubRepo).then(setPullRequests);
-        GitWorkflowService.getGitHubIssues(gitHubOwner, gitHubRepo).then(setIssues);
-      }
-    } else {
-      showToast(res.error || 'Failed to authenticate token', 'error');
-    }
-  };
-
-  const handleCreatePullRequest = async () => {
-    if (!prTitle.trim() || !gitHubOwner || !gitHubRepo) return;
-    try {
-      const res = await GitWorkflowService.createGitHubPullRequest({
-        owner: gitHubOwner,
-        repo: gitHubRepo,
-        title: prTitle.trim(),
-        body: prBody.trim(),
-        head: status.branch,
-        base: 'main',
-      });
-      if (res.success) {
-        showToast('Created Pull Request successfully', 'success');
-        setPrTitle('');
-        setPrBody('');
-        setIsCreatingPr(false);
-        GitWorkflowService.getGitHubPullRequests(gitHubOwner, gitHubRepo).then(setPullRequests);
-      } else {
-        showToast(res.error || 'Failed to create PR', 'error');
-      }
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'PR creation error';
-      logger.error('Failed to create GitHub pull request', { owner: gitHubOwner, repo: gitHubRepo }, e);
-      showToast(msg, 'error');
-    }
   };
 
   // .gitignore helper presets
@@ -716,283 +659,28 @@ export const GitSidebar: React.FC = () => {
 
           {/* TAB 1: CHANGES VIEW */}
           {activeTab === 'changes' && (
-            <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Commit Box */}
-              <div className="p-3 border-b border-slate-800 flex flex-col gap-2 shrink-0">
-                <div className="relative">
-                  <textarea
-                    placeholder="Commit message (e.g. feat(editor): add git workflow)..."
-                    value={commitMessage}
-                    onChange={e => setCommitMessage(e.target.value)}
-                    className="w-full bg-slate-800/80 border border-slate-700 rounded-md p-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 h-16 resize-none font-mono"
-                  />
-                  {/* AI Suggest Button */}
-                  <button
-                    onClick={handleSuggestCommitMessage}
-                    disabled={aiLoading}
-                    className="absolute right-2 bottom-2 p-1 bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded text-[10px] flex items-center gap-1 transition-all"
-                    title="Generate commit message using AI"
-                  >
-                    <Sparkles className="w-3 h-3 text-amber-300" />
-                    <span>AI Msg</span>
-                  </button>
-                </div>
-
-                {/* Commit Actions Bar */}
-                <div className="flex items-center justify-between text-xs">
-                  <label className="flex items-center gap-1.5 text-slate-400 hover:text-slate-300 cursor-pointer text-[11px]">
-                    <input
-                      type="checkbox"
-                      checked={amend}
-                      onChange={e => setAmend(e.target.checked)}
-                      className="rounded bg-slate-800 border-slate-700 text-indigo-600"
-                    />
-                    <span>Amend last</span>
-                  </label>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={handleReviewWithAI}
-                      disabled={aiLoading || totalChanges === 0}
-                      className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-medium flex items-center gap-1 transition-colors"
-                      title="AI review for regressions & bugs"
-                    >
-                      <Sparkles className="w-3 h-3 text-indigo-400" /> Review
-                    </button>
-
-                    <button
-                      onClick={handleCommit}
-                      disabled={isCommitting || (totalChanges === 0 && !amend)}
-                      className={`px-3 py-1 rounded text-xs font-semibold flex items-center gap-1 transition-colors ${
-                        totalChanges > 0 || amend
-                          ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow'
-                          : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                      }`}
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>{amend ? 'Amend Commit' : status.staged.length > 0 ? `Commit (${status.staged.length})` : 'Commit All'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* AI Review Result Floater */}
-                {aiReviewResult && (
-                  <div className="mt-1 p-2.5 bg-indigo-950/40 border border-indigo-500/30 rounded-lg text-xs flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between text-indigo-300 font-semibold">
-                      <span className="flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> AI Diff Review
-                      </span>
-                      <button onClick={() => setAiReviewResult(null)} className="text-slate-400 hover:text-white">
-                        &times;
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-slate-300 whitespace-pre-wrap font-sans leading-relaxed">
-                      {aiReviewResult}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Changes Lists (Staged, Unstaged, Untracked) */}
-              <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-2">
-                {/* 1. STAGED CHANGES */}
-                {status.staged.length > 0 && (
-                  <div className="flex flex-col rounded bg-slate-850/40 border border-slate-800">
-                    <div className="flex items-center justify-between p-2 bg-slate-800/40">
-                      <button
-                        onClick={() => setStagedOpen(!stagedOpen)}
-                        className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300"
-                      >
-                        {stagedOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                        <span>Staged Changes ({status.staged.length})</span>
-                      </button>
-                      <button
-                        onClick={handleUnstageAll}
-                        className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200"
-                        title="Unstage All"
-                      >
-                        <Minus className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {stagedOpen && (
-                      <div className="flex flex-col divide-y divide-slate-800/50">
-                        {status.staged.map(file => (
-                          <div
-                            key={file.filePath || (file as any).path}
-                            className="flex items-center justify-between p-2 hover:bg-slate-800/40 text-xs transition-colors group"
-                          >
-                            <div
-                              onClick={() => openFile(file.filePath, true)}
-                              className="flex-1 truncate cursor-pointer flex items-center gap-2 hover:text-indigo-300"
-                              title="Click to view diff"
-                            >
-                              <span
-                                className={`text-[10px] font-bold px-1.5 py-0.2 rounded font-mono ${
-                                  file.status === 'added'
-                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                    : file.status === 'deleted'
-                                    ? 'bg-rose-500/20 text-rose-400'
-                                    : 'bg-amber-500/20 text-amber-400'
-                                }`}
-                              >
-                                {file.status[0].toUpperCase()}
-                              </span>
-                              <span className="font-mono text-[11px] truncate">{file.filePath}</span>
-                            </div>
-
-                            <button
-                              onClick={() => handleUnstage(file.filePath)}
-                              className="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-700 opacity-80 group-hover:opacity-100"
-                              title="Unstage"
-                            >
-                              <Minus className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* 2. UNSTAGED CHANGES */}
-                <div className="flex flex-col rounded bg-slate-850/40 border border-slate-800">
-                  <div className="flex items-center justify-between p-2 bg-slate-800/40">
-                    <button
-                      onClick={() => setUnstagedOpen(!unstagedOpen)}
-                      className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-slate-300 hover:text-white"
-                    >
-                      {unstagedOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                      <span>Changes ({status.unstaged.length})</span>
-                    </button>
-                    <div className="flex items-center gap-1">
-                      {status.unstaged.length > 0 && (
-                        <>
-                          <button
-                            onClick={handleDiscardAll}
-                            className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-rose-400"
-                            title="Discard All Changes (Safety Confirmation)"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={handleStageAll}
-                            className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-emerald-400"
-                            title="Stage All Changes"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {unstagedOpen && (
-                    <div className="flex flex-col divide-y divide-slate-800/50">
-                      {status.unstaged.length === 0 ? (
-                        <div className="p-3 text-[11px] text-slate-500 italic text-center">
-                          Working tree clean.
-                        </div>
-                      ) : (
-                        status.unstaged.map(file => (
-                          <div
-                            key={file.filePath || (file as any).path}
-                            className="flex items-center justify-between p-2 hover:bg-slate-800/40 text-xs transition-colors group"
-                          >
-                            <div
-                              onClick={() => openFile(file.filePath, true)}
-                              className="flex-1 truncate cursor-pointer flex items-center gap-2 hover:text-indigo-300"
-                              title="Click to view diff"
-                            >
-                              <span
-                                className={`text-[10px] font-bold px-1.5 py-0.2 rounded font-mono ${
-                                  file.status === 'deleted'
-                                    ? 'bg-rose-500/20 text-rose-400'
-                                    : 'bg-amber-500/20 text-amber-400'
-                                }`}
-                              >
-                                {file.status[0].toUpperCase()}
-                              </span>
-                              <span className="font-mono text-[11px] truncate">{file.filePath}</span>
-                            </div>
-
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => handleDiscard(file.filePath)}
-                                className="p-1 text-slate-500 hover:text-rose-400 rounded hover:bg-slate-700 opacity-60 group-hover:opacity-100"
-                                title="Discard Changes (Safety Warning)"
-                              >
-                                <RotateCcw className="w-3 h-3" />
-                              </button>
-                              <button
-                                onClick={() => handleStage(file.filePath)}
-                                className="p-1 text-slate-400 hover:text-emerald-400 rounded hover:bg-slate-700 opacity-80 group-hover:opacity-100"
-                                title="Stage Changes"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* 3. UNTRACKED FILES */}
-                {status.untracked.length > 0 && (
-                  <div className="flex flex-col rounded bg-slate-850/40 border border-slate-800">
-                    <div className="flex items-center justify-between p-2 bg-slate-800/40">
-                      <button
-                        onClick={() => setUntrackedOpen(!untrackedOpen)}
-                        className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-amber-400 hover:text-amber-300"
-                      >
-                        {untrackedOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                        <span>Untracked Files ({status.untracked.length})</span>
-                      </button>
-                      <button
-                        onClick={handleStageAll}
-                        className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-emerald-400"
-                        title="Stage All Untracked"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {untrackedOpen && (
-                      <div className="flex flex-col divide-y divide-slate-800/50">
-                        {status.untracked.map(file => (
-                          <div
-                            key={file.filePath || (file as any).path}
-                            className="flex items-center justify-between p-2 hover:bg-slate-800/40 text-xs transition-colors group"
-                          >
-                            <div
-                              onClick={() => openFile(file.filePath)}
-                              className="flex-1 truncate cursor-pointer flex items-center gap-2 hover:text-indigo-300"
-                            >
-                              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded font-mono bg-indigo-500/20 text-indigo-400">
-                                U
-                              </span>
-                              <span className="font-mono text-[11px] truncate">{file.filePath}</span>
-                            </div>
-
-                            <button
-                              onClick={() => handleStage(file.filePath)}
-                              className="p-1 text-slate-400 hover:text-emerald-400 rounded hover:bg-slate-700 opacity-80 group-hover:opacity-100"
-                              title="Stage File"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            <GitChangesTab
+              status={status}
+              commitMessage={commitMessage}
+              setCommitMessage={setCommitMessage}
+              amend={amend}
+              setAmend={setAmend}
+              aiLoading={aiLoading}
+              aiReviewResult={aiReviewResult}
+              setAiReviewResult={setAiReviewResult}
+              isCommitting={isCommitting}
+              onSuggestCommitMessage={handleSuggestCommitMessage}
+              onReviewWithAI={handleReviewWithAI}
+              onCommit={handleCommit}
+              onOpenFile={openFile}
+              onStage={handleStage}
+              onStageAll={handleStageAll}
+              onUnstage={handleUnstage}
+              onUnstageAll={handleUnstageAll}
+              onDiscard={handleDiscard}
+              onDiscardAll={handleDiscardAll}
+            />
           )}
-
           {/* TAB 2: COMMIT HISTORY */}
           {activeTab === 'history' && (
             <GitHistoryTab
@@ -1009,7 +697,6 @@ export const GitSidebar: React.FC = () => {
               branches={branches}
               currentBranch={status.branch}
               onCreateBranch={async (name: string) => {
-                setNewBranchName(name);
                 const res = await GitWorkflowService.createBranch(name, true);
                 if (res.success) {
                   showToast(`Created & checked out branch "${name}"`, 'success');
@@ -1033,171 +720,27 @@ export const GitSidebar: React.FC = () => {
 
           {/* TAB 4: STASHES */}
           {activeTab === 'stashes' && (
-            <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 text-xs">
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Save Stash</span>
-                <div className="flex gap-1.5">
-                  <input
-                    type="text"
-                    placeholder="Stash description (optional)..."
-                    value={stashMessage}
-                    onChange={e => setStashMessage(e.target.value)}
-                    className="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:outline-none focus:border-indigo-500"
-                  />
-                  <button
-                    onClick={handleSaveStash}
-                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-medium shadow flex items-center gap-1"
-                  >
-                    <Archive className="w-3.5 h-3.5" /> Stash
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Stashes ({stashes.length})
-                </span>
-                {stashes.length === 0 ? (
-                  <div className="p-4 text-center text-slate-500 italic">No stashes found.</div>
-                ) : (
-                  stashes.map((s, idx) => (
-                    <div
-                      key={s.index}
-                      className="p-2.5 bg-slate-800/50 rounded-lg border border-slate-700/60 flex items-center justify-between text-xs"
-                    >
-                      <div className="truncate flex-1">
-                        <div className="font-medium text-slate-200 truncate">{s.message || `stash@{${s.index}}`}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">{s.branch}</div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          onClick={() => handleApplyStash(idx, true)}
-                          className="px-2 py-0.5 rounded bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white transition-colors text-[11px]"
-                        >
-                          Pop
-                        </button>
-                        <button
-                          onClick={async () => {
-                            await GitWorkflowService.dropStash(`stash@{${idx}}`);
-                            GitWorkflowService.getStashes().then(setStashes);
-                          }}
-                          className="p-1 hover:text-rose-400 text-slate-500"
-                          title="Drop stash"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <GitStashesTab
+              stashes={stashes}
+              onSaveStash={handleSaveStash}
+              onApplyStash={handleApplyStash}
+              onDropStash={handleDropStash}
+            />
           )}
 
           {/* TAB 5: TAGS */}
           {activeTab === 'tags' && (
-            <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 text-xs">
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Create Tag</span>
-                <div className="flex gap-1.5">
-                  <input
-                    type="text"
-                    placeholder="v1.0.0..."
-                    value={tagName}
-                    onChange={e => setTagName(e.target.value)}
-                    className="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-                  />
-                  <button
-                    onClick={async () => {
-                      if (!tagName.trim()) return;
-                      await GitWorkflowService.createTag(tagName.trim());
-                      setTagName('');
-                      GitWorkflowService.getTags().then(setTags);
-                      showToast(`Created tag ${tagName}`, 'success');
-                    }}
-                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-medium shadow"
-                  >
-                    Tag
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Tags ({tags.length})
-                </span>
-                {tags.map(t => (
-                  <div
-                    key={t.name}
-                    className="p-2 bg-slate-800/40 rounded border border-slate-700/60 flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center gap-1.5 font-mono text-indigo-300">
-                      <Tag className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>{t.name}</span>
-                    </div>
-                    <span className="font-mono text-[10px] text-slate-400">{t.commitHash.slice(0, 7)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <GitTagsTab
+              tags={tags}
+              onCreateTag={handleCreateTag}
+              onDeleteTag={handleDeleteTag}
+            />
           )}
 
           {/* TAB 6: .GITIGNORE ASSISTANT */}
           {activeTab === 'ignore' && (
-            <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 text-xs">
-              <div className="flex items-center gap-1.5 text-indigo-400 font-bold">
-                <FileX className="w-4 h-4" />
-                <span>Ignore-File Assistant</span>
-              </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Quickly populate your <code className="text-slate-200">.gitignore</code> file with industry-standard rules for common environments.
-              </p>
-
-              <div className="grid grid-cols-2 gap-2 mt-1">
-                <button
-                  onClick={() => handleAddGitignorePreset('node')}
-                  className="p-2.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-left flex flex-col gap-1 transition-all"
-                >
-                  <span className="font-bold text-slate-200">Node & npm</span>
-                  <span className="text-[10px] text-slate-400 font-mono">node_modules/, *.log</span>
-                </button>
-
-                <button
-                  onClick={() => handleAddGitignorePreset('env')}
-                  className="p-2.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-left flex flex-col gap-1 transition-all"
-                >
-                  <span className="font-bold text-slate-200">Environment</span>
-                  <span className="text-[10px] text-slate-400 font-mono">.env, .env.*</span>
-                </button>
-
-                <button
-                  onClick={() => handleAddGitignorePreset('build')}
-                  className="p-2.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-left flex flex-col gap-1 transition-all"
-                >
-                  <span className="font-bold text-slate-200">Build Output</span>
-                  <span className="text-[10px] text-slate-400 font-mono">dist/, build/, .output/</span>
-                </button>
-
-                <button
-                  onClick={() => handleAddGitignorePreset('os')}
-                  className="p-2.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-left flex flex-col gap-1 transition-all"
-                >
-                  <span className="font-bold text-slate-200">OS Artifacts</span>
-                  <span className="text-[10px] text-slate-400 font-mono">.DS_Store, Thumbs.db</span>
-                </button>
-              </div>
-
-              <button
-                onClick={() => openFile('.gitignore')}
-                className="mt-2 py-2 border border-slate-700 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <FileCode className="w-3.5 h-3.5" />
-                <span>Open .gitignore in Editor</span>
-              </button>
-            </div>
+            <GitIgnoreTab onAddPreset={handleAddGitignorePreset} />
           )}
-
           {/* TAB 7: GITHUB INTEGRATION */}
           {activeTab === 'github' && (
             <GitHubIntegrationTab
@@ -1208,8 +751,7 @@ export const GitSidebar: React.FC = () => {
               pullRequests={pullRequests}
               issues={issues}
               onSaveToken={async (token) => {
-                setGitHubTokenInput(token);
-                const res = await GitWorkflowService.setGitHubToken(token);
+                                const res = await GitWorkflowService.setGitHubToken(token);
                 if (res.authenticated) {
                   setGitHubAuthed(true);
                   setGitHubUser(res.user);
