@@ -71,7 +71,7 @@ export const Sidebar: React.FC = () => {
     setIsProjectWizardOpen,
     setIsCloneModalOpen,
     openLocalFolder,
-  } = useIDE() as any;
+  } = useIDE();
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');

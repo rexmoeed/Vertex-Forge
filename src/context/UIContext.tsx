@@ -3,11 +3,13 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 export type CursorMode = 'ask' | 'edit' | 'agent' | 'review';
 export type IDEActiveView = 'editor' | 'welcome' | 'agents' | 'design-system' | 'settings' | 'providers' | 'evolution' | 'bug-detective' | 'watchdog' | 'operator';
 
+export type SidebarTabId = 'explorer' | 'search' | 'git' | 'debugger' | 'debug' | 'testing' | 'tests' | 'extensions' | 'security' | 'jules' | 'agents' | 'stack' | 'settings';
+
 export interface UIContextType {
   activeView: IDEActiveView;
   setActiveView: (view: IDEActiveView) => void;
-  activeSidebarTab: 'explorer' | 'search' | 'git' | 'debugger' | 'testing' | 'extensions' | 'security' | 'jules';
-  setActiveSidebarTab: (tab: 'explorer' | 'search' | 'git' | 'debugger' | 'testing' | 'extensions' | 'security' | 'jules') => void;
+  activeSidebarTab: SidebarTabId;
+  setActiveSidebarTab: (tab: SidebarTabId) => void;
   bottomPanelTab: 'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security';
   setBottomPanelTab: (tab: 'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security') => void;
   isBottomPanelOpen: boolean;
@@ -51,7 +53,7 @@ export const UIProvider: React.FC<UIProviderProps> = ({
   initialView = 'editor',
 }) => {
   const [activeView, setActiveView] = useState<IDEActiveView>(initialView);
-  const [activeSidebarTab, setActiveSidebarTab] = useState<'explorer' | 'search' | 'git' | 'debugger' | 'testing' | 'extensions' | 'security' | 'jules'>('explorer');
+  const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTabId>('explorer');
   const [bottomPanelTab, setBottomPanelTab] = useState<'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security'>('terminal');
   const [isBottomPanelOpen, setIsBottomPanelOpen] = useState<boolean>(true);
   const [showPreview, setShowPreview] = useState<boolean>(false);
