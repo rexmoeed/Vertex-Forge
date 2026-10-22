@@ -1,3 +1,4 @@
+import { AgentRole } from '../types/ide';
 /**
  * Autonomous AI Software Engineer - Core Engine
  * Implements the complete multi-step autonomous execution loop:
@@ -139,7 +140,7 @@ export class AutonomousAgentEngine {
           id: t.id || `task-${idx + 1}`,
           title: t.title,
           description: t.description,
-          role: (t as Record<string, string>).agent || (idx === 0 ? 'Architect' : 'Developer'),
+          role: ((t as Record<string, string>).agent || (idx === 0 ? 'Architect' : 'Developer')) as AgentRole,
           status: 'pending',
           dependencies: idx > 0 ? [`task-${idx}`] : [],
           acceptanceCriteria: [

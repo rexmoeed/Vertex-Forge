@@ -8,8 +8,8 @@ export interface UIContextType {
   setActiveView: (view: IDEActiveView) => void;
   activeSidebarTab: 'explorer' | 'search' | 'git' | 'debugger' | 'testing' | 'extensions' | 'security' | 'jules';
   setActiveSidebarTab: (tab: 'explorer' | 'search' | 'git' | 'debugger' | 'testing' | 'extensions' | 'security' | 'jules') => void;
-  bottomPanelTab: 'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer';
-  setBottomPanelTab: (tab: 'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer') => void;
+  bottomPanelTab: 'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security';
+  setBottomPanelTab: (tab: 'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security') => void;
   isBottomPanelOpen: boolean;
   setIsBottomPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   toggleBottomPanel: () => void;
@@ -52,7 +52,7 @@ export const UIProvider: React.FC<UIProviderProps> = ({
 }) => {
   const [activeView, setActiveView] = useState<IDEActiveView>(initialView);
   const [activeSidebarTab, setActiveSidebarTab] = useState<'explorer' | 'search' | 'git' | 'debugger' | 'testing' | 'extensions' | 'security' | 'jules'>('explorer');
-  const [bottomPanelTab, setBottomPanelTab] = useState<'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer'>('terminal');
+  const [bottomPanelTab, setBottomPanelTab] = useState<'terminal' | 'problems' | 'output' | 'debugConsole' | 'aiChat' | 'testExplorer' | 'security'>('terminal');
   const [isBottomPanelOpen, setIsBottomPanelOpen] = useState<boolean>(true);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');

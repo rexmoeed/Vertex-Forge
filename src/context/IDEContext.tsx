@@ -1,3 +1,4 @@
+import { PermissionMode } from '../types/autonomousAgent';
 ﻿import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Project,
@@ -41,7 +42,7 @@ import {
   AIDebugDiagnosis,
 } from '../types/debugger';
 import { useTheme } from './ThemeContext';
-import { UIProvider, useUI, CursorMode, IDEActiveView } from './UIContext';
+import { UIProvider, useUI, CursorMode, IDEActiveView, UIContextType } from './UIContext';
 import { GitProvider, useGit } from './GitContext';
 import { AgentProvider, useAgent } from './AgentContext';
 import { WorkspaceLifecycleService } from '../services/workspaceLifecycleService';
@@ -159,9 +160,9 @@ export interface IDEContextType {
   setActiveView: (view: IDEActiveView) => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
-  activeSidebarTab: 'explorer' | 'search' | 'git' | 'tests' | 'agents' | 'stack' | 'settings' | 'debug' | 'extensions';
+  activeSidebarTab: UIContextType['activeSidebarTab'];
   setActiveSidebarTab: (tab: any) => void;
-  bottomPanelTab: 'terminal' | 'problems' | 'tests' | 'review' | 'audit' | 'debug';
+  bottomPanelTab: UIContextType['bottomPanelTab'];
   setBottomPanelTab: (tab: any) => void;
   isBottomPanelOpen: boolean;
   toggleBottomPanel: () => void;
@@ -659,7 +660,8 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [git]);
 
   const autonomousEngine = useMemo(() => {
-    const engine = new AutonomousAgentEngine(vfs, agent.autonomyMode, projectProfile || undefined);
+    const permissionMode: PermissionMode = agent.autonomyMode === 'autonomous' ? 'autonomous' : 'supervised';
+    const engine = new AutonomousAgentEngine(vfs, permissionMode, projectProfile || undefined);
     engine.setEvents({
       onPlanCreated: plan => {
         agent.setAutonomousPlan(plan);
@@ -701,7 +703,7 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
         agent.setVerificationSummary(summary);
       },
       onLogMessage: (role, message, type) => {
-        agent.logAgentAction(role as AgentRole, message, type as AgentLog['type']);
+        agent.logAgentAction(role as AgentRole, message, type as AgentLog['status']);
       },
     });
     return engine;

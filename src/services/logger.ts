@@ -62,17 +62,24 @@ class StructuredLogger {
     this.history = [];
   }
 
-  private emit(level: LogLevel, message: string, context?: Record<string, unknown>, cause?: unknown): void {
+  private emit(level: LogLevel, message: string, context?: unknown, cause?: unknown): void {
     if (LOG_LEVEL_SEVERITY[level] < LOG_LEVEL_SEVERITY[this.minLevel]) {
       return;
     }
+
+    const ctx = typeof context === 'object' && context !== null && !(context instanceof Error)
+      ? (context as Record<string, unknown>)
+      : context !== undefined
+        ? { value: context }
+        : undefined;
+    const actualCause = cause !== undefined ? cause : (context instanceof Error ? context : undefined);
 
     const entry: LogEntry = {
       level,
       message,
       timestamp: new Date().toISOString(),
-      ...(context && Object.keys(context).length > 0 ? { context } : {}),
-      ...(cause !== undefined ? { cause } : {}),
+      ...(ctx && Object.keys(ctx).length > 0 ? { context: ctx } : {}),
+      ...(actualCause !== undefined ? { cause: actualCause } : {}),
     };
 
     this.history.push(entry);
@@ -107,19 +114,19 @@ class StructuredLogger {
     }
   }
 
-  public debug(message: string, context?: Record<string, unknown>, cause?: unknown): void {
+  public debug(message: string, context?: unknown, cause?: unknown): void {
     this.emit('debug', message, context, cause);
   }
 
-  public info(message: string, context?: Record<string, unknown>): void {
+  public info(message: string, context?: unknown): void {
     this.emit('info', message, context);
   }
 
-  public warn(message: string, context?: Record<string, unknown>, cause?: unknown): void {
+  public warn(message: string, context?: unknown, cause?: unknown): void {
     this.emit('warn', message, context, cause);
   }
 
-  public error(message: string, context?: Record<string, unknown>, cause?: unknown): void {
+  public error(message: string, context?: unknown, cause?: unknown): void {
     this.emit('error', message, context, cause);
   }
 }

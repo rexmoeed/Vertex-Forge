@@ -1,3 +1,4 @@
+import { logger } from './logger';
 /**
  * Google Jules Cloud Agent Service
  * Integrates Google's asynchronous cloud coding agent with Vertex Forge.
