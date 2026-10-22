@@ -11,6 +11,7 @@ import {
   SelfRepairResult,
   TestRunComparison,
 } from '../types/testEngine';
+import { logger } from './logger';
 
 export class TestEngineService {
   private static lastRunResult: TestRunResult | null = null;
@@ -44,7 +45,7 @@ export class TestEngineService {
         return await res.json();
       }
     } catch (e) {
-      console.warn('[TestEngine] Discovery error:', e);
+      logger.warn('[TestEngine] Discovery error:', e);
     }
 
     return {
@@ -137,7 +138,7 @@ export class TestEngineService {
         return result;
       }
     } catch (e) {
-      console.warn('[TestEngine] Execution error:', e);
+      logger.warn('[TestEngine] Execution error:', e);
     }
 
     const fallbackResult: TestRunResult = {
@@ -223,7 +224,7 @@ export class TestEngineService {
         return await res.json();
       }
     } catch (e) {
-      console.warn('[TestEngine] Failure diagnosis error:', e);
+      logger.warn('[TestEngine] Failure diagnosis error:', e);
     }
 
     return {
@@ -260,7 +261,7 @@ export class TestEngineService {
         return await res.json();
       }
     } catch (e) {
-      console.warn('[TestEngine] Self-repair error:', e);
+      logger.warn('[TestEngine] Self-repair error:', e);
     }
 
     return {

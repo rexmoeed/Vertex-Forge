@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { useState, useEffect } from 'react';
 import {
   Cloud,
@@ -102,7 +103,7 @@ export const JulesCloudMissionModal: React.FC<JulesCloudMissionModalProps> = ({
           setCurrentSession(sessions[0]);
         }
       } catch (err: any) {
-        console.warn('[JulesCloudMissionModal] Initial load info:', err);
+        logger.warn('[JulesCloudMissionModal] Initial load info:', err);
       } finally {
         setIsLoading(false);
       }

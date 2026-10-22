@@ -1,6 +1,7 @@
 import { IDesktopAPI, WorkspaceFile, CommandExecutionResult } from '../types/desktop';
 import { VirtualFileSystem } from './virtualFs';
 import { GitProfile, DevServerProcess, ProjectProfile } from '../types/project';
+import { logger } from './logger';
 
 /**
  * Universal Production-Grade Desktop Bridge
@@ -383,7 +384,7 @@ class DesktopBridgeService implements IDesktopAPI {
         return await res.json();
       }
     } catch (e) {
-      console.error('Failed to start dev server:', e);
+      logger.error('Failed to start dev server:', e);
     }
     return null;
   }

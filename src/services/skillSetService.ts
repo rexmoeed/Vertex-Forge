@@ -1,4 +1,5 @@
 import { SkillDefinition } from '../types/kos';
+import { logger } from './logger';
 
 const SKILLS_STORAGE_KEY = 'vertex_skill_sets_v5';
 
@@ -22,7 +23,7 @@ export class SkillSetService {
         }
       }
     } catch (e) {
-      console.warn('Failed to load skills from localStorage:', e);
+      logger.warn('Failed to load skills from localStorage:', e);
     }
 
     this.skills = this.getDefaultSkills();

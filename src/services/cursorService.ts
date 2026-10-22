@@ -3,6 +3,7 @@ import { ProposedFileChange } from '../types/desktop';
 import { DesktopBridge } from './desktopBridge';
 import { AIProviderService } from './aiProviderService';
 import { CodebaseIntelligenceEngine } from './codebaseIntelligence';
+import { logger } from './logger';
 
 export interface CursorContextItem {
   id: string;
@@ -230,7 +231,7 @@ export class CursorService {
         return 'div className="p-4 rounded-xl bg-slate-900 border border-slate-800" />';
       }
       if (trimmed.startsWith('try {') || trimmed === 'try') {
-        return '\n  await performAction();\n} catch (err: any) {\n  console.error("Action failed:", err);\n}';
+        return '\n  await performAction();\n} catch (err: any) {\n  logger.error("Action failed:", err);\n}';
       }
     }
 

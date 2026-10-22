@@ -1,4 +1,5 @@
 import { CouncilSession, CouncilMember, CouncilVote } from '../types/kos';
+import { logger } from './logger';
 
 const COUNCIL_SESSIONS_KEY = 'vertex_council_sessions_v1';
 
@@ -14,7 +15,7 @@ export class MultiAiCouncilService {
         }
       }
     } catch (e) {
-      console.warn('Failed to load council sessions:', e);
+      logger.warn('Failed to load council sessions:', e);
     }
   }
 

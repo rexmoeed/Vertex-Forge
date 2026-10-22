@@ -66,12 +66,12 @@ class CommandRegistryService {
   public async execute(id: string): Promise<boolean> {
     const cmd = this.commands.get(id);
     if (!cmd) {
-      console.warn(`Command not found: ${id}`);
+      logger.warn(`Command not found: ${id}`);
       return false;
     }
 
     if (cmd.isEnabled && !cmd.isEnabled()) {
-      console.warn(`Command is disabled: ${id}`);
+      logger.warn(`Command is disabled: ${id}`);
       return false;
     }
 
@@ -82,7 +82,7 @@ class CommandRegistryService {
       await cmd.execute();
       return true;
     } catch (err) {
-      console.error(`Error executing command ${id}:`, err);
+      logger.error(`Error executing command ${id}:`, err);
       return false;
     }
   }
@@ -112,7 +112,7 @@ class CommandRegistryService {
       try {
         listener();
       } catch (err) {
-        console.error(err);
+        logger.error(err);
       }
     }
   }

@@ -1,4 +1,5 @@
 import { VaultSecret, VaultAuditEntry, SecretType, SecretAccessPolicy } from '../types/kos';
+import { logger } from './logger';
 
 const VAULT_STORAGE_KEY = 'vertex_credential_vault_v1';
 const VAULT_AUDIT_KEY = 'vertex_vault_audit_log_v1';
@@ -25,7 +26,7 @@ export class CredentialVaultService {
         }
       }
     } catch (e) {
-      console.warn('Failed to load credential vault from storage:', e);
+      logger.warn('Failed to load credential vault from storage:', e);
     }
 
     // Default seeded secrets for development if empty
@@ -65,7 +66,7 @@ export class CredentialVaultService {
         localStorage.setItem(VAULT_AUDIT_KEY, JSON.stringify(this.auditLog));
       }
     } catch (e) {
-      console.warn('Failed to save credential vault to storage:', e);
+      logger.warn('Failed to save credential vault to storage:', e);
     }
   }
 

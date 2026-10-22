@@ -20,6 +20,7 @@ import { GeminiService } from './geminiService';
 import { AIProviderService } from './aiProviderService';
 import { UniversalSystemPromptBuilder } from './universalSystemPrompt';
 import { ProjectProfile } from '../types/project';
+import { logger } from './logger';
 
 export interface AutonomousEngineEvents {
   onPlanCreated?: (plan: AutonomousPlan) => void;
@@ -138,7 +139,7 @@ export class AutonomousAgentEngine {
           id: t.id || `task-${idx + 1}`,
           title: t.title,
           description: t.description,
-          role: (t.agent as any) || (idx === 0 ? 'Architect' : 'Developer'),
+          role: (t as Record<string, string>).agent || (idx === 0 ? 'Architect' : 'Developer'),
           status: 'pending',
           dependencies: idx > 0 ? [`task-${idx}`] : [],
           acceptanceCriteria: [
@@ -156,7 +157,7 @@ export class AutonomousAgentEngine {
         }));
       }
     } catch (e: any) {
-      console.warn('AI Planning fallback:', e?.message);
+      logger.warn('AI Planning fallback:', e?.message);
     }
 
     // Fallback if AI plan returned empty

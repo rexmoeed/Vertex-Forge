@@ -607,7 +607,7 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const runTests = useCallback(async () => {
-    ui.setBottomPanelTab('testExplorer' as any);
+    ui.setBottomPanelTab('testExplorer');
     ui.setIsBottomPanelOpen(true);
     agent.logAgentAction('Testing', 'Running test suite...', 'info');
 
@@ -659,7 +659,7 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [git]);
 
   const autonomousEngine = useMemo(() => {
-    const engine = new AutonomousAgentEngine(vfs, agent.autonomyMode as any, projectProfile || undefined);
+    const engine = new AutonomousAgentEngine(vfs, agent.autonomyMode, projectProfile || undefined);
     engine.setEvents({
       onPlanCreated: plan => {
         agent.setAutonomousPlan(plan);
@@ -668,7 +668,7 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
           title: t.title,
           description: t.description,
           agent: t.role,
-          status: t.status === 'running' ? 'in-progress' : (t.status as any),
+          status: t.status === 'running' ? 'in-progress' : t.status as TaskItem['status'],
           targetFile: t.targetFiles[0] || 'src/App.tsx',
           toolAction: 'modify_file',
           requiresApproval: t.requiresApproval,
@@ -685,7 +685,7 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
         else if (status === 'failed') agent.setOrchestratorStatus('error');
       },
       onTaskStatusChange: (taskId, status) => {
-        agent.setTaskPlan(prev => prev.map(t => t.id === taskId ? { ...t, status: status === 'running' ? 'in-progress' : (status as any) } : t));
+        agent.setTaskPlan(prev => prev.map(t => t.id === taskId ? { ...t, status: status === 'running' ? 'in-progress' : status as TaskItem['status'] } : t));
       },
       onExecutionStateChange: state => {
         agent.setAutonomousExecutionState(state);
@@ -701,7 +701,7 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
         agent.setVerificationSummary(summary);
       },
       onLogMessage: (role, message, type) => {
-        agent.logAgentAction(role as AgentRole, message, type as any);
+        agent.logAgentAction(role as AgentRole, message, type as AgentLog['type']);
       },
     });
     return engine;
@@ -767,8 +767,8 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
       onSessionStateChange: session => {
         setDebugSession(session ? { ...session } : null);
         if (session && session.status !== 'stopped') {
-          ui.setActiveSidebarTab('debugger' as any);
-          ui.setBottomPanelTab('debugConsole' as any);
+          ui.setActiveSidebarTab('debugger');
+          ui.setBottomPanelTab('debugConsole');
           ui.setIsBottomPanelOpen(true);
         }
       },
@@ -827,7 +827,7 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const triggerSelfHealDebug = useCallback(async (errorDetails?: string) => {
     agent.setOrchestratorStatus('self_correcting');
     agent.setActiveAgent('Debugger');
-    ui.setBottomPanelTab('terminal' as any);
+    ui.setBottomPanelTab('terminal');
     ui.setIsBottomPanelOpen(true);
 
     const failingSuite = testResults.find(t => t.status === 'failed') ||
@@ -855,7 +855,7 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const runSecurityReview = useCallback(async () => {
     agent.setActiveAgent('Reviewer');
-    ui.setBottomPanelTab('security' as any);
+    ui.setBottomPanelTab('security');
     ui.setIsBottomPanelOpen(true);
     await IDEBuildRunner.runSecurityReview(agent.logAgentAction);
   }, [agent, ui]);
@@ -1019,10 +1019,10 @@ const IDEInternalProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveView: ui.setActiveView,
     theme: themeEngine.isDark ? 'dark' : 'light',
     toggleTheme,
-    activeSidebarTab: ui.activeSidebarTab as any,
+    activeSidebarTab: ui.activeSidebarTab,
     setActiveSidebarTab: ui.setActiveSidebarTab,
-    bottomPanelTab: ui.bottomPanelTab as any,
-    setBottomPanelTab: ui.setBottomPanelTab as any,
+    bottomPanelTab: ui.bottomPanelTab,
+    setBottomPanelTab: ui.setBottomPanelTab,
     isBottomPanelOpen: ui.isBottomPanelOpen,
     toggleBottomPanel: ui.toggleBottomPanel,
     showPreview: ui.showPreview,

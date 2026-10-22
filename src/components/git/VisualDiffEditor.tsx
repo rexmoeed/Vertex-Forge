@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { useState, useEffect } from 'react';
 import {
   SplitSquareVertical,
@@ -52,7 +53,7 @@ export const VisualDiffEditor: React.FC<VisualDiffEditorProps> = ({
       setDiff(result);
       setActiveHunkIndex(0);
     } catch (e) {
-      console.error('Failed to load diff:', e);
+      logger.error('Failed to load diff:', e);
     } finally {
       setLoading(false);
     }

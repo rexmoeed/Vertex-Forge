@@ -9,6 +9,7 @@ import {
   ConnectionTestResult,
   ModelCapability,
 } from '../types/aiProvider';
+import { logger } from './logger';
 
 const STORAGE_KEY_PROVIDERS = 'vertex_ai_providers_v2';
 const STORAGE_KEY_ASSIGNMENTS = 'vertex_ai_role_assignments_v2';
@@ -900,7 +901,7 @@ export class AIProviderService {
     try {
       safeSetStorage(STORAGE_KEY_PROVIDERS, JSON.stringify(providers));
     } catch (e) {
-      console.warn('Failed to save providers to storage', e);
+      logger.warn('Failed to save providers to storage', e);
     }
   }
 
@@ -946,7 +947,7 @@ export class AIProviderService {
         }
       }
     } catch (err) {
-      console.warn(`[AIProviderService] Could not fetch dynamic models for ${providerId}:`, err);
+      logger.warn(`[AIProviderService] Could not fetch dynamic models for ${providerId}:`, err);
     }
     return this.DEFAULT_MODELS[providerId] || [];
   }
@@ -1203,7 +1204,7 @@ export class AIProviderService {
     try {
       safeSetStorage(STORAGE_KEY_ASSIGNMENTS, JSON.stringify(assignments));
     } catch (e) {
-      console.warn('Failed to save assignments', e);
+      logger.warn('Failed to save assignments', e);
     }
   }
 
@@ -1257,7 +1258,7 @@ export class AIProviderService {
     try {
       safeSetStorage(STORAGE_KEY_AGENT_OVERRIDES, JSON.stringify(overrides));
     } catch (e) {
-      console.warn('Failed to save agent overrides', e);
+      logger.warn('Failed to save agent overrides', e);
     }
   }
 
@@ -1306,7 +1307,7 @@ export class AIProviderService {
     try {
       safeSetStorage(STORAGE_KEY_USAGE, JSON.stringify(records));
     } catch (e) {
-      console.warn('Failed to save usage records', e);
+      logger.warn('Failed to save usage records', e);
     }
   }
 
@@ -1339,7 +1340,7 @@ export class AIProviderService {
     try {
       safeSetStorage(STORAGE_KEY_PRIVACY, JSON.stringify(settings));
     } catch (e) {
-      console.warn('Failed to save privacy settings', e);
+      logger.warn('Failed to save privacy settings', e);
     }
   }
 

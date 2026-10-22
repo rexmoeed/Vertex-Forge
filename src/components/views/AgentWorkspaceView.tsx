@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import { SwarmMissionCockpit } from './SwarmMissionCockpit';
 import React, { useState, useEffect } from 'react';
 import { useIDE } from '../../context/IDEContext';
@@ -122,7 +123,7 @@ export const AgentWorkspaceView: React.FC = () => {
         concurrency: parallelConcurrency,
       });
     } catch (err: any) {
-      console.error('Parallel execution error:', err);
+      logger.error('Parallel execution error:', err);
     }
   };
 
@@ -139,7 +140,7 @@ export const AgentWorkspaceView: React.FC = () => {
     try {
       await hierarchyService.orchestrateFullTeamBenchmark(true);
     } catch (err: any) {
-      console.error('Benchmark error:', err);
+      logger.error('Benchmark error:', err);
     } finally {
       setIsOrchestrating(false);
     }

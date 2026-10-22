@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { useState, useEffect } from 'react';
 import {
   AlertTriangle,
@@ -73,7 +74,7 @@ export const MergeConflictModal: React.FC<MergeConflictModalProps> = ({
         onClose();
       }
     } catch (e) {
-      console.error('Failed to resolve conflict:', e);
+      logger.error('Failed to resolve conflict:', e);
     } finally {
       setSaving(false);
     }

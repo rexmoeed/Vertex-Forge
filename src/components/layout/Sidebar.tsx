@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { useState, useRef } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -256,7 +257,7 @@ export const Sidebar: React.FC = () => {
     };
     e.dataTransfer.setData(FILE_DRAG_MIME, JSON.stringify(payload));
     e.dataTransfer.setData('text/plain', node.path);
-    console.log(`[DragDrop] dragstart file: ${node.path}`);
+    logger.info(`[DragDrop] dragstart file: ${node.path}`);
   };
 
   const handleFileDragEnd = () => {

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { ThemeDefinition, ThemeMode, DensityMode, ThemePreferences } from '../types/theme';
 import { THEME_REGISTRY, ThemeRegistryService } from '../services/themeRegistry';
+import { logger } from '../services/logger';
 
 interface ThemeContextType {
   activeTheme: ThemeDefinition;
@@ -45,7 +46,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         };
       }
     } catch (e) {
-      console.warn('Failed to parse theme preferences', e);
+      logger.warn('Failed to parse theme preferences', e);
     }
     return DEFAULT_PREFERENCES;
   });
@@ -179,7 +180,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
     } catch (e) {
-      console.warn('Failed to save theme preferences', e);
+      logger.warn('Failed to save theme preferences', e);
     }
   }, [activeTheme, preferences, isDark]);
 

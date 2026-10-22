@@ -1,6 +1,7 @@
 import { OpenTab } from '../types/ide';
 import { DesktopBridge } from './desktopBridge';
 import { VirtualFileSystem } from './virtualFs';
+import { logger } from './logger';
 
 export interface OpenFileRequest {
   workspaceId: string;
@@ -188,7 +189,7 @@ export class CanonicalEditorFileService implements EditorFileService {
     const language = this.detectLanguage(normalizedPath);
 
     if (this.logDiagnostics) {
-      console.log(`[Editor] openFile source: ${source} file: ${normalizedPath}`);
+      logger.info(`[Editor] openFile source: ${source} file: ${normalizedPath}`);
     }
 
     // 1. Check if file is already open in openTabs
@@ -211,7 +212,7 @@ export class CanonicalEditorFileService implements EditorFileService {
       // Re-use tab without duplicating or losing unsaved edits
       this.activeTabId = existingTab.id;
       if (this.logDiagnostics) {
-        console.log(`[Editor] tabActivated ${existingTab.title}`);
+        logger.info(`[Editor] tabActivated ${existingTab.title}`);
       }
       if (this.onTabsChange) {
         this.onTabsChange(this.openTabs, existingTab.id, content ?? '');
@@ -233,7 +234,7 @@ export class CanonicalEditorFileService implements EditorFileService {
     this.activeTabId = newTab.id;
 
     if (this.logDiagnostics) {
-      console.log(`[Editor] tabActivated ${newTab.title}`);
+      logger.info(`[Editor] tabActivated ${newTab.title}`);
     }
 
     if (this.onTabsChange) {
@@ -249,7 +250,7 @@ export class CanonicalEditorFileService implements EditorFileService {
     this.activeTabId = tab.id;
     const content = this.vfs?.readFile(tab.filePath) ?? '';
     if (this.logDiagnostics) {
-      console.log(`[Editor] tabActivated ${tab.title}`);
+      logger.info(`[Editor] tabActivated ${tab.title}`);
     }
     if (this.onTabsChange) {
       this.onTabsChange(this.openTabs, tab.id, content);

@@ -14,6 +14,7 @@ import {
 } from '../types/agentHierarchy';
 import { VirtualFileSystem } from './virtualFs';
 import { Project, FileNode } from '../types/ide';
+import { logger } from './logger';
 
 export class AgentHierarchyService {
   private vfs: VirtualFileSystem;
@@ -773,7 +774,7 @@ export class AgentHierarchyService {
     onProgress?: (info: ParallelProgressInfo) => void;
   }): Promise<CompletionReport[]> {
     if (this.isParallelRunningState) {
-      console.warn('Parallel execution already active.');
+      logger.warn('Parallel execution already active.');
       return this.getCompletionReports();
     }
 
@@ -860,7 +861,7 @@ export class AgentHierarchyService {
               runningTasks.delete(task.taskId);
               options?.onProgress?.(this.getParallelProgress());
               this.notify();
-              return null as any;
+              return null!;
             });
 
           runningTasks.set(task.taskId, taskPromise);
@@ -872,7 +873,7 @@ export class AgentHierarchyService {
         if (runningTasks.size === 0) {
           if (pendingTasks.length > 0) {
             // Unresolved dependencies / deadlock or all remaining blocked
-            console.warn('No ready tasks could be scheduled with remaining dependencies.');
+            logger.warn('No ready tasks could be scheduled with remaining dependencies.');
             break;
           }
           break;

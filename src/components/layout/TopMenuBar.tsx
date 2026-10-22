@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { useState, useEffect, useRef } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -182,7 +183,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
         await CommandRegistry.execute(cmd.id);
       }
     } catch (err) {
-      console.error(`Error executing ${cmd.id}:`, err);
+      logger.error(`Error executing ${cmd.id}:`, err);
     }
   };
 

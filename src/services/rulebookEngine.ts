@@ -1,4 +1,5 @@
 import { RulebookRule, RulebookViolation, GateSeverity } from '../types/kos';
+import { logger } from './logger';
 
 const RULEBOOK_STORAGE_KEY = 'vertex_rulebook_rules_v1';
 const VIOLATIONS_STORAGE_KEY = 'vertex_rulebook_violations_v1';
@@ -24,7 +25,7 @@ export class RulebookEngine {
         }
       }
     } catch (e) {
-      console.warn('Failed to load rulebook from storage:', e);
+      logger.warn('Failed to load rulebook from storage:', e);
     }
 
     if (this.rules.length === 0) {
@@ -86,7 +87,7 @@ export class RulebookEngine {
         localStorage.setItem(VIOLATIONS_STORAGE_KEY, JSON.stringify(this.violations));
       }
     } catch (e) {
-      console.warn('Failed to save rulebook to storage:', e);
+      logger.warn('Failed to save rulebook to storage:', e);
     }
   }
 

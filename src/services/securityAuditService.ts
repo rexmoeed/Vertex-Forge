@@ -4,6 +4,7 @@ import {
   AuditVerificationResult,
   SecurityCategory,
 } from '../types/securityAudit';
+import { logger } from './logger';
 
 export class SecurityAuditService {
   /**
@@ -22,9 +23,9 @@ export class SecurityAuditService {
         return data;
       }
       const errData = await response.json().catch(() => ({}));
-      console.warn('[SecurityAuditService] Backend audit API error:', errData);
+      logger.warn('[SecurityAuditService] Backend audit API error:', errData);
     } catch (err) {
-      console.warn('[SecurityAuditService] Backend audit API unavailable:', err);
+      logger.warn('[SecurityAuditService] Backend audit API unavailable:', err);
     }
 
     return {
@@ -80,7 +81,7 @@ export class SecurityAuditService {
         modifiedFiles: [],
       };
     } catch (err: any) {
-      console.warn('[SecurityAuditService] Backend remediation API error:', err);
+      logger.warn('[SecurityAuditService] Backend remediation API error:', err);
       return {
         success: false,
         message: `Network error applying remediation: ${err?.message || String(err)}`,
@@ -114,7 +115,7 @@ export class SecurityAuditService {
         verifiedAt: new Date().toISOString(),
       };
     } catch (err: any) {
-      console.warn('[SecurityAuditService] Backend verification API error:', err);
+      logger.warn('[SecurityAuditService] Backend verification API error:', err);
       return {
         findingId: finding.id,
         resolved: false,
@@ -138,7 +139,7 @@ export class SecurityAuditService {
         return await response.json();
       }
     } catch (err) {
-      console.warn('[SecurityAuditService] Fixture API fallback error:', err);
+      logger.warn('[SecurityAuditService] Fixture API fallback error:', err);
     }
 
     return {

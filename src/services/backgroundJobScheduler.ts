@@ -1,4 +1,5 @@
 import { BackgroundJob } from '../types/kos';
+import { logger } from './logger';
 
 const JOBS_STORAGE_KEY = 'vertex_background_jobs_v1';
 
@@ -13,7 +14,7 @@ export class BackgroundJobScheduler {
         if (stored) this.jobs = JSON.parse(stored);
       }
     } catch (e) {
-      console.warn('Failed to load background jobs:', e);
+      logger.warn('Failed to load background jobs:', e);
     }
 
     if (this.jobs.length === 0) {

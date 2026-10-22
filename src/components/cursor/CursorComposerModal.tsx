@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { useState, useEffect, useRef } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import {
@@ -131,7 +132,7 @@ export const CursorComposerModal: React.FC<CursorComposerModalProps> = ({ isOpen
       setGenerationResult(result);
       setSelectedFileIndex(0);
     } catch (err) {
-      console.error('Composer generation error:', err);
+      logger.error('Composer generation error:', err);
     } finally {
       setIsLoading(false);
     }

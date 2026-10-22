@@ -1,5 +1,6 @@
 import { VirtualFileSystem } from './virtualFs';
 import { ProjectProfile } from '../types/project';
+import { logger } from './logger';
 
 export interface CodebaseSymbol {
   name: string;
@@ -339,7 +340,7 @@ export class CodebaseIntelligenceEngine {
     try {
       localStorage.setItem(`${this.MEMORY_STORAGE_KEY}_${projectKey}`, JSON.stringify(entries));
     } catch (e) {
-      console.warn('Failed to save project memory', e);
+      logger.warn('Failed to save project memory', e);
     }
   }
 

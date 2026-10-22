@@ -1,4 +1,5 @@
 import { PersistentMemoryEntry, MemoryType, MemoryScope } from '../types/kos';
+import { logger } from './logger';
 
 const MEMORY_STORAGE_KEY = 'vertex_persistent_memories_v1';
 
@@ -14,7 +15,7 @@ export class PersistentMemoryService {
         }
       }
     } catch (e) {
-      console.warn('Failed to load persistent memories:', e);
+      logger.warn('Failed to load persistent memories:', e);
     }
 
     if (this.memories.length === 0) {

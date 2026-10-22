@@ -13,6 +13,7 @@ import {
 } from '../types/autonomousAgent';
 import { DesktopBridge } from './desktopBridge';
 import { VirtualFileSystem } from './virtualFs';
+import { logger } from './logger';
 
 export class AgentToolRegistry {
   private vfs: VirtualFileSystem;
@@ -239,7 +240,7 @@ export class AgentToolRegistry {
         }
         revertedFiles.push(item.path);
       } catch (err: any) {
-        console.warn(`Rollback error for ${item.path}:`, err?.message);
+        logger.warn(`Rollback error for ${item.path}:`, err?.message);
       }
     }
 
@@ -500,7 +501,7 @@ export class AgentToolRegistry {
     try {
       await DesktopBridge.writeFile(filePath, content);
     } catch (err: any) {
-      console.warn(`Real disk write warning for ${filePath}:`, err?.message);
+      logger.warn(`Real disk write warning for ${filePath}:`, err?.message);
     }
 
     return {
@@ -568,7 +569,7 @@ export class AgentToolRegistry {
     try {
       await DesktopBridge.writeFile(filePath, initialContent);
     } catch (err: any) {
-      console.warn(`Disk createFile notice for ${filePath}:`, err?.message);
+      logger.warn(`Disk createFile notice for ${filePath}:`, err?.message);
     }
 
     return {
@@ -591,7 +592,7 @@ export class AgentToolRegistry {
     try {
       await DesktopBridge.deletePath(filePath);
     } catch (err: any) {
-      console.warn(`Disk deleteFile notice:`, err?.message);
+      logger.warn(`Disk deleteFile notice:`, err?.message);
     }
 
     return {

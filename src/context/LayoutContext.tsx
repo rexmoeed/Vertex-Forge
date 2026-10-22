@@ -8,6 +8,7 @@ import {
   PanelFocusTarget,
   PANEL_CONSTRAINTS,
 } from '../types/layout';
+import { logger } from '../services/logger';
 
 interface LayoutContextType {
   config: IDEPanelConfig;
@@ -56,7 +57,7 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         };
       }
     } catch (e) {
-      console.warn('Failed to parse saved layout config, using default', e);
+      logger.warn('Failed to parse saved layout config, using default', e);
     }
     return DEFAULT_LAYOUT_CONFIG;
   });
@@ -66,7 +67,7 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
     } catch (e) {
-      console.warn('Failed to persist layout config', e);
+      logger.warn('Failed to persist layout config', e);
     }
   }, [config]);
 

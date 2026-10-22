@@ -1,4 +1,5 @@
 import { SecretScanFinding, TamperManifestEntry } from '../types/kos';
+import { logger } from './logger';
 
 const MANIFEST_STORAGE_KEY = 'vertex_tamper_manifest_v1';
 
@@ -15,7 +16,7 @@ export class SecretScannerService {
         }
       }
     } catch (e) {
-      console.warn('Failed to load tamper manifest:', e);
+      logger.warn('Failed to load tamper manifest:', e);
     }
   }
 

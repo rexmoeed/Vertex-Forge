@@ -1,4 +1,5 @@
 import { RecentProject, ProjectProfile } from '../types/project';
+import { logger } from './logger';
 
 const RECENT_PROJECTS_KEY = 'vertex_ide_recent_projects_v2';
 
@@ -16,7 +17,7 @@ class RecentProjectsService {
         }
       }
     } catch (e) {
-      console.warn('Failed to load recent projects from localStorage:', e);
+      logger.warn('Failed to load recent projects from localStorage:', e);
     }
     return INITIAL_RECENT_PROJECTS;
   }
@@ -26,7 +27,7 @@ class RecentProjectsService {
     try {
       localStorage.setItem(RECENT_PROJECTS_KEY, JSON.stringify(projects));
     } catch (e) {
-      console.warn('Failed to save recent projects to localStorage:', e);
+      logger.warn('Failed to save recent projects to localStorage:', e);
     }
   }
 

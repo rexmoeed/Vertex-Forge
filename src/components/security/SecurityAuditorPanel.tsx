@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Shield,
@@ -64,7 +65,7 @@ export const SecurityAuditorPanel: React.FC = () => {
       const data = await SecurityAuditService.runAudit(customPath);
       setReport(data);
     } catch (err: any) {
-      console.error('Audit run error:', err);
+      logger.error('Audit run error:', err);
       setActionNotice({ message: `Audit failed: ${err.message}`, type: 'error' });
     } finally {
       setLoading(false);

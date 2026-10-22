@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Structured Logging Framework for Vertex Forge
  * Provides structured log levels, metadata context, error cause preservation,

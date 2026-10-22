@@ -81,7 +81,7 @@ export class JulesService {
       const data = await response.json();
       return data.sources || [];
     } catch (err) {
-      console.error('[JulesService] listSources error:', err);
+      logger.error('[JulesService] listSources error:', err);
       throw err;
     }
   }
@@ -98,7 +98,7 @@ export class JulesService {
       const data = await response.json();
       return data.sessions || [];
     } catch (err) {
-      console.error('[JulesService] listSessions error:', err);
+      logger.error('[JulesService] listSessions error:', err);
       throw err;
     }
   }
@@ -133,7 +133,7 @@ export class JulesService {
 
       return await response.json();
     } catch (err) {
-      console.error('[JulesService] createSession error:', err);
+      logger.error('[JulesService] createSession error:', err);
       throw err;
     }
   }
@@ -150,7 +150,7 @@ export class JulesService {
       }
       return await response.json();
     } catch (err) {
-      console.error('[JulesService] getSession error:', err);
+      logger.error('[JulesService] getSession error:', err);
       throw err;
     }
   }
@@ -168,7 +168,7 @@ export class JulesService {
       const data = await response.json();
       return data.activities || [];
     } catch (err) {
-      console.error('[JulesService] getActivities error:', err);
+      logger.error('[JulesService] getActivities error:', err);
       throw err;
     }
   }
@@ -186,7 +186,7 @@ export class JulesService {
       });
       return response.ok;
     } catch (err) {
-      console.error('[JulesService] approvePlan error:', err);
+      logger.error('[JulesService] approvePlan error:', err);
       return false;
     }
   }
@@ -204,7 +204,7 @@ export class JulesService {
       });
       return response.ok;
     } catch (err) {
-      console.error('[JulesService] sendMessage error:', err);
+      logger.error('[JulesService] sendMessage error:', err);
       return false;
     }
   }

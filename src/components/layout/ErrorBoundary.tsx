@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, RotateCcw } from 'lucide-react';
 
@@ -24,7 +25,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[Vertex Forge ErrorBoundary caught error]:', error, errorInfo);
+    logger.error('[Vertex Forge ErrorBoundary caught error]:', error, errorInfo);
     this.setState({ errorInfo });
   }
 

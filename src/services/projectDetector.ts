@@ -8,6 +8,7 @@ import {
   DetectionContext,
   DetectionResult,
 } from '../types/project';
+import { logger } from './logger';
 
 export interface ProjectDetector {
   id: string;
@@ -458,7 +459,7 @@ export class ProjectDetectionEngine {
         const res = await detector.detect(context);
         if (res) results.push(res);
       } catch (err) {
-        console.warn(`Detector ${detector.name} failed:`, err);
+        logger.warn(`Detector ${detector.name} failed:`, err);
       }
     }
 

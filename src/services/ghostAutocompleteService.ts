@@ -5,6 +5,7 @@
  */
 
 import { LocalLLMService } from './localLLMService';
+import { logger } from './logger';
 
 export interface GhostCompletionContext {
   fileUri: string;
@@ -157,7 +158,7 @@ export class GhostAutocompleteService {
       }
 
       if (/try\s*\{?$/m.test(trimmed)) {
-        return '\n  // perform operation\n} catch (error) {\n  console.error("Operation failed:", error);\n}';
+        return '\n  // perform operation\n} catch (error) {\n  logger.error("Operation failed:", error);\n}';
       }
 
       if (/export\s+const\s+[A-Za-z0-9_]+\s*=\s*async\s*\([^)]*\)\s*=>\s*\{?$/m.test(trimmed)) {

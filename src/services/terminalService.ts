@@ -1,4 +1,5 @@
 import { VirtualFileSystem } from './virtualFs';
+import { logger } from './logger';
 
 export interface TerminalSession {
   id: string;
@@ -67,7 +68,7 @@ export class TerminalService {
     try {
       localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(settings));
     } catch (e) {
-      console.warn('Failed to save terminal settings', e);
+      logger.warn('Failed to save terminal settings', e);
     }
   }
 
@@ -247,7 +248,7 @@ export class TerminalService {
         onLogUpdate?.(session);
         return { stdout: result.stdout, stderr: result.stderr, exitCode: result.exitCode };
       } catch (nativeErr: any) {
-        console.warn('[TerminalService] Native Electron execution error, falling back to server/simulation:', nativeErr);
+        logger.warn('[TerminalService] Native Electron execution error, falling back to server/simulation:', nativeErr);
       }
     }
 

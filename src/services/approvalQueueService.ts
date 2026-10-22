@@ -1,4 +1,5 @@
 import { ApprovalQueueItem, ApprovalStatus, ApprovalRiskLevel } from '../types/kos';
+import { logger } from './logger';
 
 const APPROVALS_STORAGE_KEY = 'vertex_approval_queue_v1';
 
@@ -12,7 +13,7 @@ export class ApprovalQueueService {
         if (stored) this.queue = JSON.parse(stored);
       }
     } catch (e) {
-      console.warn('Failed to load approval queue:', e);
+      logger.warn('Failed to load approval queue:', e);
     }
 
     if (this.queue.length === 0) {

@@ -18,7 +18,7 @@ export function useCommandInitializer({
   onOpenComposer,
   onOpenCursorRules,
 }: CommandInitializerProps) {
-  const ide = useIDE() as any;
+  const ide = useIDE();
   const layout = useLayout();
 
   useEffect(() => {

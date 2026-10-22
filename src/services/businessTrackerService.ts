@@ -1,4 +1,5 @@
 import { BusinessEntity, BusinessTrackerItem, TrackerStatus } from '../types/kos';
+import { logger } from './logger';
 
 const BUSINESSES_STORAGE_KEY = 'vertex_businesses_v1';
 const TRACKER_STORAGE_KEY = 'vertex_business_trackers_v1';
@@ -17,7 +18,7 @@ export class BusinessTrackerService {
         if (storedItems) this.trackerItems = JSON.parse(storedItems);
       }
     } catch (e) {
-      console.warn('Failed to load business tracker data:', e);
+      logger.warn('Failed to load business tracker data:', e);
     }
 
     if (this.businesses.length === 0) {

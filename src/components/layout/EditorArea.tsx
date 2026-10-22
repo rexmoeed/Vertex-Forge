@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger';
 import React, { useEffect, useRef, useState } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -206,7 +207,7 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
       setIsDiffReviewActive(true);
       setIsInlineAIOpen(false);
     } catch (err: any) {
-      console.error('Inline AI error:', err);
+      logger.error('Inline AI error:', err);
     } finally {
       setIsInlineLoading(false);
     }
@@ -234,7 +235,7 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
       e.preventDefault();
       dragCounterRef.current++;
       setIsDragOver(true);
-      console.log('[DragDrop] dragenter target: editor');
+      logger.info('[DragDrop] dragenter target: editor');
     }
   };
 
@@ -274,12 +275,12 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
               targetGroupId: groupId,
             });
           } else {
-            console.warn('[DragDrop] Dropped path validation failed:', validation.error);
+            logger.warn('[DragDrop] Dropped path validation failed:', validation.error);
           }
           return;
         }
       } catch (err) {
-        console.error('[DragDrop] Failed to parse drag payload:', err);
+        logger.error('[DragDrop] Failed to parse drag payload:', err);
       }
     }
 
@@ -297,7 +298,7 @@ const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
             targetGroupId: groupId,
           });
         } catch (err) {
-          console.error('[DragDrop] Failed to read external OS file:', err);
+          logger.error('[DragDrop] Failed to read external OS file:', err);
         }
       }
     }
