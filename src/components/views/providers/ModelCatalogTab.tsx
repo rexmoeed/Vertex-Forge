@@ -99,7 +99,8 @@ export const ModelCatalogTab: React.FC<ModelCatalogTabProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredModels.map(m => (
           <div
-            key={m.id}
+            // Use composite key to prevent collisions since model IDs can be shared across multiple providers
+            key={`${m.providerId}-${m.id}`}
             className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex flex-col justify-between gap-3 shadow transition"
           >
             <div>
