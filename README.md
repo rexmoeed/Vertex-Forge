@@ -324,3 +324,13 @@ npm run build
 <div align="center">
 Built with ❤️ for developers who demand real tools, zero simulated answers, and uncompromising autonomous AI engineering control.
 </div>
+
+
+## Observability & Error Tracking
+
+Vertex Forge incorporates an enterprise-grade telemetry and observability architecture:
+- **Structured JSON Logging**: The core `logger` (`src/services/logger.ts`) emits structured ISO 8601 UTC timestamped entries with severity levels (`debug`, `info`, `warn`, `error`) and structured metadata envelopes.
+- **Top-Level Error Boundary**: The application root is wrapped with an active `ErrorBoundary` (`src/components/common/ErrorBoundary.tsx`) that intercepts rendering exceptions, serializes component stack traces, and routes crash reports through `ErrorTracker.captureException`.
+- **Global Runtime Interceptors**: Uncaught browser errors and unhandled Promise rejections are automatically captured via `ErrorTracker.init()`.
+- **Zero-Key Offline Sandbox**: In fresh checkout environments without `GEMINI_API_KEY` or `JULES_API_KEY`, the IDE smoothly activates mock provider simulations and offline AST diagnostics.
+- **CI Smoke Validation**: Automated end-to-end server boot and API health probing is verified on every pull request via `npm run smoke`.

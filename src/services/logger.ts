@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /**
  * ==============================================================================
- * Vertex Forge Structured Logging & Observability Framework
+ * Vertex Forge Structured Logging & Error Tracking Framework
  * ==============================================================================
  * Logging Contract & Specification:
  * - Levels:
@@ -15,9 +15,8 @@
  *     - message: Human-readable description of the log event.
  *     - context: Record<string, unknown> carrying metadata envelopes (workspace, ids).
  *     - cause: Optional unredacted underlying Error object or reason.
- * - Subscriptions & History:
- *     - Fixed-capacity circular ring-buffer (default: 200 entries) preventing leaks.
- *     - Real-time pub/sub listeners for terminal views and diagnostics panels.
+ * - JSON Telemetry:
+ *     - Supports standardized JSON serialization for automated ingest and CI logs.
  * ==============================================================================
  */
 
@@ -40,11 +39,12 @@ const LOG_LEVEL_SEVERITY: Record<LogLevel, number> = {
   error: 3,
 };
 
-class StructuredLogger {
+export class StructuredLogger {
   private minLevel: LogLevel = 'info';
   private bufferSize: number = 200;
   private history: LogEntry[] = [];
   private listeners: Set<LogListener> = new Set();
+  private emitJson: boolean = false;
 
   constructor() {
     if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'test') {
@@ -58,6 +58,10 @@ class StructuredLogger {
 
   public getLevel(): LogLevel {
     return this.minLevel;
+  }
+
+  public setEmitJson(enabled: boolean): void {
+    this.emitJson = enabled;
   }
 
   public subscribe(listener: LogListener): () => void {
@@ -76,6 +80,20 @@ class StructuredLogger {
 
   public clearHistory(): void {
     this.history = [];
+  }
+
+  public formatJson(entry: LogEntry): string {
+    return JSON.stringify({
+      timestamp: entry.timestamp,
+      level: entry.level,
+      message: entry.message,
+      ...(entry.context ? { context: entry.context } : {}),
+      ...(entry.cause instanceof Error
+        ? { error: { message: entry.cause.message, stack: entry.cause.stack } }
+        : entry.cause
+        ? { error: entry.cause }
+        : {}),
+    });
   }
 
   private emit(level: LogLevel, message: string, context?: unknown, cause?: unknown): void {
@@ -110,6 +128,17 @@ class StructuredLogger {
       } catch (err) {
         console.error('[StructuredLogger] Subscriber error:', err);
       }
+    }
+
+    if (this.emitJson) {
+      const jsonStr = this.formatJson(entry);
+      switch (level) {
+        case 'debug': console.debug(jsonStr); break;
+        case 'info': console.info(jsonStr); break;
+        case 'warn': console.warn(jsonStr); break;
+        case 'error': console.error(jsonStr); break;
+      }
+      return;
     }
 
     // Output formatted console messages
@@ -148,3 +177,31 @@ class StructuredLogger {
 }
 
 export const logger = new StructuredLogger();
+
+export class ErrorTracker {
+  private static isInitialized = false;
+
+  public static init(): void {
+    if (this.isInitialized || typeof window === 'undefined') return;
+    this.isInitialized = true;
+
+    window.addEventListener('error', (event: ErrorEvent) => {
+      logger.error('Unhandled window runtime error', {
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+      }, event.error);
+    });
+
+    window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
+      logger.error('Unhandled Promise rejection', {
+        reason: event.reason?.message || String(event.reason),
+      }, event.reason);
+    });
+  }
+
+  public static captureException(error: Error | unknown, context?: Record<string, unknown>): void {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    logger.error(errorMsg, context, error);
+  }
+}
