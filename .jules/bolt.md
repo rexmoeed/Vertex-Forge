@@ -1,0 +1,3 @@
+## 2026-10-23 - [Fix duplicate React keys in ModelCatalogTab]
+**Learning:** Models across different AI providers (e.g., DeepSeek and Custom, or Ollama and Local) can share the exact same `modelId` (like `deepseek-chat` or `qwen2.5-coder:14b`). Rendering these unified lists using just `m.id` as the React key causes duplicate key collisions, leading to unnecessary component re-mounting and performance degradation during rendering.
+**Action:** Always use a composite key (e.g., `m.providerId + '-' + m.id`) when rendering aggregate lists of AI models to maintain stable DOM identity and optimize React reconciliation.
