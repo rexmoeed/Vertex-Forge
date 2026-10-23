@@ -1,3 +1,4 @@
+import { AgentTaskExecutor } from './agentHierarchyService.executor';
 import {
   SubAgentTaskContract,
   CompletionReport,
@@ -18,10 +19,7 @@ export class AgentTasksManager {
   private taskContracts: Map<string, SubAgentTaskContract> = new Map();
   private completionReports: Map<string, CompletionReport> = new Map();
   private fileReservations: Map<string, FileReservation[]> = new Map();
-  private isParallelRunningState: boolean = false;
-  private parallelConcurrency: number = 3;
-  private activeParallelSubAgents: Map<string, ParallelSubAgentActiveInfo> = new Map();
-  private abortRequested: boolean = false;
+  private executor: AgentTaskExecutor;
   private notifyCallback?: () => void;
 
   constructor(
@@ -32,10 +30,12 @@ export class AgentTasksManager {
     this.vfs = vfs;
     this.leadsManager = leadsManager;
     this.notifyCallback = notifyCallback;
+    this.executor = new AgentTaskExecutor(vfs, leadsManager, this, () => this.notify());
   }
 
   public setNotifyCallback(cb: () => void) {
     this.notifyCallback = cb;
+    this.executor.setNotifyCallback(() => this.notify());
   }
 
   private notify() {
@@ -87,54 +87,34 @@ export class AgentTasksManager {
   }
 
   public getParallelConcurrency(): number {
-    return this.parallelConcurrency;
+    return this.executor.getParallelConcurrency();
   }
 
   public setParallelConcurrency(concurrency: number): void {
-    this.parallelConcurrency = Math.max(1, Math.min(8, concurrency));
-    this.notify();
+    this.executor.setParallelConcurrency(concurrency);
   }
 
   public isParallelRunning(): boolean {
-    return this.isParallelRunningState;
+    return this.executor.isParallelRunning();
   }
 
   public getActiveParallelSubAgents(): ParallelSubAgentActiveInfo[] {
-    return Array.from(this.activeParallelSubAgents.values());
+    return this.executor.getActiveParallelSubAgents();
   }
 
   public getParallelProgress(): ParallelProgressInfo {
-    const allTasks = Array.from(this.taskContracts.values());
-    const totalTasks = allTasks.length;
-    const completedTasks = allTasks.filter(t => t.status === 'completed').length;
-    const failedTasks = allTasks.filter(t => t.status === 'failed').length;
-    const activeSubAgents = this.getActiveParallelSubAgents();
-    const percent = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
-
-    return {
-      totalTasks,
-      completedTasks,
-      failedTasks,
-      activeParallelCount: activeSubAgents.length,
-      percent,
-      activeSubAgents,
-    };
+    return this.executor.getParallelProgress();
   }
 
   public cancelParallelExecution(): void {
-    this.abortRequested = true;
-    this.isParallelRunningState = false;
-    this.activeParallelSubAgents.clear();
-    this.notify();
+    this.executor.cancelParallelExecution();
   }
 
   public resetAllTasks(): void {
     this.taskContracts.clear();
     this.completionReports.clear();
     this.fileReservations.clear();
-    this.activeParallelSubAgents.clear();
-    this.isParallelRunningState = false;
-    this.abortRequested = false;
+    this.executor.cancelParallelExecution();
 
     // Reset lead statuses
     for (const lead of this.leads.values()) {
@@ -528,282 +508,23 @@ export class AgentTasksManager {
     return paths;
   }
 
-  /**
-   * Execute single task step with progress reporting and file locking
-   */
   public async executeSubAgentTask(
     taskId: string,
     options?: { stepDelayMs?: number; simulateSteps?: boolean }
   ): Promise<CompletionReport> {
-    const task = this.taskContracts.get(taskId);
-    if (!task) throw new Error(`Task ${taskId} not found`);
-
-    const stepDelayMs = options?.stepDelayMs ?? 250;
-    const simulateSteps = options?.simulateSteps ?? true;
-
-    // Check dependencies
-    for (const depId of task.dependencies) {
-      const dep = this.taskContracts.get(depId);
-      if (dep && dep.status !== 'completed') {
-        task.status = 'waiting_dependency';
-        this.notify();
-        throw new Error(`Cannot execute ${taskId}: Dependency ${dep.title} is not completed yet.`);
-      }
-    }
-
-    // Reserve target files with appropriate lock mode
-    const lockMode: 'exclusive_write' | 'read_only' =
-      task.permissionLevel === 'write' ? 'exclusive_write' : 'read_only';
-
-    for (const path of task.allowedFilePaths) {
-      const res = this.reserveFile(path, task.taskId, task.parentAgentId, lockMode);
-      if (!res.success) {
-        task.status = 'failed';
-        task.error = `File lock conflict on ${path} held by ${res.conflictWith}`;
-        this.notify();
-        throw new Error(task.error);
-      }
-    }
-
-    task.status = 'working';
-    task.progressPercent = 20;
-
-    // Register active parallel sub-agent entry
-    this.activeParallelSubAgents.set(taskId, {
-      taskId: task.taskId,
-      subAgentRole: task.subAgentRole,
-      parentLead: task.parentAgentId,
-      title: task.title,
-      progress: 20,
-      stage: 'Acquired file locks & analyzing context',
-    });
-    this.notify();
-
-    if (simulateSteps) {
-      await this.sleep(stepDelayMs);
-      task.progressPercent = 50;
-      const cur = this.activeParallelSubAgents.get(taskId);
-      if (cur) {
-        cur.progress = 50;
-        cur.stage = 'Executing instructions & AST operations';
-      }
-      this.notify();
-
-      await this.sleep(stepDelayMs);
-      task.progressPercent = 80;
-      task.status = 'reviewing';
-      if (cur) {
-        cur.progress = 80;
-        cur.stage = 'Verifying assertions & quality gate review';
-      }
-      this.notify();
-
-      await this.sleep(stepDelayMs);
-    }
-
-    task.progressPercent = 100;
-
-    // Release reservations
-    for (const path of task.allowedFilePaths) {
-      this.releaseFile(path, task.taskId);
-    }
-
-    // Generate completion report
-    const report: CompletionReport = {
-      taskId: task.taskId,
-      subAgentRole: task.subAgentRole,
-      workCompleted: `Completed [${task.title}] with 100% contract compliance.`,
-      filesInspected: task.allowedFilePaths,
-      filesModified: task.permissionLevel === 'write' ? task.allowedFilePaths : [],
-      toolsUsed: task.allowedTools,
-      testsRun: ['TypeCheck', 'ContractAssertions', 'ASTSafetyValidation'],
-      testResults: 'passed',
-      knownLimitations: [],
-      approvedByLead: true, // Approved through parent quality gate
-      timestamp: new Date().toLocaleTimeString(),
-    };
-
-    this.completionReports.set(taskId, report);
-    task.status = 'completed';
-
-    // Remove from active parallel map
-    this.activeParallelSubAgents.delete(taskId);
-
-    const lead = this.leads.get(task.parentAgentId);
-    if (lead) {
-      lead.qualityGatesPassed += 1;
-      lead.status = 'idle';
-      lead.currentTaskTitle = undefined;
-    }
-
-    this.logMessage({
-      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      fromAgent: task.subAgentRole,
-      toAgent: task.parentAgentId,
-      taskId: task.taskId,
-      type: 'completion_report',
-      payload: report,
-      timestamp: new Date().toLocaleTimeString(),
-    });
-
-    this.notify();
-    return report;
+    return this.executor.executeSubAgentTask(taskId, options);
   }
 
-  /**
-   * Parallel Execution Engine:
-   * Dynamically evaluates task contracts DAG and file reservation locks.
-   * Dispatches independent sub-agents concurrently in parallel (up to `concurrency` threads).
-   * As soon as any sub-agent completes, newly unblocked tasks immediately launch in parallel!
-   */
   public async executeAllTasksParallel(options?: {
-    concurrency?: number;
     stepDelayMs?: number;
-    onProgress?: (info: ParallelProgressInfo) => void;
+    concurrency?: number;
+    simulateSteps?: boolean;
+    onProgress?: (progress: ParallelProgressInfo) => void;
   }): Promise<CompletionReport[]> {
-    if (this.isParallelRunningState) {
-      logger.warn('Parallel execution already active.');
-      return this.getCompletionReports();
-    }
-
-    const concurrency = options?.concurrency ?? this.parallelConcurrency;
-    const stepDelayMs = options?.stepDelayMs ?? 300;
-
-    this.isParallelRunningState = true;
-    this.abortRequested = false;
-    this.activeParallelSubAgents.clear();
-
-    const reports: CompletionReport[] = [];
-    const completedSet = new Set<string>();
-    const failedSet = new Set<string>();
-
-    // Seed existing completed tasks
-    for (const task of this.taskContracts.values()) {
-      if (task.status === 'completed') {
-        completedSet.add(task.taskId);
-      }
-    }
-
-    const runningTasks = new Map<string, Promise<CompletionReport>>();
-
-    try {
-      while (!this.abortRequested) {
-        const allTasks = Array.from(this.taskContracts.values());
-        const pendingTasks = allTasks.filter(
-          t => t.status !== 'completed' && t.status !== 'failed' && !runningTasks.has(t.taskId)
-        );
-
-        if (pendingTasks.length === 0 && runningTasks.size === 0) {
-          // All tasks resolved
-          break;
-        }
-
-        // Find candidate tasks whose dependencies are fully completed
-        const readyTasks = pendingTasks.filter(task => {
-          const depsSatisfied = task.dependencies.every(depId => completedSet.has(depId));
-          if (!depsSatisfied) {
-            if (task.status !== 'waiting_dependency') {
-              task.status = 'waiting_dependency';
-              this.notify();
-            }
-            return false;
-          }
-
-          // Check file lock conflicts with currently running tasks
-          const isWrite = task.permissionLevel === 'write';
-          for (const path of task.allowedFilePaths) {
-            const list = this.fileReservations.get(path) || [];
-            if (isWrite && list.some(r => r.subAgentId !== task.taskId)) {
-              return false; // Writer requires exclusive file access
-            }
-            if (!isWrite && list.some(r => r.mode === 'exclusive_write' && r.subAgentId !== task.taskId)) {
-              return false; // Reader blocked by active writer
-            }
-          }
-
-          return true;
-        });
-
-        // Launch up to available concurrency slots
-        const availableSlots = concurrency - runningTasks.size;
-        const tasksToLaunch = readyTasks.slice(0, Math.max(0, availableSlots));
-
-        for (const task of tasksToLaunch) {
-          const taskPromise = this.executeSubAgentTask(task.taskId, {
-            stepDelayMs,
-            simulateSteps: true,
-          })
-            .then(rep => {
-              completedSet.add(task.taskId);
-              reports.push(rep);
-              runningTasks.delete(task.taskId);
-              options?.onProgress?.(this.getParallelProgress());
-              this.notify();
-              return rep;
-            })
-            .catch(err => {
-              failedSet.add(task.taskId);
-              task.status = 'failed';
-              task.error = err.message || String(err);
-              this.activeParallelSubAgents.delete(task.taskId);
-              runningTasks.delete(task.taskId);
-              options?.onProgress?.(this.getParallelProgress());
-              this.notify();
-              return null!;
-            });
-
-          runningTasks.set(task.taskId, taskPromise);
-        }
-
-        options?.onProgress?.(this.getParallelProgress());
-        this.notify();
-
-        if (runningTasks.size === 0) {
-          if (pendingTasks.length > 0) {
-            // Unresolved dependencies / deadlock or all remaining blocked
-            logger.warn('No ready tasks could be scheduled with remaining dependencies.');
-            break;
-          }
-          break;
-        }
-
-        // Wait for at least one running task to complete before next scheduling cycle
-        await Promise.race(Array.from(runningTasks.values())).catch(() => {
-          // Handled per task catch, continue loop
-        });
-      }
-    } finally {
-      this.isParallelRunningState = false;
-      this.activeParallelSubAgents.clear();
-      this.notify();
-      options?.onProgress?.(this.getParallelProgress());
-    }
-
-    return reports;
+    return this.executor.executeAllTasksParallel(options);
   }
 
-  /**
-   * Orchestrate sample benchmark workflow: Can run parallel or sequential
-   */
   public async orchestrateFullTeamBenchmark(parallel: boolean = true): Promise<void> {
-    if (this.taskContracts.size === 0) {
-      this.decomposeProjectIntoSubTasks({
-        name: 'Workspace Engineering Benchmark',
-      });
-    }
-
-    if (parallel) {
-      await this.executeAllTasksParallel({ concurrency: this.parallelConcurrency });
-    } else {
-      for (const task of this.taskContracts.values()) {
-        if (task.status !== 'completed') {
-          await this.executeSubAgentTask(task.taskId);
-        }
-      }
-    }
-  }
-
-  private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return this.executor.orchestrateFullTeamBenchmark(parallel);
   }
 }
