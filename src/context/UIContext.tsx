@@ -39,7 +39,7 @@ export interface UIContextType {
   isOpenFolderModalOpen: boolean;
   setIsOpenFolderModalOpen: (open: boolean) => void;
   isVoiceModalOpen: boolean;
-  setIsVoiceModalOpen: (open: boolean) => void;
+  setIsVoiceModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const UIContext = createContext<UIContextType | null>(null);
