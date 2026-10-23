@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.6] - 2026-10-23
+
+### Architecture & Observability
+- **Decoupled IDEContext**: Fully eliminated the 1,030 LOC monolith by decomposing concerns into dedicated `TerminalContext`, `WorkspaceContext`, `useIDEDebugger`, and `useIDEAutonomousEngine` modules.
+- **Modular Model Catalogs**: Decomposed `defaultModelCatalog.ts` (838 LOC) into domain catalogs under `catalogs/` (`cloudModels`, `openSourceModels`, `routingAndLocalModels`, `providerConfigs`).
+- **Structured Telemetry & Error Tracking**: Implemented `ErrorTracker` and structured JSON logging in `logger.ts`, wrapped root with top-level `ErrorBoundary`.
+- **CI Smoke Healthcheck**: Added automated server boot and health probe via `npm run smoke` to CI pipeline.
+- **Expanded Test Coverage**: Added behavioral test suites for `OperatorConsoleView`, `BugDetectiveView`, `TerminalContext`, `WorkspaceContext`, and `ErrorBoundary`, pushing total tests to 606 across 84 suites (100% green).
+
+
 ## [1.2.5] - 2026-10-23
 
 ### Enterprise Modularity & Quality Gate Perfect Score (Tier S Peak)
