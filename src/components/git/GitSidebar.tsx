@@ -71,7 +71,7 @@ export const GitSidebar: React.FC = () => {
                 onClick={wf.handlePull}
                 disabled={wf.loading}
                 className="p-1 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded transition-colors"
-                title="Pull from Remote"
+                title="Pull latest changes from remote"
               >
                 <DownloadCloud className="w-3.5 h-3.5" />
               </button>
@@ -80,7 +80,7 @@ export const GitSidebar: React.FC = () => {
                 onClick={() => wf.handlePush(false)}
                 disabled={wf.loading}
                 className="p-1 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded transition-colors"
-                title="Push to Remote"
+                title="Push changes to remote"
               >
                 <UploadCloud className="w-3.5 h-3.5" />
               </button>
