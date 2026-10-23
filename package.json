@@ -21,7 +21,8 @@
     "lint:eslint": "eslint src/ --max-warnings=50",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "audit": "npm audit --audit-level=high"
+    "audit": "npm audit --audit-level=high",
+    "smoke": "node scripts/smoke.cjs"
   },
   "build": {
     "appId": "com.vertexforge.ide",

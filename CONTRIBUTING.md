@@ -50,3 +50,19 @@ npm run build
 2. Run test suites locally before opening a PR.
 3. Ensure the GitHub Actions CI pipeline runs completely green.
 4. Provide a clear description of the problem solved and test coverage added.
+
+
+### Minimal Environment Configuration & Offline Mode
+
+Vertex Forge is designed to boot immediately from a fresh clone without mandatory API credentials:
+```bash
+# Optional: create a local .env file
+PORT=3000
+NODE_ENV=development
+# GEMINI_API_KEY=your_key_here  # Optional: defaults to offline/mock mode if absent
+```
+To verify fresh-clone health:
+```bash
+npm run smoke   # Boots Express server and validates /api/health
+npm run dev     # Starts local Vite development server
+```

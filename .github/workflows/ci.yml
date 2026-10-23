@@ -95,10 +95,29 @@ jobs:
           path: coverage/
           retention-days: 14
 
+  smoke:
+    name: Run Server Boot & Health Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Express Server Healthcheck Smoke Test
+        run: npm run smoke
+
   build:
     name: Verify Production Bundle Build
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, audit, test]
+    needs: [lint, typecheck, audit, test, smoke]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
