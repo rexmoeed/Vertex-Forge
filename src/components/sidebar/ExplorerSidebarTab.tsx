@@ -159,6 +159,18 @@ export const ExplorerSidebarTab: React.FC = () => {
     setDraggingPath(null);
   };
 
+  // ⚡ Bolt: Optimize modified files lookup from O(N*M) to O(N) by using a Set
+  // Expected impact: Reduces render time for large file trees by eliminating nested arrays search
+  const modifiedPathsSet = useMemo(() => {
+    const set = new Set<string>();
+    if (!modifiedFiles) return set;
+    modifiedFiles.forEach((f: any) => {
+      if (typeof f === 'string') set.add(f);
+      else if (f?.path) set.add(f.path);
+    });
+    return set;
+  }, [modifiedFiles]);
+
   const toggleFolder = (folderPath: string) => {
     setCollapsedFolders(prev => ({
       ...prev,
@@ -203,9 +215,7 @@ export const ExplorerSidebarTab: React.FC = () => {
       const isFolder = node.type === 'folder';
       const isCollapsed = collapsedFolders[node.path];
       const isSelected = activeFile === node.path;
-      const isModified = modifiedFiles?.some((f: any) =>
-        typeof f === 'string' ? f === node.path : f?.path === node.path
-      );
+      const isModified = modifiedPathsSet.has(node.path);
       const isBeingDragged = draggingPath === node.path;
 
       return (
