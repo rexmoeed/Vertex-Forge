@@ -1,4 +1,5 @@
 import { serverLogger } from './logger';
+import { errorHandler } from './middleware/errorHandler';
 import express, { Express, Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
@@ -75,25 +76,7 @@ export function createApp(): { app: Express; getAiClient: () => GoogleGenAI | nu
   app.use(createJulesRouter());
 
   // 5. Global Error Handling Middleware with Structured Logging
-  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    serverLogger.error({
-      err: {
-        message: err.message,
-        stack: err.stack,
-        status: err.status || 500,
-      },
-      method: req.method,
-      path: req.path,
-      query: req.query,
-    }, 'Unhandled server exception caught by middleware');
-
-    res.status(err.status || 500).json({
-      status: 'error',
-      error: err.message || 'Internal server error',
-      path: req.path,
-      timestamp: new Date().toISOString(),
-    });
-  });
+  app.use(errorHandler);
 
   return { app, getAiClient };
 }
