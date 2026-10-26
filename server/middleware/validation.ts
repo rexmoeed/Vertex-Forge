@@ -135,6 +135,16 @@ export const CommonSchemas: Record<string, ValidationSchema> = {
     minLengths: { command: 1 },
     maxLengths: { command: 4000 },
   },
+  planGoalSchema: {
+    required: ['goal'],
+    types: { goal: 'string' },
+    minLengths: { goal: 1 },
+  },
+  debugErrorSchema: {
+    required: ['errorLog'],
+    types: { errorLog: 'string' },
+    minLengths: { errorLog: 1 },
+  },
   julesSession: {
     required: ['prompt', 'sourceContext'],
     types: { prompt: 'string', sourceContext: 'object' },
