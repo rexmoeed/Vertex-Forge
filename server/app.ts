@@ -1,3 +1,4 @@
+import { serverLogger } from './logger';
 import express, { Express, Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
@@ -15,6 +16,12 @@ export function createApp(): { app: Express; getAiClient: () => GoogleGenAI | nu
 
   // 1. Core Transport Middleware with Body Limits
   app.use(express.json({ limit: '15mb' }));
+  // 1.1 Structured Request Logging via Pino
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    serverLogger.info({ method: req.method, path: req.path }, 'Incoming HTTP Request');
+    next();
+  });
+
 
   // 2. Global GenAI Client State
   let currentApiKey = process.env.GEMINI_API_KEY || '';
@@ -36,7 +43,7 @@ export function createApp(): { app: Express; getAiClient: () => GoogleGenAI | nu
       });
       currentApiKey = key;
     } catch (err) {
-      console.error('[Server] Failed to initialize GoogleGenAI:', err);
+      serverLogger.error({ err }, 'Failed to initialize GoogleGenAI');
     }
   }
 
@@ -67,12 +74,24 @@ export function createApp(): { app: Express; getAiClient: () => GoogleGenAI | nu
   app.use(createTestRouter(getAiClient));
   app.use(createJulesRouter());
 
-  // 5. Global Error Handling Middleware
+  // 5. Global Error Handling Middleware with Structured Logging
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    console.error('[Server Error]:', err);
+    serverLogger.error({
+      err: {
+        message: err.message,
+        stack: err.stack,
+        status: err.status || 500,
+      },
+      method: req.method,
+      path: req.path,
+      query: req.query,
+    }, 'Unhandled server exception caught by middleware');
+
     res.status(err.status || 500).json({
+      status: 'error',
       error: err.message || 'Internal server error',
       path: req.path,
+      timestamp: new Date().toISOString(),
     });
   });
 

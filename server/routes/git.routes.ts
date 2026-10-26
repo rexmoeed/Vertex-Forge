@@ -1,3 +1,4 @@
+import { serverLogger } from '../logger';
 import { Router, Request, Response } from 'express';
 import { exec } from 'child_process';
 import util from 'util';
@@ -45,6 +46,7 @@ router.post('/api/git/init', async (req: Request, res: Response) => {
     const { stdout } = await execAsync('git init && git branch -M main', { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git init failed');
     return res.status(500).json({ error: err?.message || 'Git init failed' });
   }
 });
@@ -199,6 +201,7 @@ router.post('/api/git/stage', async (req: Request, res: Response) => {
     }
     return res.json({ success: true });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git add failed');
     return res.status(500).json({ error: err?.message || 'Git add failed' });
   }
 });
@@ -220,6 +223,7 @@ router.post('/api/git/unstage', async (req: Request, res: Response) => {
     }
     return res.json({ success: true });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git unstage failed');
     return res.status(500).json({ error: err?.message || 'Git unstage failed' });
   }
 });
@@ -237,6 +241,7 @@ router.post('/api/git/discard', async (req: Request, res: Response) => {
     }
     return res.json({ success: true });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git discard failed');
     return res.status(500).json({ error: err?.message || 'Git discard failed' });
   }
 });
@@ -254,6 +259,7 @@ router.post('/api/git/clean-untracked', async (req: Request, res: Response) => {
     }
     return res.json({ success: true });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git clean failed');
     return res.status(500).json({ error: err?.message || 'Git clean failed' });
   }
 });
@@ -271,6 +277,7 @@ router.post('/api/git/commit', async (req: Request, res: Response) => {
     const { stdout } = await execAsync(`git commit${amendFlag}${msgFlag}`, { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git commit failed');
     return res.status(500).json({ error: err?.message || 'Git commit failed' });
   }
 });
@@ -348,6 +355,7 @@ router.post('/api/git/branch/create', async (req: Request, res: Response) => {
     const { stdout } = await execAsync(`git ${flag} "${name}"`, { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Branch creation failed');
     return res.status(500).json({ error: err?.message || 'Branch creation failed' });
   }
 });
@@ -362,6 +370,7 @@ router.post('/api/git/branch/checkout', async (req: Request, res: Response) => {
     const { stdout } = await execAsync(`git checkout "${name}"`, { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Branch checkout failed');
     return res.status(500).json({ error: err?.message || 'Branch checkout failed' });
   }
 });
@@ -376,6 +385,7 @@ router.post('/api/git/branch/rename', async (req: Request, res: Response) => {
     const { stdout } = await execAsync(`git branch -m "${oldName}" "${newName}"`, { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Branch rename failed');
     return res.status(500).json({ error: err?.message || 'Branch rename failed' });
   }
 });
@@ -391,6 +401,7 @@ router.post('/api/git/branch/delete', async (req: Request, res: Response) => {
     const { stdout } = await execAsync(`git branch ${flag} "${name}"`, { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Branch deletion failed');
     return res.status(500).json({ error: err?.message || 'Branch deletion failed' });
   }
 });
@@ -431,6 +442,7 @@ router.post('/api/git/remote/add', async (req: Request, res: Response) => {
     await execAsync(`git remote add "${name}" "${url}"`, { cwd: targetCwd });
     return res.json({ success: true });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Add remote failed');
     return res.status(500).json({ error: err?.message || 'Add remote failed' });
   }
 });
@@ -444,6 +456,7 @@ router.post('/api/git/remote/remove', async (req: Request, res: Response) => {
     await execAsync(`git remote remove "${name}"`, { cwd: targetCwd });
     return res.json({ success: true });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Remove remote failed');
     return res.status(500).json({ error: err?.message || 'Remove remote failed' });
   }
 });
@@ -457,6 +470,7 @@ router.post('/api/git/fetch', async (req: Request, res: Response) => {
     const { stdout, stderr } = await execAsync(`git fetch "${remote}"`, { cwd: targetCwd, timeout: 30000 });
     return res.json({ success: true, output: stdout || stderr });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git fetch failed');
     return res.status(500).json({ error: err?.message || 'Git fetch failed' });
   }
 });
@@ -470,6 +484,7 @@ router.post('/api/git/pull', async (req: Request, res: Response) => {
     const { stdout, stderr } = await execAsync(`git pull "${remote}"${branchArg}`, { cwd: targetCwd, timeout: 60000 });
     return res.json({ success: true, output: stdout || stderr });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git pull failed');
     return res.status(500).json({ error: err?.message || 'Git pull failed' });
   }
 });
@@ -484,6 +499,7 @@ router.post('/api/git/push', async (req: Request, res: Response) => {
     const { stdout, stderr } = await execAsync(`git push${forceFlag} "${remote}"${branchArg}`, { cwd: targetCwd, timeout: 60000 });
     return res.json({ success: true, output: stdout || stderr });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git push failed');
     return res.status(500).json({ error: err?.message || 'Git push failed' });
   }
 });
@@ -516,6 +532,7 @@ router.post('/api/git/tag/create', async (req: Request, res: Response) => {
     await execAsync(`git tag -a "${name}"${msgArg}`, { cwd: targetCwd });
     return res.json({ success: true });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Tag creation failed');
     return res.status(500).json({ error: err?.message || 'Tag creation failed' });
   }
 });
@@ -529,6 +546,7 @@ router.post('/api/git/tag/delete', async (req: Request, res: Response) => {
     await execAsync(`git tag -d "${name}"`, { cwd: targetCwd });
     return res.json({ success: true });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Tag deletion failed');
     return res.status(500).json({ error: err?.message || 'Tag deletion failed' });
   }
 });
@@ -565,6 +583,7 @@ router.post('/api/git/stash/save', async (req: Request, res: Response) => {
     const { stdout } = await execAsync(`git stash push -m "${safeMsg}"`, { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git stash failed');
     return res.status(500).json({ error: err?.message || 'Git stash failed' });
   }
 });
@@ -590,6 +609,7 @@ router.post('/api/git/stash/drop', async (req: Request, res: Response) => {
     const { stdout } = await execAsync(`git stash drop "${stashId}"`, { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git stash drop failed');
     return res.status(500).json({ error: err?.message || 'Git stash drop failed' });
   }
 });
@@ -644,6 +664,7 @@ router.post('/api/git/conflict/resolve', async (req: Request, res: Response) => 
     await execAsync(`git add "${filePath}"`, { cwd: targetCwd });
     return res.json({ success: true });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Conflict resolution failed');
     return res.status(500).json({ error: err?.message || 'Conflict resolution failed' });
   }
 });
@@ -658,6 +679,7 @@ router.post('/api/git/cherry-pick', async (req: Request, res: Response) => {
     const { stdout } = await execAsync(`git cherry-pick "${hash}"`, { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Cherry-pick failed');
     return res.status(500).json({ error: err?.message || 'Cherry-pick failed' });
   }
 });
@@ -671,6 +693,7 @@ router.post('/api/git/revert', async (req: Request, res: Response) => {
     const { stdout } = await execAsync(`git revert --no-edit "${hash}"`, { cwd: targetCwd });
     return res.json({ success: true, output: stdout });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git revert failed');
     return res.status(500).json({ error: err?.message || 'Git revert failed' });
   }
 });
@@ -862,6 +885,7 @@ router.post('/api/git/clone', async (req: Request, res: Response) => {
       output: stdout || stderr,
     });
   } catch (err: any) {
+    serverLogger.error({ err, path: req.path }, 'Git clone failed');
     return res.status(500).json({ error: err?.message || 'Git clone failed' });
   }
 });

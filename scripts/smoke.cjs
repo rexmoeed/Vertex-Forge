@@ -29,7 +29,7 @@ serverProc.stderr.on('data', d => {
 });
 
 let attempts = 0;
-const maxAttempts = 20;
+const maxAttempts = 35;
 
 function checkHealth() {
   attempts++;

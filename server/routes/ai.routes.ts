@@ -1,3 +1,4 @@
+import { serverLogger } from '../logger';
 import { Router, Request, Response } from 'express';
 import { GoogleGenAI } from '@google/genai';
 import path from 'path';
@@ -237,7 +238,7 @@ router.post('/api/ai/provider/test', async (req: Request, res: Response) => {
           });
         }
       } catch (authErr: any) {
-        console.warn('OpenRouter auth/key check error:', authErr?.message);
+        serverLogger.warn({ err: authErr?.message }, 'OpenRouter auth/key check error');
       }
     }
 
@@ -359,7 +360,7 @@ router.get('/api/ai/provider/models', async (req: Request, res: Response) => {
 
     return res.json({ success: true, models: [] });
   } catch (err: any) {
-    console.warn('[Models Catalog Error]:', err?.message);
+    serverLogger.warn({ err: err?.message }, 'Models Catalog Error');
     return res.status(500).json({ success: false, error: err?.message || 'Failed to fetch model catalog' });
   }
 });
@@ -558,7 +559,7 @@ Format:
     const parsed = JSON.parse(text);
     return res.json(parsed);
   } catch (error: any) {
-    console.error('Error generating AI plan:', error?.message);
+    serverLogger.error({ err: error?.message }, 'Error generating AI plan');
     return res.json(getMockOrFallbackPlan(goal, currentStack));
   }
 });
@@ -612,7 +613,7 @@ Format:
     const parsed = JSON.parse(response.text || '{}');
     return res.json(parsed);
   } catch (error: any) {
-    console.error('Error in code generation:', error?.message);
+    serverLogger.error({ err: error?.message }, 'Error in code generation');
     return res.json({
       code: currentCode || `// File: ${filePath}\n// Code generation fallback\nexport default function Module() {\n  return <div>Ready</div>;\n}`,
       explanation: `Generated fallback code due to model latency or network condition.`,
@@ -691,7 +692,7 @@ Reply to the user clearly and concisely. You may suggest code blocks, explain ar
       agent: agentRole,
     });
   } catch (error: any) {
-    console.warn('AI chat error:', error?.message);
+    serverLogger.warn({ err: error?.message }, 'AI chat error');
     return res.status(500).json({
       error: error?.message || 'Chat generation failed',
       reply: `❌ AI Generation Error: ${error?.message || 'Request failed. Please verify your API key and network connection.'}`,
@@ -750,7 +751,7 @@ Output valid JSON only:
     const parsed = JSON.parse(response.text || '{}');
     return res.json(parsed);
   } catch (error: any) {
-    console.error('Debug error:', error?.message);
+    serverLogger.error({ err: error?.message }, 'Debug error');
     return res.json({
       rootCause: 'Runtime issue detected in code execution.',
       explanation: 'Recommended null-safety check and boundary validation.',
@@ -814,7 +815,7 @@ Output valid JSON only:
     const parsed = JSON.parse(response.text || '{}');
     return res.json(parsed);
   } catch (error: any) {
-    console.error('Code review error:', error?.message);
+    serverLogger.error({ err: error?.message }, 'Code review error');
     return res.status(500).json({ error: error?.message || 'Review failed' });
   }
 });
@@ -868,7 +869,7 @@ async function buildDirectoryTree(currentPath: string, rootPath: string, depth =
     }
     return nodes;
   } catch (err: any) {
-    console.warn(`Error reading dir ${currentPath}:`, err?.message);
+    serverLogger.warn({ err: err?.message }, `Error reading dir ${currentPath}`);
     return [];
   }
 }
