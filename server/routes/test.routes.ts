@@ -1,3 +1,4 @@
+import { serverLogger } from '../logger';
 import { Router, Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -461,7 +462,7 @@ Strict JSON Schema to return:
         verificationCommand: parsed.verificationCommand || `npx vitest run "${filePath}"`,
       });
     } catch (err: any) {
-      serverLogger.warn('[TestEngine] AI diagnosis error:', err.message);
+      serverLogger.warn({ err: err.message }, '[TestEngine] AI diagnosis error');
     }
   }
 
@@ -642,7 +643,7 @@ router.post('/api/security/audit', async (req: Request, res: Response) => {
     const report = await SecurityAuditEngine.auditWorkspace(targetDir);
     return res.json(report);
   } catch (err: any) {
-    serverLogger.error('[API /api/security/audit] Error:', err);
+    serverLogger.error({ err }, '[API /api/security/audit] Error');
     return res.status(500).json({
       error: 'Security audit failed',
       details: err?.message || String(err),
@@ -663,7 +664,7 @@ router.post('/api/security/remediate', async (req: Request, res: Response) => {
     const result = await SecurityAuditEngine.applyRemediation(finding, targetDir);
     return res.json(result);
   } catch (err: any) {
-    serverLogger.error('[API /api/security/remediate] Error:', err);
+    serverLogger.error({ err }, '[API /api/security/remediate] Error');
     return res.status(500).json({
       error: 'Remediation failed',
       details: err?.message || String(err),
@@ -684,7 +685,7 @@ router.post('/api/security/verify', async (req: Request, res: Response) => {
     const result = await SecurityAuditEngine.verifyFindingResolution(finding, targetDir);
     return res.json(result);
   } catch (err: any) {
-    serverLogger.error('[API /api/security/verify] Error:', err);
+    serverLogger.error({ err }, '[API /api/security/verify] Error');
     return res.status(500).json({
       error: 'Verification failed',
       details: err?.message || String(err),
@@ -698,7 +699,7 @@ router.post('/api/security/fixture/create', async (req: Request, res: Response) 
     const fixturePath = await SecurityAuditEngine.createVulnerableFixture();
     return res.json({ success: true, fixturePath });
   } catch (err: any) {
-    serverLogger.error('[API /api/security/fixture/create] Error:', err);
+    serverLogger.error({ err }, '[API /api/security/fixture/create] Error');
     return res.status(500).json({
       error: 'Failed to create vulnerable fixture',
       details: err?.message || String(err),

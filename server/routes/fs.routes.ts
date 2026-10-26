@@ -1,3 +1,4 @@
+import { serverLogger } from '../logger';
 import { Router, Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -53,7 +54,7 @@ async function buildDirectoryTree(currentPath: string, rootPath: string, depth =
     }
     return nodes;
   } catch (err: any) {
-    serverLogger.warn(`Error reading dir ${currentPath}:`, err?.message);
+    serverLogger.warn({ err: err?.message }, `Error reading dir ${currentPath}`);
     return [];
   }
 }
