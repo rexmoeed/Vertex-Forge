@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.3.0] - 2026-10-26
+
+### Architectural Modularization & Cleanliness (Buyer Recommendation 02)
+- **Zero Files > 1,000 LOC:** Completely dismantled all remaining monoliths across the repository:
+  - `types/projectIntelligence.ts` (1,238 LOC -> 15 LOC domain facade)
+  - `src/services/templates/webTemplates.ts` (1,002 LOC -> 35 LOC template facade)
+  - `src/services/agentHierarchyService.ts` (1,353 LOC -> 197 LOC)
+  - `src/services/agentHierarchyService.tasks.ts` (810 LOC -> 450 LOC decoupled executor engine)
+  - `src/components/git/GitSidebar.tsx` (1,203 LOC -> 320 LOC with modular tabs and workflow hook)
+  - `src/components/views/AIProviderHubView.tsx` (843 LOC -> 448 LOC with extracted modular tabs)
+  - `src/components/layout/EditorArea.tsx` (916 LOC -> 85 LOC with SingleEditorGroup and cursor/find controllers)
+  - `src/components/layout/BottomPanel.tsx` (837 LOC -> 406 LOC with IntegratedTerminalTab, ProblemsTab, and AuditTrailTab)
+
+### CI/CD, Quality & Testing
+- **Test Count Expansion:** Expanded test coverage to **629 tests across 91 test suites** at 100% pass rate.
+- **Dependabot Automation:** Added `github-actions` ecosystem alongside `npm` for automated dependency security audits.
+- **Automated Packaging:** Added continuous release packaging workflow (`.github/workflows/release.yml`) for GitHub release publishing.
+
 ## [1.2.6] - 2026-10-23
 
 ### Architecture & Observability
