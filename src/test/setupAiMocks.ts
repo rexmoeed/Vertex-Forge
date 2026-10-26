@@ -17,6 +17,11 @@ globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise
           parts: [{ text: JSON.stringify({
             interpretation: 'Mock offline architecture plan',
             tasks: [{ id: 't1', title: 'Offline mock task', status: 'pending' }],
+            rootCause: 'Mock diagnosed root cause: null safety violation',
+            explanation: 'Step-by-step diagnostic reasoning',
+            patch: '// Fixed code',
+            verificationCommand: 'npm test',
+            confidence: 0.98,
           }) }]
         }
       }]

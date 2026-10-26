@@ -193,8 +193,12 @@ export class AgentToolRegistry {
         // 2. Try disk
         try {
           const diskRead = await DesktopBridge.readFile(cleanPath);
-          originalContent = diskRead;
-          existsBefore = true;
+          if (diskRead !== undefined && diskRead !== null) {
+            originalContent = diskRead;
+            existsBefore = true;
+          } else {
+            existsBefore = false;
+          }
         } catch {
           existsBefore = false;
         }
@@ -229,11 +233,11 @@ export class AgentToolRegistry {
 
     for (const item of checkpoint.files) {
       try {
-        if (!item.existsBefore) {
+        if (!item.existsBefore || item.originalContent === null || item.originalContent === undefined) {
           // File was created by agent -> delete it
           this.vfs.deleteNode(item.path);
           await DesktopBridge.deletePath(item.path);
-        } else if (item.originalContent !== null) {
+        } else {
           // File was modified by agent -> revert to original
           this.vfs.writeFile(item.path, item.originalContent);
           await DesktopBridge.writeFile(item.path, item.originalContent);

@@ -187,7 +187,9 @@ class DesktopBridgeService implements IDesktopAPI {
       });
       if (res.ok) {
         const data = await res.json();
-        return data.content;
+        if (data && data.content !== undefined && data.content !== null) {
+          return data.content;
+        }
       }
     } catch (e) {
       // fallback
