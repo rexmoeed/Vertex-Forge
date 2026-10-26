@@ -53,7 +53,7 @@ async function buildDirectoryTree(currentPath: string, rootPath: string, depth =
     }
     return nodes;
   } catch (err: any) {
-    console.warn(`Error reading dir ${currentPath}:`, err?.message);
+    serverLogger.warn(`Error reading dir ${currentPath}:`, err?.message);
     return [];
   }
 }
