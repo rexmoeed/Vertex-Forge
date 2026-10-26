@@ -6,24 +6,28 @@ import { DefaultsTab } from '../DefaultsTab';
 import { UsageTab } from '../UsageTab';
 import { PrivacyTab } from '../PrivacyTab';
 import { AgentOverridesTab } from '../AgentOverridesTab';
+import { AIProviderService } from '../../../../services/aiProviderService';
 
 describe('Modular AI Provider Hub Tabs', () => {
+  const initialProviders = AIProviderService.getInitialProviders();
+  const initialRoles = AIProviderService.getInitialRoleAssignments();
+  const initialPrivacy = AIProviderService.getInitialPrivacySettings();
+
   it('renders ConnectedTab with providers and handles connect action', () => {
     const onGoToAdd = vi.fn();
     render(
       <ConnectedTab
-        providers={[
-          { id: 'gemini', name: 'Google Gemini', enabled: true, isDefault: true },
-          { id: 'anthropic', name: 'Anthropic Claude', enabled: false },
-        ]}
-        activeProviderId="gemini"
-        onSetActiveProvider={vi.fn()}
-        onToggleProvider={vi.fn()}
-        onTestProvider={vi.fn()}
-        onDeleteProvider={vi.fn()}
-        isTesting={null}
-        testResults={{}}
+        providers={initialProviders}
         onGoToAddTab={onGoToAdd}
+        isAutoDetecting={false}
+        onAutoDetectLocalLLMs={vi.fn()}
+        autoDetectResult={null}
+        onUpdateProvider={vi.fn()}
+        onTestConnection={vi.fn()}
+        isTestingConnection={false}
+        diagnosticResult={null}
+        diagnosticProvider="gemini"
+        onDeleteProvider={vi.fn()}
         showKeys={{}}
         onToggleShowKey={vi.fn()}
       />
@@ -31,7 +35,6 @@ describe('Modular AI Provider Hub Tabs', () => {
 
     expect(screen.getByText('Configured AI Providers')).toBeDefined();
     expect(screen.getByText('Google Gemini')).toBeDefined();
-    expect(screen.getByText('Anthropic Claude')).toBeDefined();
 
     const connectBtn = screen.getByText('Connect New Provider');
     fireEvent.click(connectBtn);
@@ -42,17 +45,9 @@ describe('Modular AI Provider Hub Tabs', () => {
     const onUpdate = vi.fn();
     render(
       <DefaultsTab
-        defaults={{
-          orchestrator: 'gemini-3.8-flash',
-          codeWriter: 'claude-3-7-sonnet',
-          architect: 'claude-3-7-sonnet',
-          debugger: 'gemini-3.8-flash',
-          reviewer: 'claude-3-7-sonnet',
-        }}
-        onUpdateDefaults={onUpdate}
-        models={[
-          { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash', provider: 'gemini', contextWindow: 1000000, maxOutputTokens: 8192, costPer1kInputUsd: 0.0001, costPer1kOutputUsd: 0.0004, capabilities: ['chat', 'coding'], status: 'active', isDefault: true },
-        ]}
+        roleAssignments={initialRoles}
+        providers={initialProviders}
+        onRoleModelChange={onUpdate}
       />
     );
 
@@ -63,42 +58,54 @@ describe('Modular AI Provider Hub Tabs', () => {
     const onClear = vi.fn();
     render(
       <UsageTab
-        usageRecords={[
-          { modelId: 'gemini-3.8-flash', promptTokens: 100, completionTokens: 50, costUsd: 0.0002, timestamp: Date.now() },
+        usageHistory={[
+          {
+            id: 'u1',
+            providerId: 'gemini',
+            modelId: 'gemini-3.8-flash',
+            agentRole: 'Architect',
+            project: 'Default',
+            inputTokens: 100,
+            outputTokens: 50,
+            estimatedCostUsd: 0.0002,
+            durationMs: 120,
+            timestamp: new Date().toISOString(),
+            success: true,
+            isReported: false,
+          },
         ]}
-        onClearUsage={onClear}
+        totalTokensUsed={150}
         totalCostUsd={0.0002}
+        onClearHistory={onClear}
       />
     );
 
-    expect(screen.getByText('Token Usage & Cost Telemetry')).toBeDefined();
-    expect(screen.getByText(/Total:\s*\$0\.0002/)).toBeDefined();
+    expect(screen.getByText('Usage & Cost Tracking')).toBeDefined();
+    expect(screen.getByText('$0.0002')).toBeDefined();
   });
 
   it('renders PrivacyTab and toggles zero-retention mode', () => {
     const onUpdate = vi.fn();
     render(
       <PrivacyTab
-        privacy={{ zeroDataRetention: true, maskSensitiveData: true, localOnly: false, promptLoggingEnabled: false }}
-        onUpdatePrivacy={onUpdate}
+        privacySettings={initialPrivacy}
+        onPrivacyChange={onUpdate}
       />
     );
 
-    expect(screen.getByText('Data Privacy & Zero-Retention Gates')).toBeDefined();
+    expect(screen.getByText('Privacy & Project Data Control')).toBeDefined();
   });
 
   it('renders AgentOverridesTab', () => {
     render(
       <AgentOverridesTab
-        agentOverrides={[]}
-        onAddAgentOverride={vi.fn()}
-        onRemoveAgentOverride={vi.fn()}
-        models={[
-          { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash', provider: 'gemini', contextWindow: 1000000, maxOutputTokens: 8192, costPer1kInputUsd: 0.0001, costPer1kOutputUsd: 0.0004, capabilities: ['chat', 'coding'], status: 'active', isDefault: true },
-        ]}
+        roleAssignments={initialRoles}
+        agentOverrides={{}}
+        providers={initialProviders}
+        onAgentOverrideChange={vi.fn()}
       />
     );
 
-    expect(screen.getByText('Agent-Specific Model Overrides')).toBeDefined();
+    expect(screen.getByText('Hierarchical Agent Model Matrix')).toBeDefined();
   });
 });

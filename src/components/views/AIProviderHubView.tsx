@@ -76,6 +76,7 @@ export const AIProviderHubView: React.FC<{ onClose?: () => void }> = ({ onClose 
   const [wizardTestResult, setWizardTestResult] = useState<ConnectionTestResult | null>(null);
 
   // Local AI Auto-Detection State
+  const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [isAutoDetecting, setIsAutoDetecting] = useState(false);
   const [autoDetectResult, setAutoDetectResult] = useState<{
     onlineCount: number;
@@ -331,19 +332,22 @@ export const AIProviderHubView: React.FC<{ onClose?: () => void }> = ({ onClose 
           {activeTab === 'connected' && (
             <ConnectedTab
               providers={providers}
-              activeProviderId={providers.find(p => p.enabled)?.id || 'gemini'}
-              onSetActiveProvider={id => handleUpdateProvider(id, { enabled: true })}
-              onToggleProvider={(id, enabled) => handleUpdateProvider(id, { enabled })}
-              onTestProvider={id => handleTestConnection(id)}
-              onDeleteProvider={id => {
-                AIProviderService.deleteProvider(id);
-                setProviders(AIProviderService.loadProviders());
-              }}
-              isTesting={isTestingConnection ? 'gemini' : null}
-              testResults={diagnosticResult ? { [diagnosticProvider]: { success: diagnosticResult.success, message: diagnosticResult.message, latencyMs: diagnosticResult.latencyMs } } : {}}
               onGoToAddTab={() => setActiveTab('add')}
-              showKeys={{}}
-              onToggleShowKey={() => {}}
+              isAutoDetecting={isAutoDetecting}
+              onAutoDetectLocalLLMs={handleAutoDetectLocal}
+              autoDetectResult={autoDetectResult}
+              onUpdateProvider={handleUpdateProvider}
+              onTestConnection={handleTestConnection}
+              isTestingConnection={isTestingConnection}
+              diagnosticResult={diagnosticResult}
+              diagnosticProvider={diagnosticProvider}
+              onDeleteProvider={id => {
+                const filtered = providers.filter(p => p.id !== id);
+                AIProviderService.saveProviders(filtered);
+                setProviders(filtered);
+              }}
+              showKeys={showKeys}
+              onToggleShowKey={id => setShowKeys(prev => ({ ...prev, [id]: !prev[id] }))}
             />
           )}
 
@@ -385,49 +389,38 @@ export const AIProviderHubView: React.FC<{ onClose?: () => void }> = ({ onClose 
           {/* TAB 4: DEFAULT MODEL CONFIG */}
           {activeTab === 'defaults' && (
             <DefaultsTab
-              defaults={roleAssignments}
-              onUpdateDefaults={(role, modelId) => {
-                AIProviderService.setRoleAssignment(role, modelId);
-                setRoleAssignments(AIProviderService.loadRoleAssignments());
-              }}
-              models={AIProviderService.getAllModels()}
+              roleAssignments={roleAssignments}
+              providers={providers}
+              onRoleModelChange={handleRoleModelChange}
             />
           )}
 
           {activeTab === 'agents' && (
             <AgentOverridesTab
-              agentOverrides={Object.values(agentOverrides)}
-              onAddAgentOverride={(agentId, modelId) => {
-                AIProviderService.setAgentOverride(agentId, modelId);
-                setAgentOverrides(AIProviderService.loadAgentOverrides());
-              }}
-              onRemoveAgentOverride={agentId => {
-                AIProviderService.removeAgentOverride(agentId);
-                setAgentOverrides(AIProviderService.loadAgentOverrides());
-              }}
-              models={AIProviderService.getAllModels()}
+              roleAssignments={roleAssignments}
+              agentOverrides={agentOverrides}
+              providers={providers}
+              onAgentOverrideChange={handleAgentOverrideChange}
             />
           )}
 
           {activeTab === 'usage' && (
             <UsageTab
-              usageRecords={usageHistory}
-              onClearUsage={() => {
-                AIProviderService.clearUsageHistory();
+              usageHistory={usageHistory}
+              totalTokensUsed={totalTokensUsed}
+              totalCostUsd={totalCostUsd}
+              onClearHistory={() => {
+                AIProviderService.saveUsageHistory([]);
                 setUsageHistory([]);
+                showToast('Cleared usage history.');
               }}
-              totalCostUsd={usageHistory.reduce((acc, u) => acc + (u.costUsd || 0), 0)}
             />
           )}
 
           {activeTab === 'privacy' && (
             <PrivacyTab
-              privacy={privacySettings}
-              onUpdatePrivacy={(key, val) => {
-                const updated = { ...privacySettings, [key]: val };
-                setPrivacySettings(updated);
-                AIProviderService.savePrivacySettings(updated);
-              }}
+              privacySettings={privacySettings}
+              onPrivacyChange={handlePrivacyChange}
             />
           )}
 
