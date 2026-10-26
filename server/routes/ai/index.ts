@@ -42,7 +42,7 @@ export function createAiRouter(
         process.env.GEMINI_API_KEY = cleanKey;
         setApiKey(cleanKey);
         serverLogger.info('Google Gemini API Key securely updated in server environment');
-        return res.json({ success: true, message: 'Google Gemini API Key successfully saved and active.' });
+        return res.json({ success: true, hasApiKey: true, message: 'Google Gemini API Key successfully saved and active.' });
       }
       return res.status(400).json({ success: false, error: 'Invalid API key provided.' });
     } catch (err: any) {
