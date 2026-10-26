@@ -135,7 +135,7 @@ export const ConnectedTab: React.FC<ConnectedTabProps> = ({
                       )}
                     </div>
                     <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                      {p.apiKey ? (isKeyVisible ? p.apiKey : '••••••••••••••••') : 'No Key (Offline/Local)'}
+                      {p.apiKey ? (isKeyVisible ? 'Configured & Active (Masked for Security)' : '••••••••••••••••') : 'No Key (Offline/Local)'}
                     </p>
                   </div>
                 </div>
