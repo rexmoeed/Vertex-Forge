@@ -42,7 +42,7 @@ export const SettingsView: React.FC = () => {
     saveCurrentFile,
     saveAllFiles,
     isAutoSaving,
-  } = useIDE() as any;
+  } = useIDE();
   const layout = useLayout();
   const themeEngine = useTheme();
 
