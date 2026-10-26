@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import {
   GitBranch,
@@ -53,11 +53,14 @@ export const CodeEvolutionView: React.FC = () => {
     }
   };
 
-  const filteredCommits = (evolutionMap?.commits || []).filter(c =>
-    c.message.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    c.author.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    c.shortHash.toLowerCase().includes(searchFilter.toLowerCase())
-  );
+  // ⚡ Bolt: Memoize heavy list transformations on code evolution commits to prevent render lag
+  const filteredCommits = useMemo(() => {
+    return (evolutionMap?.commits || []).filter(c =>
+      c.message.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      c.author.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      c.shortHash.toLowerCase().includes(searchFilter.toLowerCase())
+    );
+  }, [evolutionMap?.commits, searchFilter]);
 
   return (
     <div className="flex-1 w-full h-full min-h-0 flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
