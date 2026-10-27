@@ -67,6 +67,86 @@ export const webReactVite: TemplateDefinition = {
       }, null, 2),
     },
     {
+      id: 'tsconfig',
+      path: 'tsconfig.json',
+      description: 'TypeScript configuration',
+      category: 'config',
+      content: JSON.stringify({
+        compilerOptions: {
+          target: 'ES2022',
+          module: 'ESNext',
+          moduleResolution: 'bundler',
+          jsx: 'react-jsx',
+          strict: true,
+          noEmit: true,
+        },
+        include: ['src'],
+      }, null, 2),
+    },
+    {
+      id: 'vite-config',
+      path: 'vite.config.ts',
+      description: 'Vite bundler config',
+      category: 'config',
+      content: `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: { port: 5173 },
+});
+`,
+    },
+    {
+      id: 'index-html',
+      path: 'index.html',
+      description: 'HTML5 entry point',
+      category: 'config',
+      content: `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>\${ctx.projectName}</title>
+  </head>
+  <body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+`,
+    },
+    {
+      id: 'src-main',
+      path: 'src/main.tsx',
+      description: 'Application entry bootstrap',
+      category: 'source',
+      content: `import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+`,
+    },
+    {
+      id: 'src-index-css',
+      path: 'src/index.css',
+      description: 'Tailwind styling imports',
+      category: 'style',
+      content: `@import "tailwindcss";
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+`,
+    },
+    {
       id: 'src-app',
       path: 'src/App.tsx',
       description: 'Working starter home page with feature architecture',
@@ -215,6 +295,15 @@ export const DashboardView: React.FC = () => {
     </div>
   );
 };
+`,
+    },
+    {
+      id: 'env-example',
+      path: '.env.example',
+      description: 'Sample environment variables',
+      category: 'config',
+      content: `VITE_API_URL=http://localhost:3000/api
+VITE_APP_TITLE="${ctx.projectName}"
 `,
     },
     {
