@@ -1,53 +1,11 @@
-import { AgentDeliverablesPanel, AgentArtifactTabId } from './agent/AgentDeliverablesPanel';
-import { logger } from '../../services/logger';
-import { SwarmMissionCockpit } from './SwarmMissionCockpit';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useIDE } from '../../context/IDEContext';
-import {
-  Users,
-  Bot,
-  Sparkles,
-  ShieldCheck,
-  CheckCircle2,
-  Clock,
-  Lock,
-  ArrowRight,
-  AlertTriangle,
-  Play,
-  RotateCw,
-  FileCode,
-  Layers,
-  ChevronRight,
-  MessageSquare,
-  FileText,
-  Palette,
-  Terminal,
-  ExternalLink,
-  Code2,
-  Wrench,
-  XCircle,
-  X,
-  Key,
-  Cpu,
-  Pause,
-  Undo2,
-  Send,
-  AlertCircle,
-  RefreshCw,
-  Zap,
-  Split,
-  Sliders,
-  Check,
-} from 'lucide-react';
-import { AutonomousTask, StepExecutionRecord } from '../../types/autonomousAgent';
-import { AgentHierarchyService } from '../../services/agentHierarchyService';
-import {
-  SpecialistLeadInfo,
-  SubAgentTaskContract,
-  CompletionReport,
-  ParallelSubAgentActiveInfo,
-  ParallelProgressInfo,
-} from '../../types/agentHierarchy';
+import { Users, Key, RotateCw, Zap, Play } from 'lucide-react';
+import { AgentDeliverablesPanel } from './agent/AgentDeliverablesPanel';
+import { SwarmMissionCockpit } from './SwarmMissionCockpit';
+import { AgentDecompositionToolbar } from './agent/AgentDecompositionToolbar';
+import { AgentAutonomousEngineCard } from './agent/AgentAutonomousEngineCard';
+import { useAgentWorkspace } from '../../hooks/useAgentWorkspace';
 
 export const AgentWorkspaceView: React.FC = () => {
   const {
@@ -60,7 +18,6 @@ export const AgentWorkspaceView: React.FC = () => {
     setActiveView,
     autonomousPlan,
     autonomousExecutionState,
-    verificationSummary,
     startAutonomousPlan,
     pauseAutonomousPlan,
     resumeAutonomousPlan,
@@ -73,81 +30,7 @@ export const AgentWorkspaceView: React.FC = () => {
     setAutonomyMode,
   } = useIDE();
 
-  const [autonomousInput, setAutonomousInput] = useState('');
-  const [isLaunching, setIsLaunching] = useState(false);
-  const [showWorkspaceToolActivity, setShowWorkspaceToolActivity] = useState(false);
-
-  const [hierarchyService] = useState<AgentHierarchyService>(() => new AgentHierarchyService(vfs));
-  const [leads, setLeads] = useState<SpecialistLeadInfo[]>(() => hierarchyService.getLeads());
-  const [tasks, setTasks] = useState<SubAgentTaskContract[]>(() => hierarchyService.getTasks());
-  const [reports, setReports] = useState<CompletionReport[]>(() => hierarchyService.getCompletionReports());
-  const [messages, setMessages] = useState(() => hierarchyService.getMessages());
-  const [isOrchestrating, setIsOrchestrating] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<SpecialistLeadInfo | null>(leads[0]);
-  const [activeArtifactTab, setActiveArtifactTab] = useState<AgentArtifactTabId>('brief');
-
-  // Dynamic Project Decomposition & Parallel Tasking states
-  const [projectGoalInput, setProjectGoalInput] = useState('');
-  const [parallelConcurrency, setParallelConcurrency] = useState<number>(() => hierarchyService.getParallelConcurrency());
-  const [isParallelRunning, setIsParallelRunning] = useState<boolean>(() => hierarchyService.isParallelRunning());
-  const [activeParallelSubAgents, setActiveParallelSubAgents] = useState<ParallelSubAgentActiveInfo[]>(() => hierarchyService.getActiveParallelSubAgents());
-  const [parallelProgress, setParallelProgress] = useState<ParallelProgressInfo>(() => hierarchyService.getParallelProgress());
-
-  useEffect(() => {
-    hierarchyService.setUpdateListener(() => {
-      setLeads(hierarchyService.getLeads());
-      setTasks(hierarchyService.getTasks());
-      setReports(hierarchyService.getCompletionReports());
-      setMessages([...hierarchyService.getMessages()]);
-      setIsParallelRunning(hierarchyService.isParallelRunning());
-      setActiveParallelSubAgents(hierarchyService.getActiveParallelSubAgents());
-      setParallelProgress(hierarchyService.getParallelProgress());
-    });
-  }, [hierarchyService]);
-
-  const handleDecomposeProject = (customGoal?: string) => {
-    const goal = customGoal !== undefined ? customGoal : projectGoalInput;
-    hierarchyService.decomposeProjectIntoSubTasks(activeProject, goal);
-    setTasks(hierarchyService.getTasks());
-    setActiveArtifactTab('contracts');
-  };
-
-  const handleRunParallelSubAgents = async () => {
-    // If no tasks exist or all are already completed, auto-decompose
-    const currentTasks = hierarchyService.getTasks();
-    if (currentTasks.length === 0 || currentTasks.every(t => t.status === 'completed')) {
-      handleDecomposeProject();
-    }
-    hierarchyService.setParallelConcurrency(parallelConcurrency);
-    try {
-      await hierarchyService.executeAllTasksParallel({
-        concurrency: parallelConcurrency,
-      });
-    } catch (err: any) {
-      logger.error('Parallel execution error:', err);
-    }
-  };
-
-  const handleCancelParallel = () => {
-    hierarchyService.cancelParallelExecution();
-  };
-
-  const handleResetTasks = () => {
-    hierarchyService.resetAllTasks();
-  };
-
-  const handleRunFullTeamBenchmark = async () => {
-    setIsOrchestrating(true);
-    try {
-      await hierarchyService.orchestrateFullTeamBenchmark(true);
-    } catch (err: any) {
-      logger.error('Benchmark error:', err);
-    } finally {
-      setIsOrchestrating(false);
-    }
-  };
-
-  const totalQualityGates = leads.reduce((acc, l) => acc + l.qualityGatesPassed, 0);
+  const ws = useAgentWorkspace(vfs, activeProject);
   const failedTests = testResults.filter((t: any) => t.status === 'failed').length;
 
   return (
@@ -181,15 +64,15 @@ export const AgentWorkspaceView: React.FC = () => {
           <div className="flex items-center gap-5 border-r border-slate-800 pr-5 text-xs whitespace-nowrap shrink-0">
             <div>
               <span className="text-slate-500 text-[10px] uppercase font-semibold block whitespace-nowrap">Quality Gates</span>
-              <span className="text-emerald-400 font-bold font-mono text-sm whitespace-nowrap">{totalQualityGates} Passed</span>
+              <span className="text-emerald-400 font-bold font-mono text-sm whitespace-nowrap">{ws.totalQualityGates} Passed</span>
             </div>
             <div>
               <span className="text-slate-500 text-[10px] uppercase font-semibold block whitespace-nowrap">Delegated Tasks</span>
-              <span className="text-indigo-400 font-bold font-mono text-sm whitespace-nowrap">{tasks.length} Managed</span>
+              <span className="text-indigo-400 font-bold font-mono text-sm whitespace-nowrap">{ws.tasks.length} Managed</span>
             </div>
             <div>
               <span className="text-slate-500 text-[10px] uppercase font-semibold block whitespace-nowrap">File Locks</span>
-              <span className="text-cyan-400 font-bold font-mono text-sm whitespace-nowrap">{hierarchyService.getFileReservations().length} Active</span>
+              <span className="text-cyan-400 font-bold font-mono text-sm whitespace-nowrap">{ws.hierarchyService.getFileReservations().length} Active</span>
             </div>
           </div>
 
@@ -211,509 +94,70 @@ export const AgentWorkspaceView: React.FC = () => {
           </button>
 
           <button
-            onClick={handleRunParallelSubAgents}
-            disabled={isParallelRunning}
+            onClick={ws.handleRunParallelSubAgents}
+            disabled={ws.isParallelRunning}
             className="px-4 py-2 bg-gradient-to-r from-amber-500 via-indigo-600 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer whitespace-nowrap shrink-0"
             title="Decompose any active project and execute multiple sub-agents in parallel"
           >
-            {isParallelRunning ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />}
-            <span className="whitespace-nowrap">{isParallelRunning ? `Running (${activeParallelSubAgents.length} Parallel)...` : 'Decompose & Run Parallel'}</span>
+            {ws.isParallelRunning ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />}
+            <span className="whitespace-nowrap">{ws.isParallelRunning ? `Running (${ws.activeParallelSubAgents.length} Parallel)...` : 'Decompose & Run Parallel'}</span>
           </button>
 
           <button
-            onClick={handleRunFullTeamBenchmark}
-            disabled={isOrchestrating || isParallelRunning}
+            onClick={ws.handleRunFullTeamBenchmark}
+            disabled={ws.isOrchestrating || ws.isParallelRunning}
             className="px-3.5 py-2 bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-750 hover:border-slate-600 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap shrink-0"
           >
-            {isOrchestrating ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-white" />}
+            {ws.isOrchestrating ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-white" />}
             <span className="whitespace-nowrap">Benchmark</span>
           </button>
         </div>
       </div>
 
       {/* 1A. DYNAMIC PROJECT DECOMPOSITION & MULTI-AGENT PARALLEL EXECUTION STUDIO */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shrink-0">
-              <Zap className="w-5 h-5 fill-white" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-sm font-bold text-white whitespace-nowrap">Dynamic Project Decomposition & Multi-Agent Parallel Tasking</h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
-                  {isParallelRunning ? `${activeParallelSubAgents.length} Active in Parallel` : 'Ready to Decompose'}
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap shrink-0">
-                  Workspace: {activeProject?.name || 'Current Project'}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Any project is decomposed into a structured DAG of sub-tasks across 10 specialized Team Leads and executed concurrently with file-lock concurrency control.
-              </p>
-            </div>
-          </div>
-
-          {/* Concurrency Selector */}
-          <div className="flex items-center gap-2 whitespace-nowrap shrink-0">
-            <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1 whitespace-nowrap shrink-0">
-              <Split className="w-3 h-3 text-amber-400" />
-              Parallel Threads:
-            </span>
-            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
-              {[2, 3, 4, 5, 6].map(num => (
-                <button
-                  key={num}
-                  onClick={() => {
-                    setParallelConcurrency(num);
-                    hierarchyService.setParallelConcurrency(num);
-                  }}
-                  className={`px-2 py-1 rounded-lg text-[10px] font-bold font-mono transition-all ${
-                    parallelConcurrency === num
-                      ? 'bg-gradient-to-r from-amber-500 to-indigo-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-                  }`}
-                  title={`Run up to ${num} sub-agents simultaneously`}
-                >
-                  {num}x
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Project Decomposition Form */}
-        <form
-          onSubmit={e => {
-            e.preventDefault();
-            handleRunParallelSubAgents();
-          }}
-          className="flex flex-col gap-2.5"
-        >
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={projectGoalInput}
-              onChange={e => setProjectGoalInput(e.target.value)}
-              placeholder="Enter custom project goal (e.g. 'Build REST API with JWT authentication', 'Harmonize UI Design Tokens & Dark Mode', or leave blank for full project lifecycle)..."
-              className="flex-1 bg-slate-950 border border-slate-750 focus:border-amber-500 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={isParallelRunning}
-              className="px-4 py-2 bg-gradient-to-r from-amber-500 via-indigo-600 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-md"
-            >
-              {isParallelRunning ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-white" />}
-              <span>{isParallelRunning ? 'Executing in Parallel...' : 'Decompose & Execute in Parallel'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDecomposeProject()}
-              disabled={isParallelRunning}
-              className="px-3.5 py-2 bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer"
-              title="Decompose project into sub-tasks and inspect contracts DAG without immediate execution"
-            >
-              Decompose Only
-            </button>
-            {isParallelRunning ? (
-              <button
-                type="button"
-                onClick={handleCancelParallel}
-                className="px-3 py-2 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-700 rounded-xl text-xs font-bold transition cursor-pointer"
-              >
-                Stop
-              </button>
-            ) : tasks.length > 0 ? (
-              <button
-                type="button"
-                onClick={handleResetTasks}
-                className="px-3 py-2 bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 rounded-xl text-xs font-medium transition cursor-pointer"
-                title="Reset all tasks and contracts"
-              >
-                Reset
-              </button>
-            ) : null}
-          </div>
-
-          {/* Quick Presets */}
-          <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-            <span className="text-[10px] text-slate-500 uppercase font-semibold">Presets:</span>
-            {[
-              'Full Workspace Engineering Audit & Quality Gate Verification',
-              'API Endpoints, Schema Validation & Data Flow Operations',
-              'UI Design Tokens, Responsive Components & WCAG AA Contrast',
-              'AST Security Audit, Input Sanitization & Automated Unit Tests',
-            ].map((preset, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => {
-                  setProjectGoalInput(preset);
-                  handleDecomposeProject(preset);
-                }}
-                className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-300 text-[10px] transition-colors cursor-pointer"
-              >
-                {preset}
-              </button>
-            ))}
-          </div>
-        </form>
-
-        {/* Live Parallel Concurrency Active Monitor */}
-        {activeParallelSubAgents.length > 0 && (
-          <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-indigo-600/10 to-emerald-500/10 border border-amber-500/40 flex flex-col gap-3 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-                <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">
-                  Parallel Tasking Active: {activeParallelSubAgents.length} Sub-Agents Executing Simultaneously
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400">
-                Max Concurrency: {parallelConcurrency} Threads
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {activeParallelSubAgents.map(sub => (
-                <div
-                  key={sub.taskId}
-                  className="p-3 rounded-lg bg-slate-950/80 border border-amber-500/30 flex flex-col gap-2 shadow-xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-white flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-amber-400" />
-                      {sub.subAgentRole}
-                    </span>
-                    <span className="text-[10px] font-mono font-bold text-amber-400">
-                      {sub.progress}%
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-300 line-clamp-1">{sub.title}</span>
-                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-amber-400 to-indigo-500 h-full rounded-full transition-all duration-300"
-                      style={{ width: `${sub.progress}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                    <span className="truncate">{sub.stage}</span>
-                    <span className="text-indigo-400">{sub.parentLead}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Overall Tasks Progress Bar */}
-        {tasks.length > 0 && (
-          <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800 flex flex-col gap-2">
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-200">Sub-Agent Execution Progress:</span>
-                <span className="font-mono text-indigo-400 font-bold">
-                  {parallelProgress.completedTasks} / {parallelProgress.totalTasks} Tasks Completed
-                </span>
-              </div>
-              <span className="font-mono text-xs font-bold text-emerald-400">
-                {parallelProgress.percent}%
-              </span>
-            </div>
-
-            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-indigo-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-300"
-                style={{ width: `${parallelProgress.percent}%` }}
-              />
-            </div>
-
-            {/* Phase Pills */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-2 border-t border-slate-850 text-[10px]">
-              <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
-                <span className="text-slate-400">Phase 1: Planning</span>
-                <span className="font-bold text-cyan-300">Parallel</span>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
-                <span className="text-slate-400">Phase 2: Implementation</span>
-                <span className="font-bold text-amber-300">Parallel (Locks)</span>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
-                <span className="text-slate-400">Phase 3: QA & Security</span>
-                <span className="font-bold text-emerald-300">Parallel</span>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
-                <span className="text-slate-400">Phase 4: E2E Signoff</span>
-                <span className="font-bold text-indigo-300">Quality Gate</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      <AgentDecompositionToolbar
+        projectGoalInput={ws.projectGoalInput}
+        setProjectGoalInput={ws.setProjectGoalInput}
+        parallelConcurrency={ws.parallelConcurrency}
+        setParallelConcurrency={ws.setParallelConcurrency}
+        isParallelRunning={ws.isParallelRunning}
+        activeParallelSubAgents={ws.activeParallelSubAgents}
+        tasks={ws.tasks}
+        activeProjectName={activeProject?.name}
+        onRunParallel={ws.handleRunParallelSubAgents}
+        onDecomposeProject={ws.handleDecomposeProject}
+        onCancelParallel={ws.handleCancelParallel}
+        onResetTasks={ws.handleResetTasks}
+      />
 
       {/* 1B. AUTONOMOUS AI SOFTWARE ENGINEER STUDIO */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
-              <Cpu className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-white">Autonomous AI Software Engineer</h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  {autonomousExecutionState || 'IDLE'}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Understand → Inspect → Plan → Execute → Observe → Diagnose → Correct → Verify → Summarize
-              </p>
-            </div>
-          </div>
-
-          {/* Safety & Permission Mode Selector */}
-          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
-            <span className="text-[10px] text-slate-500 uppercase font-semibold px-2">Safety:</span>
-            {(['autonomous', 'supervised', 'strict'] as const).map(mode => (
-              <button
-                key={mode}
-                onClick={() => setAutonomyMode(mode)}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                  autonomyMode === mode
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Prompt Input Form */}
-        <form
-          onSubmit={async e => {
-            e.preventDefault();
-            if (!autonomousInput.trim() || isLaunching) return;
-            setIsLaunching(true);
-            try {
-              await startAutonomousPlan(autonomousInput.trim());
-            } finally {
-              setIsLaunching(false);
-            }
-          }}
-          className="flex flex-col gap-2.5"
-        >
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={autonomousInput}
-              onChange={e => setAutonomousInput(e.target.value)}
-              placeholder="Describe requested changes (e.g. 'Add input validation and unit tests', 'Fix broken imports')..."
-              className="flex-1 bg-slate-950 border border-slate-750 focus:border-indigo-500 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={!autonomousInput.trim() || isLaunching}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-md"
-            >
-              {isLaunching ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-              <span>Launch Autonomous Engineer</span>
-            </button>
-          </div>
-
-          {/* Presets */}
-          <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-            <span className="text-[10px] text-slate-500 uppercase font-semibold">Presets:</span>
-            {[
-              'Implement priority weight validation with unit tests',
-              'Audit task transition RBAC matrix and harden security',
-              'Refactor error handling with self-healing try-catch blocks',
-            ].map((preset, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setAutonomousInput(preset)}
-                className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-[10px] transition-colors cursor-pointer"
-              >
-                {preset}
-              </button>
-            ))}
-          </div>
-        </form>
-
-        {/* Active Plan & Controls */}
-        {autonomousPlan && (
-          <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col gap-3">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-850 pb-3">
-              <div>
-                <span className="text-[10px] text-slate-500 uppercase font-semibold block">Goal</span>
-                <span className="text-xs font-mono font-bold text-indigo-300">{autonomousPlan.goal}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {autonomousExecutionState === 'executing' && (
-                  <button
-                    onClick={pauseAutonomousPlan}
-                    className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-amber-300 border border-slate-750 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer"
-                  >
-                    <Pause className="w-3 h-3" />
-                    <span>Pause</span>
-                  </button>
-                )}
-                {autonomousExecutionState === 'paused' && (
-                  <button
-                    onClick={resumeAutonomousPlan}
-                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer"
-                  >
-                    <Play className="w-3 h-3" />
-                    <span>Resume</span>
-                  </button>
-                )}
-                <button
-                  onClick={cancelAutonomousPlan}
-                  className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-rose-300 border border-slate-750 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer"
-                >
-                  <X className="w-3 h-3" />
-                  <span>Cancel</span>
-                </button>
-                <button
-                  onClick={() => rollbackAutonomousPlan()}
-                  className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-750 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer"
-                  title="Rollback agent modifications using latest checkpoint"
-                >
-                  <Undo2 className="w-3 h-3" />
-                  <span>Rollback Changes</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Plan Approval Banner */}
-            {autonomousExecutionState === 'waiting_plan_approval' && (
-              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 text-amber-200">
-                <div>
-                  <div className="font-bold flex items-center gap-1.5 text-amber-300 text-xs">
-                    <ShieldCheck className="w-4 h-4 text-amber-400" />
-                    <span>Human Approval Required for Plan</span>
-                  </div>
-                  <span className="text-[11px] text-slate-300">
-                    Review {autonomousPlan.tasks.length} tasks before autonomous modifications proceed.
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={approveAutonomousPlan}
-                    className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow cursor-pointer"
-                  >
-                    Approve Plan & Begin
-                  </button>
-                  <button
-                    onClick={rejectAutonomousPlan}
-                    className="px-3 py-1.5 bg-slate-800 text-slate-300 hover:text-white rounded-lg text-xs cursor-pointer"
-                  >
-                    Reject
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Task State Machine Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              {autonomousPlan.tasks.map((task: AutonomousTask, idx: number) => (
-                <div
-                  key={task.id}
-                  className={`p-3 rounded-xl border flex flex-col justify-between gap-2 text-xs transition-all ${
-                    task.status === 'running'
-                      ? 'bg-indigo-950/70 border-indigo-500/60 shadow-lg text-indigo-100'
-                      : task.status === 'completed'
-                      ? 'bg-slate-900/90 border-slate-800 text-slate-300'
-                      : task.status === 'failed'
-                      ? 'bg-rose-950/40 border-rose-500/50 text-rose-200'
-                      : task.status === 'blocked'
-                      ? 'bg-amber-950/40 border-amber-500/40 text-amber-200'
-                      : 'bg-slate-900/50 border-slate-850 text-slate-400'
-                  }`}
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-slate-500">Task #{idx + 1}</span>
-                      <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
-                        {task.status}
-                      </span>
-                    </div>
-                    <span className="font-bold text-white text-xs">{task.title}</span>
-                    <p className="text-[10px] text-slate-400 line-clamp-2">{task.description}</p>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
-                    <span className="font-mono text-cyan-400 truncate max-w-[140px]">
-                      {task.targetFiles[0] || 'Multiple files'}
-                    </span>
-                    {task.status === 'failed' && (
-                      <button
-                        onClick={() => retryAutonomousTask(task.id)}
-                        className="text-cyan-300 hover:underline font-bold text-[10px] cursor-pointer"
-                      >
-                        Retry Task
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Verification Summary */}
-            {verificationSummary && (
-              <div className={`p-4 rounded-xl border flex flex-col gap-3 text-xs ${
-                verificationSummary.overallSuccess
-                  ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-200'
-                  : 'bg-rose-950/30 border-rose-500/40 text-rose-200'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                    <div>
-                      <h4 className="font-bold text-sm text-white">Verification & Health Report</h4>
-                      <span className="text-[11px] text-slate-300">Executed type checks, Vitest test suite, and build assertions</span>
-                    </div>
-                  </div>
-                  <span className="text-xs uppercase font-mono px-3 py-1 rounded-full bg-slate-900 border border-slate-800 font-bold text-white">
-                    {verificationSummary.overallSuccess ? 'ALL CHECKS PASSED' : 'ACTION REQUIRED'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                  <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-                    <span className="text-slate-400 text-[10px] block">Files Modified</span>
-                    <span className="font-bold text-sm text-white">{verificationSummary.filesChanged.length}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-                    <span className="text-slate-400 text-[10px] block">Vitest Tests</span>
-                    <span className="font-bold text-sm text-emerald-400">{verificationSummary.testsPassed} passed</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-                    <span className="text-slate-400 text-[10px] block">TypeScript AST</span>
-                    <span className="font-bold text-sm text-white">{verificationSummary.typeCheckPassed ? '0 Errors' : 'Errors'}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-                    <span className="text-slate-400 text-[10px] block">Shell Commands</span>
-                    <span className="font-bold text-sm text-white">{verificationSummary.commandsExecuted.length} executed</span>
-                  </div>
-                </div>
-
-                {verificationSummary.remainingRisks.length > 0 && (
-                  <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-500/20 text-amber-200 text-xs">
-                    <span className="font-bold block">Remaining Risks:</span>
-                    <span>{verificationSummary.remainingRisks.join(', ')}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <AgentAutonomousEngineCard
+        autonomousExecutionState={autonomousExecutionState}
+        autonomyMode={autonomyMode}
+        setAutonomyMode={setAutonomyMode}
+        autonomousInput={ws.autonomousInput}
+        setAutonomousInput={ws.setAutonomousInput}
+        isLaunching={ws.isLaunching}
+        onLaunch={async input => {
+          ws.setIsLaunching(true);
+          try {
+            await startAutonomousPlan(input);
+          } finally {
+            ws.setIsLaunching(false);
+          }
+        }}
+        autonomousPlan={autonomousPlan}
+        onPausePlan={pauseAutonomousPlan}
+        onResumePlan={resumeAutonomousPlan}
+        onCancelPlan={cancelAutonomousPlan}
+        onRollbackPlan={() => rollbackAutonomousPlan()}
+        onApprovePlan={approveAutonomousPlan}
+        onRejectPlan={rejectAutonomousPlan}
+        onRetryTask={retryAutonomousTask}
+      />
 
       {/* SWARM MISSION COCKPIT & LIVE GRAPH */}
-      <SwarmMissionCockpit hierarchyService={hierarchyService} onNavigateToFile={openFile} />
+      <SwarmMissionCockpit hierarchyService={ws.hierarchyService} onNavigateToFile={openFile} />
 
       {/* 2. TEAM LEADS ROSTER (Level 2) */}
       <div className="flex flex-col gap-3">
@@ -725,19 +169,19 @@ export const AgentWorkspaceView: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-          {leads.map(lead => {
-            const isSelected = selectedLead?.role === lead.role;
+          {ws.leads.map(lead => {
+            const isSelected = ws.selectedLead?.role === lead.role;
             return (
               <div
                 key={lead.role}
                 onClick={() => {
-                  setSelectedLead(lead);
-                  if (lead.role === 'ProductDesignLead') setActiveArtifactTab('brief');
-                  else if (lead.role === 'UIDesignLead') setActiveArtifactTab('design');
-                  else if (lead.role === 'ArchitectureLead') setActiveArtifactTab('architecture');
-                  else if (lead.role === 'QALead') setActiveArtifactTab('qa');
-                  else if (lead.role === 'FrontendLead' || lead.role === 'BackendLead' || lead.role === 'FullStackLead') setActiveArtifactTab('code');
-                  else setActiveArtifactTab('contracts');
+                  ws.setSelectedLead(lead);
+                  if (lead.role === 'ProductDesignLead') ws.setActiveArtifactTab('brief');
+                  else if (lead.role === 'UIDesignLead') ws.setActiveArtifactTab('design');
+                  else if (lead.role === 'ArchitectureLead') ws.setActiveArtifactTab('architecture');
+                  else if (lead.role === 'QALead') ws.setActiveArtifactTab('qa');
+                  else if (lead.role === 'FrontendLead' || lead.role === 'BackendLead' || lead.role === 'FullStackLead') ws.setActiveArtifactTab('code');
+                  else ws.setActiveArtifactTab('contracts');
                 }}
                 className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between gap-3 min-w-0 overflow-hidden break-words ${
                   isSelected
@@ -773,11 +217,11 @@ export const AgentWorkspaceView: React.FC = () => {
 
       {/* 3. SPECIALIST DELIVERABLES & INTERACTIVE PANELS (Modularized) */}
       <AgentDeliverablesPanel
-        activeArtifactTab={activeArtifactTab}
-        setActiveArtifactTab={setActiveArtifactTab}
+        activeArtifactTab={ws.activeArtifactTab}
+        setActiveArtifactTab={ws.setActiveArtifactTab}
         activeProject={activeProject}
-        tasks={tasks}
-        reports={reports}
+        tasks={ws.tasks}
+        reports={ws.reports}
         testResults={testResults}
         failedTests={failedTests}
         runTests={runTests}
