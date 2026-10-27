@@ -1,63 +1,10 @@
-import { serverLogger } from '../logger';
 import { Router, Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import os from 'os';
-import net from 'net';
-import http from 'http';
-import { ChildProcess } from 'child_process';
-import { validateBody, CommonSchemas } from '../middleware/validation';
-
-const IGNORED_DIRS = new Set(['.git', 'node_modules', 'dist', '.next', '.nuxt', '.output', '.cache', '__pycache__', '.vitest', 'sample-projects', '.gemini']);
-
-async function buildDirectoryTree(currentPath: string, rootPath: string, depth = 0, maxDepth = 6): Promise<any[]> {
-  if (depth > maxDepth) return [];
-  try {
-    const entries = await fsPromises.readdir(currentPath, { withFileTypes: true });
-    const nodes: any[] = [];
-
-    // Sort folders first, then files
-    const sorted = entries.sort((a, b) => {
-      if (a.isDirectory() && !b.isDirectory()) return -1;
-      if (!a.isDirectory() && b.isDirectory()) return 1;
-      return a.name.localeCompare(b.name);
-    });
-
-    for (const entry of sorted) {
-      if (IGNORED_DIRS.has(entry.name)) continue;
-
-      const fullPath = path.join(currentPath, entry.name);
-      const relativePath = path.relative(rootPath, fullPath).replace(/\\/g, '/');
-
-      if (entry.isDirectory()) {
-        const children = await buildDirectoryTree(fullPath, rootPath, depth + 1, maxDepth);
-        nodes.push({
-          id: `dir-${relativePath}`,
-          name: entry.name,
-          path: relativePath,
-          fullPath,
-          type: 'folder',
-          children,
-        });
-      } else if (entry.isFile()) {
-        const stats = await fsPromises.stat(fullPath).catch(() => null);
-        nodes.push({
-          id: `file-${relativePath}`,
-          name: entry.name,
-          path: relativePath,
-          fullPath,
-          type: 'file',
-          size: stats?.size || 0,
-        });
-      }
-    }
-    return nodes;
-  } catch (err: any) {
-    serverLogger.warn({ err: err?.message }, `Error reading dir ${currentPath}`);
-    return [];
-  }
-}
+import { serverLogger } from '../logger';
+import { buildDirectoryTree, getAvailableDrives, IGNORED_DIRS } from '../services/fsDirectoryService';
 
 // 1. Read Directory Tree
 
@@ -305,23 +252,6 @@ router.post('/api/fs/inspect-path', async (req: Request, res: Response) => {
     }
   });
 
-function getAvailableDrives(): string[] {
-  if (process.platform !== 'win32') return ['/'];
-  const drives: string[] = [];
-  for (let i = 65; i <= 90; i++) {
-    const letter = String.fromCharCode(i);
-    const drivePath = `${letter}:\\`;
-    try {
-      if (fs.existsSync(drivePath)) {
-        drives.push(drivePath);
-      }
-    } catch {
-      // drive inaccessible or not mounted
-    }
-  }
-  return drives.length > 0 ? drives : ['C:\\'];
-}
-
 // 8c. In-App Filesystem Browser for Seamless Project & Folder Opening (Zero Native Popups)
 router.post('/api/fs/browse-dirs', async (req: Request, res: Response) => {
   const { currentPath } = req.body;
@@ -409,113 +339,6 @@ router.post('/api/fs/create-dir', async (req: Request, res: Response) => {
     return res.status(500).json({ error: err?.message || 'Failed to create directory' });
   }
 });
-
-// ==========================================
-// REAL PROCESS RUNNER & DEV SERVER MANAGER
-// ==========================================
-
-interface DevServerProcessRecord {
-  pid: number;
-  command: string;
-  cwd: string;
-  port: number;
-  detectedPort?: number;
-  status: 'starting' | 'probing' | 'running' | 'stopped' | 'failed';
-  startTime: number;
-  url: string;
-  logs: string[];
-  childRef?: any;
-  portConflictDetected?: boolean;
-  healthState: 'pending' | 'healthy' | 'unhealthy' | 'stopped';
-  lastHealthCheck?: {
-    timestamp: number;
-    ok: boolean;
-    statusCode?: number;
-    latencyMs?: number;
-    message: string;
-  };
-}
-
-const activeServers = new Map<number, DevServerProcessRecord>();
-const activeCommands = new Map<string, { pid: number; child: ChildProcess; startTime: number }>();
-
-// Helper: Check if a TCP port is currently free on localhost
-function isPortAvailable(port: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const tester = net.createServer()
-      .once('error', () => {
-        resolve(false);
-      })
-      .once('listening', () => {
-        tester.once('close', () => resolve(true)).close();
-      })
-      .listen(port, '0.0.0.0');
-  });
-}
-
-// Helper: Find next available port to resolve port conflicts
-async function findAvailablePort(preferredPort: number, excludedPorts: number[] = [(Number(process.env.PORT) || 3000)]): Promise<number> {
-  const candidates = [preferredPort, 5173, 5174, 5175, 3001, 3002, 8080, 8081];
-  for (const p of candidates) {
-    if (excludedPorts.includes(p)) continue;
-    const available = await isPortAvailable(p);
-    if (available) return p;
-  }
-  // Fallback: random high port
-  return 5173;
-}
-
-// Helper: Verify HTTP readiness of a server endpoint
-function verifyHttpReadiness(url: string, timeoutMs: number = 2500): Promise<{ ok: boolean; statusCode?: number; latencyMs?: number; message: string }> {
-  return new Promise((resolve) => {
-    const startTime = Date.now();
-    try {
-      const parsed = new URL(url);
-      const req = http.get({
-        hostname: parsed.hostname || 'localhost',
-        port: parsed.port || 80,
-        path: parsed.pathname || '/',
-        timeout: timeoutMs,
-        headers: { 'User-Agent': 'VertexForge-HealthChecker/1.0' },
-      }, (res) => {
-        const latencyMs = Date.now() - startTime;
-        // Drain response
-        res.resume();
-        resolve({
-          ok: (res.statusCode !== undefined && res.statusCode < 500),
-          statusCode: res.statusCode,
-          latencyMs,
-          message: `HTTP ${res.statusCode} responded in ${latencyMs}ms`,
-        });
-      });
-
-      req.on('timeout', () => {
-        req.destroy();
-        resolve({
-          ok: false,
-          latencyMs: Date.now() - startTime,
-          message: 'Connection timed out during health check probe',
-        });
-      });
-
-      req.on('error', (err) => {
-        resolve({
-          ok: false,
-          latencyMs: Date.now() - startTime,
-          message: `Health probe error: ${err.message}`,
-        });
-      });
-    } catch (e: any) {
-      resolve({
-        ok: false,
-        latencyMs: 0,
-        message: `Invalid URL format: ${e.message}`,
-      });
-    }
-  });
-}
-
-// 9. Execute Real Shell Command (with cancellation / tracking)
 
   return router;
 }
