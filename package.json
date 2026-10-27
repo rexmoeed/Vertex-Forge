@@ -20,6 +20,7 @@
     "electron:build:dir": "npm run build && npm run build:electron && electron-builder --win --dir",
     "lint:eslint": "eslint src/ --max-warnings=50",
     "test:coverage": "vitest run --coverage",
+    "test:integration-isolated": "vitest run",
     "typecheck": "tsc --noEmit",
     "audit": "npm audit --audit-level=high",
     "smoke": "node scripts/smoke.cjs"

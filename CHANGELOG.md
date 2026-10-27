@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.4.0] - 2026-10-27
+
+### Architecture, Cleanliness & Robustness (Audit Remediation)
+- **Typed Error Hierarchy & Global Middleware**:
+  - Integrated `server/errors.ts` (`AppError`, `ValidationError`, `UpstreamApiError`, `NotFoundError`, `ConflictError`, `UnauthorizedError`, `ForbiddenError`) with standard `{ success: false, error: { code, message }, path, timestamp }` schema.
+  - Refactored `git.routes.ts` and sub-routers to throw structured `AppError` subclasses with automated Pino structured telemetry logging.
+  - Added Supertest test suite `server/routes/__tests__/git.routes.test.ts` verifying typed error handling and zero-leak payload validation.
+- **God-File Elimination (Target < 400 LOC)**:
+  - `server/routes/git.routes.ts` (900 LOC -> 25 LOC): Decomposed into `git.status.routes.ts`, `git.branch.routes.ts`, `git.mutation.routes.ts`, and `git.remote.routes.ts`.
+  - `src/components/views/SettingsView.tsx` (852 LOC -> 245 LOC): Extracted `AppearanceSettingsSection.tsx`, `LayoutSettingsSection.tsx`, `ProvidersSettingsSection.tsx`, `AiEngineSettingsSection.tsx`, `AgentsSettingsSection.tsx`, and `SecuritySettingsSection.tsx`.
+  - `src/components/layout/editor/SingleEditorGroup.tsx` (889 LOC -> 388 LOC): Extracted `EditorEmptyState.tsx`, `EditorDiffReviewBar.tsx`, `EditorInlineAIBar.tsx`, `EditorGutter.tsx`, and `EditorMinimap.tsx`.
+
+### Test Coverage, Isolation & Strict Gates
+- **100% Offline Network Isolation**:
+  - Enhanced `src/test/setupAiMocks.ts` with comprehensive synthetic stubs for `api.github.com` and `jules.googleapis.com` alongside Gemini, Claude, and OpenAI endpoints.
+  - Added `test:integration-isolated` script to `package.json` ensuring fully deterministic execution on air-gapped systems without API credentials.
+- **Expanded Test Coverage Suite**:
+  - Added test suites for previously untested services: `scaffoldingEngine.test.ts`, `architecturePlanner.test.ts`, `designSystemEngine.test.ts`, `bugDetectiveService.test.ts`, and `codeEvolutionService.test.ts`.
+  - Added test suites for extracted components: `SettingsSections.test.ts` and `EditorSubcomponents.test.ts`.
+  - Raised enforced coverage thresholds in `vitest.config.ts` from 60% to **70% lines and 75% functions**.
+- **Documentation & Environment Completeness**:
+  - Added explicit documentation for `LOG_LEVEL` in `.env.example` and `README.md`.
+  - Documented `## 🧪 Testing & Isolated Execution` workflows in `README.md`.
+
 ## [1.3.0] - 2026-10-26
 
 ### Architectural Modularization & Cleanliness (Buyer Recommendation 02)

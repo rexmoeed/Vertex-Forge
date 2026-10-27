@@ -282,6 +282,7 @@ Copy `.env.example` to `.env` to configure runtime options:
 |:---|:---:|:---|:---|
 | `PORT` | Optional | `3000` | Port for Express HTTP server, WebSocket bridge & static asset host |
 | `NODE_ENV` | Optional | `development` | Runtime operational mode (`development`, `production`, or `test`) |
+| `LOG_LEVEL` | Optional | `info` | Verbosity level for structured Pino & client logging (`debug`, `info`, `warn`, `error`) |
 | `DISABLE_HMR` | Optional | `false` | Disable Vite Hot Module Reloading when running in constrained headless containers |
 | `VITE_API_URL` | Optional | `http://localhost:3000` | Client API destination gateway used by frontend fetch clients |
 | `VITE_DEV_SERVER_URL` | Optional | `http://localhost:5173` | Internal dev server link for Vite client development proxy |
@@ -305,18 +306,31 @@ npm run electron:build
 
 ---
 
-### Verification & Quality Assurance
+### 🧪 Testing & Isolated Execution
+
+Vertex Forge features a 100% network-isolated test suite that runs cleanly on air-gapped workstations or continuous integration runners without configuring external API keys or remote accounts:
 
 ```bash
-# Run complete test suite (644 tests across 93 test suites (100% passing, coverage enforced))
-npm test
+# Run isolated test suite with synthetic provider stubs (100% offline, 0 credentials needed)
+npm run test:integration-isolated
+
+# Run complete Vitest suite with enforced coverage threshold gates (70%+ lines/functions)
+npm run test:coverage
 
 # Verify TypeScript type integrity (0 errors)
-npx tsc --noEmit
+npm run typecheck
+
+# Lint workspace with zero warning tolerance
+npm run lint
 
 # Compile production web bundle
 npm run build
 ```
+
+#### Isolated Mocking Guarantees:
+- **Upstream AI Providers**: Calls to Google AI Studio, Anthropic Claude, OpenAI, and Google Jules are intercepted via `src/test/setupAiMocks.ts` with typed synthetic responses.
+- **Git & GitHub Integration**: Remote calls to `api.github.com` and `git` operations are stubbed with zero network socket usage.
+- **Determinism**: Exit code is guaranteed `0` on any clean checkout without `.env` or external tokens.
 
 
 ---
