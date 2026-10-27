@@ -227,7 +227,10 @@ export class VoiceCodingEngine {
     await speechRecognitionService.speak(completionMsg);
   }
 
+  private currentState: SpeechRecognitionState = 'idle';
+
   private updateState(state: SpeechRecognitionState) {
+    this.currentState = state;
     if (this.currentSession) {
       this.currentSession.state = state;
     }
@@ -236,7 +239,7 @@ export class VoiceCodingEngine {
 
   private notify() {
     if (this.onStateChange) {
-      this.onStateChange(this.currentSession?.state || 'idle', this.currentSession || undefined);
+      this.onStateChange(this.currentState, this.currentSession || undefined);
     }
   }
 
