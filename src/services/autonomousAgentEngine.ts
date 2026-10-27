@@ -1,4 +1,3 @@
-import { AgentRole } from '../types/ide';
 /**
  * Autonomous AI Software Engineer - Core Engine
  * Implements the complete multi-step autonomous execution loop:
@@ -13,15 +12,13 @@ import {
   StepExecutionRecord,
   VerificationSummary,
   PermissionMode,
-  ToolName,
 } from '../types/autonomousAgent';
 import { AgentToolRegistry } from './agentToolRegistry';
 import { VirtualFileSystem } from './virtualFs';
 import { GeminiService } from './geminiService';
-import { AIProviderService } from './aiProviderService';
-import { UniversalSystemPromptBuilder } from './universalSystemPrompt';
 import { ProjectProfile } from '../types/project';
-import { logger } from './logger';
+import { AutonomousPlanGenerator } from './agent/autonomousPlanGenerator';
+import { AutonomousVerificationService } from './agent/autonomousVerificationService';
 
 export interface AutonomousEngineEvents {
   onPlanCreated?: (plan: AutonomousPlan) => void;
@@ -106,126 +103,23 @@ export class AutonomousAgentEngine {
     this.setExecutionState('planning');
     this.log('Architect', `Analyzing workspace and goal: "${userGoal}"`, 'info');
 
-    // 1. Inspect Workspace Stack & Manifests
-    let packageJsonRaw = this.vfs.readFile('package.json');
-    if (!packageJsonRaw) {
-      const readRes = await this.toolRegistry.executeTool('read_file', { filePath: 'package.json' });
-      if (readRes.success && readRes.data?.content) {
-        packageJsonRaw = readRes.data.content;
-      }
-    }
-
-    let stackSummary = 'React + TypeScript + Vite';
-    if (packageJsonRaw) {
-      try {
-        const pkg = JSON.parse(packageJsonRaw);
-        const deps = Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.devDependencies || {}));
-        stackSummary = `${pkg.name || 'Application'} [${deps.slice(0, 6).join(', ')}]`;
-      } catch {}
-    }
-
-    // 2. Synthesize Tasks via Gemini or Deterministic Fallback
-    const planId = `plan-${Date.now()}`;
-    let generatedTasks: AutonomousTask[] = [];
-
-    try {
-      const aiPlan = await GeminiService.planProject({
-        goal: userGoal,
-        currentStack: stackSummary,
-        filesSummary: this.vfs.getTree().map(n => n.name).join(', '),
-      });
-
-      if (aiPlan.tasks && aiPlan.tasks.length > 0) {
-        generatedTasks = aiPlan.tasks.map((t, idx) => ({
-          id: t.id || `task-${idx + 1}`,
-          title: t.title,
-          description: t.description,
-          role: ((t as Record<string, string>).agent || (idx === 0 ? 'Architect' : 'Developer')) as AgentRole,
-          status: 'pending',
-          dependencies: idx > 0 ? [`task-${idx}`] : [],
-          acceptanceCriteria: [
-            `Implement changes for ${t.title}`,
-            `Zero syntax/type check errors`,
-            `File saved and verified on disk`,
-          ],
-          estimatedTools: ['read_file', 'write_file', 'type_check', 'run_tests'],
-          targetFiles: [t.targetFile || 'src/App.tsx'],
-          requiresApproval: this.permissionMode === 'strict' || this.permissionMode === 'supervised',
-          approvalStatus: 'pending',
-          executionHistory: [],
-          retryCount: 0,
-          maxRetries: this.maxRetriesPerTask,
-        }));
-      }
-    } catch (e: any) {
-      logger.warn('AI Planning fallback:', e?.message);
-    }
-
-    // Fallback if AI plan returned empty
-    if (generatedTasks.length === 0) {
-      generatedTasks = [
-        {
-          id: 'task-1',
-          title: `Investigate and implement: ${userGoal.slice(0, 40)}`,
-          description: `Analyze current codebase files, make requested modifications, and verify type soundness.`,
-          role: 'Developer',
-          status: 'pending',
-          dependencies: [],
-          acceptanceCriteria: [
-            `Verify workspace imports`,
-            `Apply edits without regression`,
-            `Pass type checks`,
-          ],
-          estimatedTools: ['file_search', 'read_file', 'write_file', 'type_check'],
-          targetFiles: ['src/App.tsx'],
-          requiresApproval: this.permissionMode === 'strict',
-          approvalStatus: 'pending',
-          executionHistory: [],
-          retryCount: 0,
-          maxRetries: this.maxRetriesPerTask,
-        },
-        {
-          id: 'task-2',
-          title: 'Automated Verification & Diagnostics',
-          description: 'Run project type-checks and test assertions to verify zero errors.',
-          role: 'Testing',
-          status: 'pending',
-          dependencies: ['task-1'],
-          acceptanceCriteria: ['Pass test suite', 'Pass lint checks'],
-          estimatedTools: ['type_check', 'run_tests'],
-          targetFiles: [],
-          requiresApproval: false,
-          approvalStatus: 'approved',
-          executionHistory: [],
-          retryCount: 0,
-          maxRetries: this.maxRetriesPerTask,
-        },
-      ];
-    }
-
-    const plan: AutonomousPlan = {
-      id: planId,
-      goal: userGoal,
-      techStackSummary: stackSummary,
-      rootWorkspace: '.',
-      tasks: generatedTasks,
-      suggestedTools: ['read_file', 'write_file', 'patch_file', 'type_check', 'run_tests'],
-      estimatedTotalSteps: generatedTasks.length * 3,
-      createdAt: Date.now(),
-      status: 'draft',
-    };
+    const plan = await AutonomousPlanGenerator.planGoal(
+      userGoal,
+      this.vfs,
+      this.toolRegistry,
+      this.permissionMode,
+      this.maxRetriesPerTask
+    );
 
     this.currentPlan = plan;
     if (this.events.onPlanCreated) {
       this.events.onPlanCreated(plan);
     }
 
-    // Permission Check: If strict or supervised mode, pause for user review
     if (this.permissionMode === 'strict' || this.permissionMode === 'supervised') {
       this.setExecutionState('waiting_plan_approval');
       this.log('Architect', `Plan generated with ${plan.tasks.length} tasks. Waiting for human approval.`, 'info');
     } else {
-      // In autonomous mode, auto-approve and start
       plan.status = 'approved';
       this.setExecutionState('idle');
       this.log('Architect', `Plan approved autonomously (${plan.tasks.length} tasks). Ready to execute.`, 'success');
@@ -329,7 +223,7 @@ export class AutonomousAgentEngine {
       if (this.isCancelled) break;
       if (this.isPaused) {
         this.setExecutionState('paused');
-        return this.createEmptyVerification();
+        return AutonomousVerificationService.createEmptyVerification();
       }
 
       const task = this.currentPlan.tasks[taskIdx];
@@ -354,7 +248,7 @@ export class AutonomousAgentEngine {
         this.setExecutionState('waiting_step_approval');
         this.notifyTaskStatus(task.id, 'waiting_approval');
         this.log(task.role, `Waiting for user approval to execute "${task.title}"`, 'info');
-        return this.createEmptyVerification();
+        return AutonomousVerificationService.createEmptyVerification();
       }
 
       // Execute Single Autonomous Task
@@ -461,7 +355,6 @@ export class AutonomousAgentEngine {
             taskSuccess = true;
             task.resultSummary = codeGen.explanation || `Successfully implemented ${task.title}.`;
           } else {
-            // DIAGNOSE & CORRECT
             task.retryCount++;
             this.log(task.role, `Type-check failed (${task.retryCount}/${task.maxRetries}). Attempting self-healing correction...`, 'warning');
             if (task.retryCount > task.maxRetries) {
@@ -470,12 +363,13 @@ export class AutonomousAgentEngine {
               break;
             }
           }
-        } catch (genErr: any) {
+        } catch (genErr: unknown) {
           task.retryCount++;
-          this.log(task.role, `Code generation error: ${genErr?.message}`, 'error');
+          const msg = genErr instanceof Error ? genErr.message : String(genErr);
+          this.log(task.role, `Code generation error: ${msg}`, 'error');
           if (task.retryCount > task.maxRetries) {
             task.status = 'failed';
-            task.error = genErr?.message;
+            task.error = msg;
             break;
           }
         }
@@ -499,32 +393,11 @@ export class AutonomousAgentEngine {
     this.setExecutionState('verifying');
     this.log('Testing', 'Running project-wide verification suite...', 'info');
 
-    // 1. Project Type Check
-    const finalLint = await this.toolRegistry.executeTool('type_check', {});
-    // 2. Project Unit Tests
-    const finalTests = await this.toolRegistry.executeTool('run_tests', {});
-
-    commandsExecutedGlobally.push({
-      command: 'npm test',
-      exitCode: finalTests.success ? 0 : 1,
-      success: finalTests.success,
-    });
-
-    const verification: VerificationSummary = {
-      filesChanged: Array.from(filesModifiedGlobally),
-      commandsExecuted: commandsExecutedGlobally,
-      testsPassed: finalTests.data?.passed || (finalTests.success ? 1 : 0),
-      testsFailed: finalTests.data?.failed || (!finalTests.success ? 1 : 0),
-      testErrors: finalTests.error ? [finalTests.error] : [],
-      typeCheckPassed: finalLint.success,
-      typeCheckErrors: finalLint.error ? [finalLint.error] : [],
-      checksNotRun: ['Full browser visual regression', 'Cloud deployment check'],
-      remainingRisks: finalTests.success && finalLint.success
-        ? []
-        : ['Some assertions or type rules need manual confirmation'],
-      overallSuccess: finalLint.success && finalTests.success,
-      timestamp: Date.now(),
-    };
+    const verification = await AutonomousVerificationService.runVerification(
+      this.toolRegistry,
+      filesModifiedGlobally,
+      commandsExecutedGlobally
+    );
 
     if (this.currentPlan) {
       this.currentPlan.status = verification.overallSuccess ? 'completed' : 'failed';
@@ -555,19 +428,5 @@ export class AutonomousAgentEngine {
     if (this.events.onTaskStatusChange) {
       this.events.onTaskStatusChange(taskId, status);
     }
-  }
-
-  private createEmptyVerification(): VerificationSummary {
-    return {
-      filesChanged: [],
-      commandsExecuted: [],
-      testsPassed: 0,
-      testsFailed: 0,
-      typeCheckPassed: true,
-      checksNotRun: [],
-      remainingRisks: [],
-      overallSuccess: false,
-      timestamp: Date.now(),
-    };
   }
 }
