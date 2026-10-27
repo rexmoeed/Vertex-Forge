@@ -18,9 +18,13 @@ import {
   RuntimeCapability,
   AIDebugDiagnosis,
 } from '../types/debugger';
-import { DesktopBridge } from './desktopBridge';
 import { VirtualFileSystem } from './virtualFs';
-import { GeminiService } from './geminiService';
+import { discoverAvailableRuntimes } from './debugger/debuggerRuntimes';
+import { prepareExecutionTrajectory, SimulatedExecutionLine } from './debugger/debuggerTrajectory';
+import { diagnoseDebugSessionWithAI } from './debugger/debuggerAiAssistant';
+import { DebuggerBreakpointsManager } from './debugger/debuggerBreakpoints';
+import { DebuggerWatchManager } from './debugger/debuggerWatch';
+import { DebuggerConfigManager } from './debugger/debuggerConfig';
 
 export interface DebuggerEngineEvents {
   onSessionStateChange?: (session: DebugSession | null) => void;
@@ -38,10 +42,9 @@ export class DebuggerEngine {
   private vfs: VirtualFileSystem;
   private events: DebuggerEngineEvents = {};
 
-  private breakpoints: Map<string, Breakpoint> = new Map();
-  private watchExpressions: Map<string, WatchExpression> = new Map();
-  private configurations: DebugConfiguration[] = [];
-  private activeConfigName: string = 'Launch Current File (TypeScript / Node)';
+  private breakpointsMgr: DebuggerBreakpointsManager;
+  private watchMgr: DebuggerWatchManager;
+  private configMgr: DebuggerConfigManager;
 
   private currentSession: DebugSession | null = null;
   private currentThread: Thread = { id: 1, name: 'main', status: 'running' };
@@ -52,12 +55,15 @@ export class DebuggerEngine {
 
   private runtimes: RuntimeCapability[] = [];
   private activeExecutionStepIndex: number = 0;
-  private simulatedExecutionLines: Array<{ line: number; name: string; vars: Record<string, any>; isException?: boolean }> = [];
+  private simulatedExecutionLines: SimulatedExecutionLine[] = [];
 
   constructor(vfs: VirtualFileSystem) {
     this.vfs = vfs;
+    this.breakpointsMgr = new DebuggerBreakpointsManager(bp => this.events.onBreakpointsChange?.(bp));
+    this.watchMgr = new DebuggerWatchManager(w => this.events.onWatchExpressionsChange?.(w));
+    this.configMgr = new DebuggerConfigManager(vfs);
+
     this.seedSampleDebugTarget();
-    this.initDefaultConfigurations();
     this.discoverRuntimes();
   }
 
@@ -72,308 +78,91 @@ export class DebuggerEngine {
 
   public setEvents(events: DebuggerEngineEvents) {
     this.events = events;
+    this.breakpointsMgr.setOnChange(bp => this.events.onBreakpointsChange?.(bp));
+    this.watchMgr.setOnChange(w => this.events.onWatchExpressionsChange?.(w));
   }
 
-  // ==========================================
-  // RUNTIME & ADAPTER DISCOVERY
-  // ==========================================
-
+  // Runtime Discovery
   public async discoverRuntimes(): Promise<RuntimeCapability[]> {
-    const list: RuntimeCapability[] = [];
-
-    // 1. Node.js & TypeScript
-    try {
-      const nodeCheck = await DesktopBridge.executeCommand('node -v');
-      const isAvailable = nodeCheck.exitCode === 0;
-      list.push({
-        language: 'JavaScript / TypeScript',
-        runtime: 'Node.js',
-        version: isAvailable ? nodeCheck.stdout.trim() : undefined,
-        isAvailable,
-        adapterName: 'js-debug (Node V8 Inspector)',
-        adapterInstalled: isAvailable,
-        reasonIfNotAvailable: isAvailable ? undefined : 'Node.js runtime not found in environment.',
-      });
-    } catch {
-      list.push({
-        language: 'JavaScript / TypeScript',
-        runtime: 'Node.js',
-        isAvailable: false,
-        adapterName: 'js-debug',
-        adapterInstalled: false,
-        reasonIfNotAvailable: 'Unable to execute node binary check.',
-      });
-    }
-
-    // 2. Python
-    try {
-      const pyCheck = await DesktopBridge.executeCommand('python3 --version');
-      const isAvailable = pyCheck.exitCode === 0;
-      list.push({
-        language: 'Python',
-        runtime: 'Python 3',
-        version: isAvailable ? pyCheck.stdout.trim() : undefined,
-        isAvailable,
-        adapterName: 'debugpy (DAP)',
-        adapterInstalled: isAvailable,
-        reasonIfNotAvailable: isAvailable ? undefined : 'Python 3 not detected in host system PATH.',
-      });
-    } catch {
-      list.push({
-        language: 'Python',
-        runtime: 'Python 3',
-        isAvailable: false,
-        adapterName: 'debugpy (DAP)',
-        adapterInstalled: false,
-        reasonIfNotAvailable: 'Python 3 not detected in host system PATH.',
-      });
-    }
-
-    // 3. Go
-    try {
-      const goCheck = await DesktopBridge.executeCommand('go version');
-      const isAvailable = goCheck.exitCode === 0;
-      list.push({
-        language: 'Go',
-        runtime: 'Go Toolchain',
-        version: isAvailable ? goCheck.stdout.trim() : undefined,
-        isAvailable,
-        adapterName: 'delve (dlv)',
-        adapterInstalled: isAvailable,
-        reasonIfNotAvailable: isAvailable ? undefined : 'Go toolchain not detected in host system PATH.',
-      });
-    } catch {
-      list.push({
-        language: 'Go',
-        runtime: 'Go Toolchain',
-        isAvailable: false,
-        adapterName: 'delve (dlv)',
-        adapterInstalled: false,
-        reasonIfNotAvailable: 'Go compiler not found in PATH.',
-      });
-    }
-
-    this.runtimes = list;
-    return list;
+    this.runtimes = await discoverAvailableRuntimes();
+    return this.runtimes;
   }
 
   public getRuntimes(): RuntimeCapability[] {
     return this.runtimes;
   }
 
-  // ==========================================
-  // LAUNCH CONFIGURATIONS
-  // ==========================================
-
-  private initDefaultConfigurations() {
-    this.configurations = [
-      {
-        name: 'Launch Current File (TypeScript / Node)',
-        type: 'node',
-        request: 'launch',
-        program: '${file}',
-        stopOnEntry: false,
-        sourceMaps: true,
-      },
-      {
-        name: 'Debug Sample Program (sampleDebugTarget.ts)',
-        type: 'tsx',
-        request: 'launch',
-        program: 'src/services/sampleDebugTarget.ts',
-        stopOnEntry: true,
-        sourceMaps: true,
-      },
-      {
-        name: 'Debug Vitest Test Runner',
-        type: 'node',
-        request: 'launch',
-        program: 'node_modules/vitest/vitest.mjs',
-        args: ['run'],
-        stopOnEntry: false,
-      },
-    ];
-
-    // Load any custom config from .vertex/launch.json or .vscode/launch.json
-    this.loadPersistedConfigurations();
-  }
-
+  // Configurations delegation
   public getConfigurations(): DebugConfiguration[] {
-    return this.configurations;
+    return this.configMgr.getConfigurations();
   }
 
   public getActiveConfigName(): string {
-    return this.activeConfigName;
+    return this.configMgr.getActiveConfigName();
   }
 
   public setActiveConfigName(name: string) {
-    this.activeConfigName = name;
+    this.configMgr.setActiveConfigName(name);
   }
 
   public async saveConfiguration(config: DebugConfiguration): Promise<void> {
-    const existingIdx = this.configurations.findIndex(c => c.name === config.name);
-    if (existingIdx !== -1) {
-      this.configurations[existingIdx] = config;
-    } else {
-      this.configurations.push(config);
-    }
-
-    const payload = JSON.stringify({ version: '0.2.0', configurations: this.configurations }, null, 2);
-    this.vfs.writeFile('.vertex/launch.json', payload);
-    try {
-      await DesktopBridge.writeFile('.vertex/launch.json', payload);
-    } catch {}
+    return this.configMgr.saveConfiguration(config);
   }
 
   public loadPersistedConfigurations() {
-    const content = this.vfs.readFile('.vertex/launch.json') || this.vfs.readFile('.vscode/launch.json');
-    if (content) {
-      try {
-        const parsed = JSON.parse(content);
-        if (Array.isArray(parsed.configurations) && parsed.configurations.length > 0) {
-          this.configurations = parsed.configurations;
-          this.activeConfigName = this.configurations[0].name;
-        }
-      } catch {}
-    }
+    this.configMgr.loadPersistedConfigurations();
   }
 
-  // ==========================================
-  // BREAKPOINTS MANAGEMENT
-  // ==========================================
-
+  // Breakpoints delegation
   public setBreakpoint(filePath: string, line: number, condition?: string): Breakpoint {
-    const cleanPath = filePath.replace(/\\/g, '/');
-    const id = `bp-${cleanPath}-${line}`;
-    const bp: Breakpoint = {
-      id,
-      filePath: cleanPath,
-      line,
-      enabled: true,
-      condition: condition?.trim() || undefined,
-      verified: true,
-    };
-    this.breakpoints.set(id, bp);
-    this.notifyBreakpoints();
-    return bp;
+    return this.breakpointsMgr.setBreakpoint(filePath, line, condition);
   }
 
   public toggleBreakpoint(filePath: string, line: number): boolean {
-    const cleanPath = filePath.replace(/\\/g, '/');
-    const id = `bp-${cleanPath}-${line}`;
-    if (this.breakpoints.has(id)) {
-      this.breakpoints.delete(id);
-      this.notifyBreakpoints();
-      return false; // removed
-    } else {
-      this.setBreakpoint(cleanPath, line);
-      return true; // added
-    }
+    return this.breakpointsMgr.toggleBreakpoint(filePath, line);
   }
 
   public removeBreakpoint(id: string) {
-    this.breakpoints.delete(id);
-    this.notifyBreakpoints();
+    this.breakpointsMgr.removeBreakpoint(id);
   }
 
   public setBreakpointEnabled(id: string, enabled: boolean) {
-    const bp = this.breakpoints.get(id);
-    if (bp) {
-      bp.enabled = enabled;
-      this.notifyBreakpoints();
-    }
+    this.breakpointsMgr.setBreakpointEnabled(id, enabled);
   }
 
   public clearAllBreakpoints() {
-    this.breakpoints.clear();
-    this.notifyBreakpoints();
+    this.breakpointsMgr.clearAllBreakpoints();
   }
 
   public getBreakpoints(): Breakpoint[] {
-    return Array.from(this.breakpoints.values());
+    return this.breakpointsMgr.getBreakpoints();
   }
 
   public getBreakpointsForFile(filePath: string): Breakpoint[] {
-    const cleanPath = filePath.replace(/\\/g, '/');
-    return Array.from(this.breakpoints.values()).filter(b => b.filePath === cleanPath);
+    return this.breakpointsMgr.getBreakpointsForFile(filePath);
   }
 
-  private notifyBreakpoints() {
-    if (this.events.onBreakpointsChange) {
-      this.events.onBreakpointsChange(this.getBreakpoints());
-    }
-  }
-
-  // ==========================================
-  // WATCH EXPRESSIONS
-  // ==========================================
-
+  // Watch expressions delegation
   public addWatchExpression(expression: string): WatchExpression {
-    const cleanExpr = expression.trim();
-    const id = `watch-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    const watch: WatchExpression = {
-      id,
-      expression: cleanExpr,
-      updatedAt: Date.now(),
-    };
-    this.watchExpressions.set(id, watch);
-    this.evaluateWatchExpressions();
-    return watch;
+    return this.watchMgr.addWatchExpression(expression, this.variablesScopeMap.get(1));
   }
 
   public removeWatchExpression(id: string) {
-    this.watchExpressions.delete(id);
-    this.notifyWatchExpressions();
+    this.watchMgr.removeWatchExpression(id);
   }
 
   public getWatchExpressions(): WatchExpression[] {
-    return Array.from(this.watchExpressions.values());
+    return this.watchMgr.getWatchExpressions();
   }
 
   private evaluateWatchExpressions() {
-    const activeFrame = this.stackFrames.find(f => f.id === this.activeFrameId);
-    const scopeVars = this.variablesScopeMap.get(1) || []; // Local scope
-
-    // Context dictionary for evaluation
-    const context: Record<string, any> = {};
-    for (const v of scopeVars) {
-      try {
-        context[v.name] = JSON.parse(v.value);
-      } catch {
-        context[v.name] = v.value;
-      }
-    }
-
-    for (const watch of this.watchExpressions.values()) {
-      try {
-        const fn = new Function(...Object.keys(context), `return (${watch.expression});`);
-        const evaluated = fn(...Object.values(context));
-        watch.value = typeof evaluated === 'object' ? JSON.stringify(evaluated) : String(evaluated);
-        watch.type = typeof evaluated;
-        watch.error = undefined;
-      } catch (err: any) {
-        watch.value = undefined;
-        watch.error = err.message || 'Evaluation error';
-      }
-      watch.updatedAt = Date.now();
-    }
-
-    this.notifyWatchExpressions();
+    const scopeVars = this.variablesScopeMap.get(1) || [];
+    this.watchMgr.evaluate(scopeVars);
   }
 
-  private notifyWatchExpressions() {
-    if (this.events.onWatchExpressionsChange) {
-      this.events.onWatchExpressionsChange(this.getWatchExpressions());
-    }
-  }
-
-  // ==========================================
-  // DEBUGGING SESSION CONTROLS
-  // ==========================================
-
+  // Session controls
   public async startSession(configName?: string, customFile?: string): Promise<DebugSession> {
-    const targetName = configName || this.activeConfigName;
-    const config = this.configurations.find(c => c.name === targetName) || this.configurations[0];
-
+    const config = this.configMgr.getConfigurationByName(configName);
     const targetProgram = customFile || (config.program === '${file}' ? 'src/services/sampleDebugTarget.ts' : config.program || 'src/App.tsx');
 
     const session: DebugSession = {
@@ -390,14 +179,14 @@ export class DebuggerEngine {
     this.currentThread = { id: 1, name: 'Main Thread', status: 'running' };
     this.logConsole(`[Debugger] Launching ${config.name} (${targetProgram})...`, 'system');
 
-    // Build execution trajectory for target program
-    this.prepareExecutionTrajectory(targetProgram);
+    this.simulatedExecutionLines = prepareExecutionTrajectory(targetProgram, this.vfs, () => this.seedSampleDebugTarget());
+    this.activeExecutionStepIndex = 0;
 
     session.status = 'running';
     this.notifySession();
 
-    // Check if stopOnEntry is set or first breakpoint is encountered
-    if (config.stopOnEntry || this.hasBreakpointAt(targetProgram, this.simulatedExecutionLines[0]?.line)) {
+    const currVars = this.simulatedExecutionLines[0]?.vars || {};
+    if (config.stopOnEntry || this.breakpointsMgr.hasBreakpointAt(targetProgram, this.simulatedExecutionLines[0]?.line, currVars)) {
       this.pauseAtStep(0, config.stopOnEntry ? 'entry' : 'breakpoint');
     } else {
       this.runUntilNextBreakpoint();
@@ -455,12 +244,10 @@ export class DebuggerEngine {
   }
 
   public stepInto() {
-    // In our engine, stepInto advances to nested execution frame
     this.stepOver();
   }
 
   public stepOut() {
-    // Advance to parent frame return
     const nextIdx = Math.min(this.simulatedExecutionLines.length - 1, this.activeExecutionStepIndex + 2);
     this.pauseAtStep(nextIdx, 'step');
   }
@@ -481,120 +268,6 @@ export class DebuggerEngine {
     this.evaluateWatchExpressions();
   }
 
-  // ==========================================
-  // EXECUTION TRAJECTORY & STEPPING ENGINE
-  // ==========================================
-
-  private prepareExecutionTrajectory(filePath: string) {
-    let content = this.vfs.readFile(filePath) || '';
-    if (!content && filePath.includes('sampleDebugTarget')) {
-      this.seedSampleDebugTarget();
-      content = this.vfs.readFile('src/services/sampleDebugTarget.ts') || '';
-    }
-    const lines = content.split('\n');
-
-    this.simulatedExecutionLines = [];
-    const cumulativeVars: Record<string, any> = {
-      sourceFile: filePath,
-      prices: [45, 120, 89, 320, 15],
-    };
-
-    // Parse executable lines and synthesize actual stack/variable states
-    lines.forEach((l, idx) => {
-      const trimmed = l.trim();
-      const lineNum = idx + 1;
-
-      // Match statements
-      if (
-        trimmed &&
-        !trimmed.startsWith('//') &&
-        !trimmed.startsWith('/*') &&
-        !trimmed.startsWith('*') &&
-        !trimmed.startsWith('import ') &&
-        !trimmed.startsWith('export interface') &&
-        !trimmed.startsWith('type ')
-      ) {
-        if (trimmed.includes('const') || trimmed.includes('let') || trimmed.includes('var')) {
-          const varMatch = trimmed.match(/(const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*([^;]+);?/);
-          if (varMatch) {
-            const varName = varMatch[2];
-            const rawVal = varMatch[3].trim();
-            try {
-              cumulativeVars[varName] = JSON.parse(rawVal);
-            } catch {
-              cumulativeVars[varName] = rawVal;
-            }
-          }
-        }
-
-        if (trimmed.includes('+=') || (trimmed.includes('=') && !trimmed.startsWith('const') && !trimmed.startsWith('let') && !trimmed.startsWith('var') && !trimmed.startsWith('if') && !trimmed.startsWith('for'))) {
-          const assignMatch = trimmed.match(/([a-zA-Z0-9_$]+)\s*(\+=|=)\s*([^;]+);?/);
-          if (assignMatch) {
-            const varName = assignMatch[1];
-            const op = assignMatch[2];
-            const rawVal = assignMatch[3].trim();
-            if (op === '+=') {
-              const num = Number(rawVal);
-              if (!isNaN(num) && typeof cumulativeVars[varName] === 'number') {
-                cumulativeVars[varName] += num;
-              } else {
-                cumulativeVars[varName] = (cumulativeVars[varName] || 0) + 1;
-              }
-            } else {
-              try {
-                cumulativeVars[varName] = JSON.parse(rawVal);
-              } catch {
-                cumulativeVars[varName] = rawVal;
-              }
-            }
-          }
-        }
-
-        // Detect potential division by zero or error assertions
-        const isException = trimmed.includes('throw new Error') || trimmed.includes('/ 0') || trimmed.includes('.undefinedMethod()');
-
-        this.simulatedExecutionLines.push({
-          line: lineNum,
-          name: trimmed.slice(0, 40),
-          vars: { ...cumulativeVars, stepIndex: this.simulatedExecutionLines.length + 1, line: lineNum },
-          isException,
-        });
-      }
-    });
-
-    if (this.simulatedExecutionLines.length === 0) {
-      this.simulatedExecutionLines.push({
-        line: 1,
-        name: 'Entry',
-        vars: { ...cumulativeVars, initialized: true },
-      });
-    }
-
-    this.activeExecutionStepIndex = 0;
-  }
-
-  private hasBreakpointAt(filePath: string, line?: number): boolean {
-    if (!line) return false;
-    const cleanPath = filePath.replace(/\\/g, '/');
-    const id = `bp-${cleanPath}-${line}`;
-    const bp = this.breakpoints.get(id);
-    if (!bp || !bp.enabled) return false;
-
-    // Evaluate conditional breakpoint expression if present
-    if (bp.condition) {
-      try {
-        const currentVars = this.simulatedExecutionLines[this.activeExecutionStepIndex]?.vars || {};
-        const fn = new Function(...Object.keys(currentVars), `return Boolean(${bp.condition});`);
-        const matches = fn(...Object.values(currentVars));
-        return !!matches;
-      } catch {
-        return true; // trigger if condition evaluation fails
-      }
-    }
-
-    return true;
-  }
-
   private runUntilNextBreakpoint() {
     let nextIdx = this.activeExecutionStepIndex + 1;
     const program = this.currentSession?.configuration.program || 'src/services/sampleDebugTarget.ts';
@@ -603,14 +276,12 @@ export class DebuggerEngine {
       const step = this.simulatedExecutionLines[nextIdx];
       this.activeExecutionStepIndex = nextIdx;
 
-      // Check exception
       if (step.isException) {
         this.pauseAtStep(nextIdx, 'exception', `Uncaught Error encountered at line ${step.line}: ${step.name}`);
         return;
       }
 
-      // Check breakpoint
-      if (this.hasBreakpointAt(program, step.line)) {
+      if (this.breakpointsMgr.hasBreakpointAt(program, step.line, step.vars)) {
         this.pauseAtStep(nextIdx, 'breakpoint');
         return;
       }
@@ -632,7 +303,6 @@ export class DebuggerEngine {
     this.currentThread.pauseReason = reason;
     this.currentThread.exceptionText = exceptionText;
 
-    // 1. Construct Stack Frames
     this.stackFrames = [
       {
         id: 1,
@@ -658,7 +328,6 @@ export class DebuggerEngine {
     ];
     this.activeFrameId = 1;
 
-    // 2. Construct Scopes & Variables
     const localVars: Variable[] = Object.entries(currentStep.vars).map(([k, v], idx) => ({
       name: k,
       value: typeof v === 'object' ? JSON.stringify(v) : String(v),
@@ -666,7 +335,6 @@ export class DebuggerEngine {
       variablesReference: 100 + idx,
     }));
 
-    // Add common local inspection variables
     localVars.push(
       { name: 'this', value: '{ context: "DebuggerEngine" }', type: 'object', variablesReference: 199 },
       { name: 'executionState', value: '"PAUSED_AT_BREAKPOINT"', type: 'string', variablesReference: 0 }
@@ -677,8 +345,8 @@ export class DebuggerEngine {
       { name: 'global.timeout', value: '5000', type: 'number', variablesReference: 0 },
     ];
 
-    this.variablesScopeMap.set(1, localVars); // Local Scope (ref: 1)
-    this.variablesScopeMap.set(2, globalVars); // Global Scope (ref: 2)
+    this.variablesScopeMap.set(1, localVars);
+    this.variablesScopeMap.set(2, globalVars);
 
     this.logConsole(`[Thread 1] Paused at ${program}:${currentStep.line} (${reason})`, 'system');
     if (exceptionText) {
@@ -706,10 +374,7 @@ export class DebuggerEngine {
     this.stopSession();
   }
 
-  // ==========================================
-  // REPL EVALUATION
-  // ==========================================
-
+  // REPL evaluation
   public evaluateInConsole(expression: string): string {
     this.logConsole(`> ${expression}`, 'input');
 
@@ -720,9 +385,10 @@ export class DebuggerEngine {
       const str = typeof res === 'object' ? JSON.stringify(res, null, 2) : String(res);
       this.logConsole(str, 'output');
       return str;
-    } catch (err: any) {
-      this.logConsole(`Error: ${err.message}`, 'stderr');
-      return `Error: ${err.message}`;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logConsole(`Error: ${msg}`, 'stderr');
+      return `Error: ${msg}`;
     }
   }
 
@@ -747,76 +413,19 @@ export class DebuggerEngine {
     }
   }
 
-  // ==========================================
-  // AI DEBUGGER ASSISTANT
-  // ==========================================
-
+  // AI Assistant delegation
   public async diagnoseWithAI(): Promise<AIDebugDiagnosis> {
-    if (!this.currentSession || this.currentThread.status !== 'paused') {
-      throw new Error('Debugger must be paused at a breakpoint or exception to diagnose.');
-    }
-
-    const activeFrame = this.stackFrames.find(f => f.id === this.activeFrameId) || this.stackFrames[0];
-    const sourcePath = activeFrame.source.path;
-    const sourceCode = this.vfs.readFile(sourcePath) || '';
-
-    // Extract variables with secret redaction
-    const rawVars = this.variablesScopeMap.get(1) || [];
-    const sanitizedVars: Record<string, string> = {};
-    const redactedKeys: string[] = [];
-
-    const sensitiveWords = ['token', 'secret', 'password', 'key', 'auth', 'cred'];
-    for (const v of rawVars) {
-      const lower = v.name.toLowerCase();
-      if (sensitiveWords.some(w => lower.includes(w))) {
-        sanitizedVars[v.name] = '[REDACTED_SECRET]';
-        redactedKeys.push(v.name);
-      } else {
-        sanitizedVars[v.name] = v.value;
-      }
-    }
-
-    const promptContext = `
-The multi-language debugger is paused at:
-- File: ${sourcePath}
-- Line: ${activeFrame.line}
-- Pause reason: ${this.currentThread.pauseReason}
-- Exception: ${this.currentThread.exceptionText || 'None'}
-- Variables in scope: ${JSON.stringify(sanitizedVars, null, 2)}
-- Source code around line:
-${sourceCode.split('\n').slice(Math.max(0, activeFrame.line - 5), activeFrame.line + 5).join('\n')}
-    `;
-
-    try {
-      const aiRes = await GeminiService.debugIssue({
-        errorLog: this.currentThread.exceptionText || `Paused at line ${activeFrame.line}`,
-        failingFile: sourcePath,
-        fileContent: sourceCode,
-      });
-
-      return {
-        hypothesis: aiRes.rootCause || 'Identified potential null reference or boundary mismatch.',
-        rootCause: aiRes.explanation || 'Logic issue detected at the active breakpoint location.',
-        suggestedFix: aiRes.patch || 'Apply guarded state checks or correct loop bounds.',
-        targetFile: sourcePath,
-        replacementCode: aiRes.patch,
-        redactedVariables: redactedKeys,
-      };
-    } catch {
-      return {
-        hypothesis: 'Off-by-one or boundary exception in loop execution',
-        rootCause: `At line ${activeFrame.line}, variable inspection revealed unexpected state: ${JSON.stringify(sanitizedVars)}`,
-        suggestedFix: 'Add null-check guard before accessing member and bound index.',
-        targetFile: sourcePath,
-        redactedVariables: redactedKeys,
-      };
-    }
+    return diagnoseDebugSessionWithAI({
+      currentSession: this.currentSession,
+      currentThread: this.currentThread,
+      stackFrames: this.stackFrames,
+      activeFrameId: this.activeFrameId,
+      variablesScopeMap: this.variablesScopeMap,
+      vfs: this.vfs,
+    });
   }
 
-  // ==========================================
-  // GETTERS & EVENT NOTIFIERS
-  // ==========================================
-
+  // Getters & Notifiers
   public getSession(): DebugSession | null {
     return this.currentSession;
   }
@@ -829,7 +438,7 @@ ${sourceCode.split('\n').slice(Math.max(0, activeFrame.line - 5), activeFrame.li
     return this.stackFrames;
   }
 
-  public getScopes(frameId: number): Scope[] {
+  public getScopes(_frameId: number): Scope[] {
     return [
       { name: 'Local', variablesReference: 1, expensive: false },
       { name: 'Global', variablesReference: 2, expensive: false },
@@ -841,32 +450,22 @@ ${sourceCode.split('\n').slice(Math.max(0, activeFrame.line - 5), activeFrame.li
   }
 
   private notifySession() {
-    if (this.events.onSessionStateChange) {
-      this.events.onSessionStateChange(this.currentSession);
-    }
+    this.events.onSessionStateChange?.(this.currentSession);
   }
 
   private notifyThread() {
-    if (this.events.onThreadStateChange) {
-      this.events.onThreadStateChange(this.currentThread);
-    }
+    this.events.onThreadStateChange?.(this.currentThread);
   }
 
   private notifyStackFrames() {
-    if (this.events.onStackFramesChange) {
-      this.events.onStackFramesChange(this.stackFrames);
-    }
+    this.events.onStackFramesChange?.(this.stackFrames);
   }
 
   private notifyScopes() {
-    if (this.events.onScopesChange) {
-      this.events.onScopesChange(this.getScopes(this.activeFrameId));
-    }
+    this.events.onScopesChange?.(this.getScopes(this.activeFrameId));
   }
 
   private notifyVariables(scopeRef: number) {
-    if (this.events.onVariablesChange) {
-      this.events.onVariablesChange(this.getVariables(scopeRef));
-    }
+    this.events.onVariablesChange?.(this.getVariables(scopeRef));
   }
 }
