@@ -1,25 +1,33 @@
 import { IDesktopAPI, WorkspaceFile, CommandExecutionResult } from '../types/desktop';
 import { VirtualFileSystem } from './virtualFs';
-import { GitProfile, DevServerProcess, ProjectProfile } from '../types/project';
-import { logger } from './logger';
+import { DevServerProcess } from '../types/project';
+import { DesktopProcessBridge } from './desktop/desktopProcessBridge';
+import { DesktopGitBridge } from './desktop/desktopGitBridge';
+
+export { DesktopProcessBridge } from './desktop/desktopProcessBridge';
+export { DesktopGitBridge } from './desktop/desktopGitBridge';
 
 /**
  * Universal Production-Grade Desktop Bridge
- * Interfaces with:
- * 1. Electron Preload API (window.desktopAPI) when in Electron desktop bundle
- * 2. Real Node/Express Backend APIs (/api/fs, /api/process, /api/git) for real filesystem & shell
- * 3. Browser File System Access API (showDirectoryPicker) for direct client folder access
- * 4. High-fidelity VFS for instant project templates and sandbox environments
+ * Interfaces with Electron Preload, backend endpoints, and VFS sandbox.
  */
 class DesktopBridgeService implements IDesktopAPI {
   private localVfs: VirtualFileSystem | null = null;
+
   public get isElectron(): boolean {
     return typeof window !== 'undefined' && (!!(window as any).desktopAPI?.isElectron || !!(window as any).desktopAPI);
   }
+
   public get platform(): 'darwin' | 'win32' | 'linux' {
-    return (typeof window !== 'undefined' && (window as any).desktopAPI?.platform) || (typeof process !== 'undefined' && (process.platform as any)) || 'win32';
+    return (
+      (typeof window !== 'undefined' && (window as any).desktopAPI?.platform) ||
+      (typeof process !== 'undefined' && (process.platform as any)) ||
+      'win32'
+    );
   }
-  public currentWorkspacePath: string = (typeof process !== 'undefined' && process.cwd) ? process.cwd() : '/workspace';
+
+  public currentWorkspacePath: string =
+    typeof process !== 'undefined' && process.cwd ? process.cwd() : '/workspace';
 
   public attachVFS(vfs: VirtualFileSystem) {
     this.localVfs = vfs;
@@ -44,7 +52,6 @@ class DesktopBridgeService implements IDesktopAPI {
     this.filePickerHandler = handler;
   }
 
-  // 1. Directory Picker (Zero native browser dialogs)
   public async openDirectoryDialog(): Promise<string | null> {
     if (this.isElectron && (window as any).desktopAPI?.openDirectoryDialog) {
       return (window as any).desktopAPI.openDirectoryDialog();
@@ -55,7 +62,6 @@ class DesktopBridgeService implements IDesktopAPI {
     return null;
   }
 
-  // 1c. File Picker (Zero native browser dialogs)
   public async openFileDialog(): Promise<string | null> {
     if (this.isElectron && (window as any).desktopAPI?.openFileDialog) {
       return (window as any).desktopAPI.openFileDialog();
@@ -66,7 +72,6 @@ class DesktopBridgeService implements IDesktopAPI {
     return null;
   }
 
-  // 1b. Inspect Path (Existence & Conflict Detection)
   public async inspectPath(targetPath: string): Promise<{
     exists: boolean;
     isDirectory: boolean;
@@ -85,7 +90,7 @@ class DesktopBridgeService implements IDesktopAPI {
       if (res.ok) {
         return await res.json();
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
 
@@ -100,7 +105,6 @@ class DesktopBridgeService implements IDesktopAPI {
     };
   }
 
-  // 2. Read Workspace Tree
   public async getWorkspaceTree(workspacePath: string): Promise<WorkspaceFile[]> {
     if (this.isElectron && (window as any).desktopAPI?.getWorkspaceTree) {
       return (window as any).desktopAPI.getWorkspaceTree(workspacePath);
@@ -139,7 +143,7 @@ class DesktopBridgeService implements IDesktopAPI {
           return filterTree(data.tree);
         }
       }
-    } catch (e) {
+    } catch {
       // fallback
     }
 
@@ -173,7 +177,6 @@ class DesktopBridgeService implements IDesktopAPI {
     return this.localVfs.getTree().filter((n: any) => !isDummyNode(n)).map(mapNode);
   }
 
-  // 3. Read File
   public async readFile(filePath: string): Promise<string> {
     if (this.isElectron && (window as any).desktopAPI?.readFile) {
       return (window as any).desktopAPI.readFile(filePath);
@@ -191,7 +194,7 @@ class DesktopBridgeService implements IDesktopAPI {
           return data.content;
         }
       }
-    } catch (e) {
+    } catch {
       // fallback
     }
 
@@ -202,7 +205,6 @@ class DesktopBridgeService implements IDesktopAPI {
     return content;
   }
 
-  // 4. Write File
   public async writeFile(filePath: string, content: string): Promise<{ success: boolean; error?: string }> {
     if (this.isElectron && (window as any).desktopAPI?.writeFile) {
       return (window as any).desktopAPI.writeFile(filePath, content);
@@ -218,7 +220,7 @@ class DesktopBridgeService implements IDesktopAPI {
         this.localVfs?.writeFile(filePath, content);
         return { success: true };
       }
-    } catch (e) {
+    } catch {
       // fallback
     }
 
@@ -226,7 +228,6 @@ class DesktopBridgeService implements IDesktopAPI {
     return { success: !!ok };
   }
 
-  // 5. Create File
   public async createFile(filePath: string, initialContent: string = ''): Promise<{ success: boolean; error?: string }> {
     try {
       const res = await fetch('/api/fs/create-file', {
@@ -238,13 +239,12 @@ class DesktopBridgeService implements IDesktopAPI {
         this.localVfs?.writeFile(filePath, initialContent);
         return { success: true };
       }
-    } catch (e) {
+    } catch {
       // fallback
     }
     return this.writeFile(filePath, initialContent);
   }
 
-  // 6. Create Directory
   public async createDirectory(dirPath: string): Promise<{ success: boolean; error?: string }> {
     try {
       const res = await fetch('/api/fs/create-dir', {
@@ -256,14 +256,13 @@ class DesktopBridgeService implements IDesktopAPI {
         this.localVfs?.writeFile(`${dirPath}/.keep`, '');
         return { success: true };
       }
-    } catch (e) {
+    } catch {
       // fallback
     }
     this.localVfs?.writeFile(`${dirPath}/.keep`, '');
     return { success: true };
   }
 
-  // 7. Delete Path
   public async deletePath(targetPath: string): Promise<{ success: boolean; error?: string }> {
     try {
       const res = await fetch('/api/fs/delete-path', {
@@ -275,14 +274,13 @@ class DesktopBridgeService implements IDesktopAPI {
         this.localVfs?.deleteNode(targetPath);
         return { success: true };
       }
-    } catch (e) {
+    } catch {
       // fallback
     }
     const ok = this.localVfs?.deleteNode(targetPath);
     return { success: !!ok };
   }
 
-  // 8. Rename Path
   public async renamePath(oldPath: string, newPath: string): Promise<{ success: boolean; error?: string }> {
     try {
       const res = await fetch('/api/fs/rename-path', {
@@ -298,7 +296,7 @@ class DesktopBridgeService implements IDesktopAPI {
         }
         return { success: true };
       }
-    } catch (e) {
+    } catch {
       // fallback
     }
     const content = this.localVfs?.readFile(oldPath);
@@ -308,7 +306,6 @@ class DesktopBridgeService implements IDesktopAPI {
     return { success: true };
   }
 
-  // 9. Search Workspace
   public async searchWorkspace(query: string): Promise<Array<{ filePath: string; line: number; text: string }>> {
     try {
       const res = await fetch('/api/fs/search', {
@@ -320,231 +317,58 @@ class DesktopBridgeService implements IDesktopAPI {
         const data = await res.json();
         return data.results || [];
       }
-    } catch (e) {
+    } catch {
       // fallback
     }
     const results = this.localVfs?.searchFiles(query) || [];
     return results.map(r => ({ filePath: r.path, line: r.line, text: r.text }));
   }
 
-  // 10. Execute Real Command
-  public async executeCommand(command: string, options?: { cwd?: string; timeoutMs?: number; env?: Record<string, string>; executionId?: string }): Promise<CommandExecutionResult> {
-    const cwd = options?.cwd || this.currentWorkspacePath;
-    try {
-      const res = await fetch('/api/process/execute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command, cwd, executionId: options?.executionId }),
-      });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch (e: any) {
-      return {
-        stdout: '',
-        stderr: `[Process Runner Error]: Failed to reach execution backend: ${e?.message || 'Network error'}`,
-        exitCode: 1,
-        durationMs: 0,
-      };
-    }
-
-    return {
-      stdout: '',
-      stderr: `[Process Runner Error]: Execution request failed`,
-      exitCode: 1,
-      durationMs: 0,
-    };
+  public async executeCommand(
+    command: string,
+    options?: { cwd?: string; timeoutMs?: number; env?: Record<string, string>; executionId?: string }
+  ): Promise<CommandExecutionResult> {
+    return DesktopProcessBridge.executeCommand(command, this.currentWorkspacePath, options);
   }
 
-  // 10b. Interrupt Real Running Command
   public async interruptCommand(executionId?: string, pid?: number): Promise<boolean> {
-    try {
-      const res = await fetch('/api/process/interrupt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ executionId, pid }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return !!data.success;
-      }
-    } catch {
-      // ignore
-    }
-    return false;
+    return DesktopProcessBridge.interruptCommand(executionId, pid);
   }
 
-  // 11. Start Dev Server (Defaults to port 5173 to avoid collision with IDE port 3000)
   public async startDevServer(command: string, cwd?: string, port = 5173): Promise<DevServerProcess | null> {
-    try {
-      const res = await fetch('/api/process/dev-server/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command, cwd: cwd || this.currentWorkspacePath, port }),
-      });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch (e) {
-      logger.error('Failed to start dev server:', e);
-    }
-    return null;
+    return DesktopProcessBridge.startDevServer(command, this.currentWorkspacePath, cwd, port);
   }
 
-  // 11b. Check Real Dev Server Health
-  public async checkDevServerHealth(pid: number): Promise<{ isAlive: boolean; isReady: boolean; status: string; healthState: string; statusCode?: number; message?: string }> {
-    try {
-      const res = await fetch(`/api/process/dev-server/health?pid=${pid}`);
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch {
-      // ignore
-    }
-    return { isAlive: false, isReady: false, status: 'stopped', healthState: 'stopped', message: 'Unable to connect to health checker' };
+  public async checkDevServerHealth(
+    pid: number
+  ): Promise<{ isAlive: boolean; isReady: boolean; status: string; healthState: string; statusCode?: number; message?: string }> {
+    return DesktopProcessBridge.checkDevServerHealth(pid);
   }
 
-  // 12. Stop Dev Server
   public async stopDevServer(pid: number): Promise<boolean> {
-    try {
-      const res = await fetch('/api/process/dev-server/stop', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pid }),
-      });
-      return res.ok;
-    } catch (e) {
-      return false;
-    }
+    return DesktopProcessBridge.stopDevServer(pid);
   }
 
-  // 13. List Dev Servers
   public async listDevServers(): Promise<DevServerProcess[]> {
-    try {
-      const res = await fetch('/api/process/dev-server/list');
-      if (res.ok) {
-        const data = await res.json();
-        return data.servers || [];
-      }
-    } catch (e) {
-      // ignore
-    }
-    return [];
+    return DesktopProcessBridge.listDevServers();
   }
 
-  // 14. Real Git Status
-  public async getGitStatus(workspacePath: string): Promise<{
-    branch: string;
-    modified: string[];
-    staged: string[];
-    untracked: string[];
-    isRepo?: boolean;
-    ahead?: number;
-    behind?: number;
-    lastCommit?: any;
-    modifiedCount?: number;
-    stagedCount?: number;
-    untrackedCount?: number;
-  }> {
-    try {
-      const res = await fetch('/api/git/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cwd: workspacePath || this.currentWorkspacePath }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return {
-          isRepo: !!data.isRepo,
-          branch: data.branch || 'main',
-          ahead: data.ahead || 0,
-          behind: data.behind || 0,
-          modified: data.modified || [],
-          staged: data.staged || [],
-          untracked: data.untracked || [],
-          modifiedCount: (data.modified || []).length,
-          stagedCount: (data.staged || []).length,
-          untrackedCount: (data.untracked || []).length,
-          lastCommit: data.lastCommit,
-        };
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    const modified = (this.localVfs?.getModifiedFiles() || []).map(d => d.filePath);
-    return {
-      isRepo: true,
-      branch: this.localVfs?.getBranch() || 'main',
-      ahead: 0,
-      behind: 0,
-      modified,
-      staged: [],
-      untracked: [],
-      modifiedCount: modified.length,
-      stagedCount: 0,
-      untrackedCount: 0,
-    };
+  public async getGitStatus(workspacePath: string) {
+    return DesktopGitBridge.getGitStatus(workspacePath, this.currentWorkspacePath, this.localVfs);
   }
 
-  // 15. Real Git Diff
   public async getGitDiff(workspacePath: string, filePath?: string): Promise<string> {
-    try {
-      const res = await fetch('/api/git/diff', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cwd: workspacePath || this.currentWorkspacePath, filePath }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return data.diff || '';
-      }
-    } catch (e) {
-      // ignore
-    }
-    const diffs = this.localVfs?.getModifiedFiles() || [];
-    const targetDiffs = filePath ? diffs.filter(d => d.filePath === filePath) : diffs;
-    return targetDiffs.map(d => `--- a/${d.filePath}\n+++ b/${d.filePath}\n+${d.additions} -${d.deletions}`).join('\n\n');
+    return DesktopGitBridge.getGitDiff(workspacePath, this.currentWorkspacePath, this.localVfs, filePath);
   }
 
-  // 16. Real Git Commit
   public async gitCommit(workspacePath: string, message: string): Promise<{ hash: string; success: boolean }> {
-    try {
-      const res = await fetch('/api/git/commit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cwd: workspacePath || this.currentWorkspacePath, message }),
-      });
-      if (res.ok) {
-        const c = this.localVfs?.commit(message);
-        return { hash: c?.hash || 'commit', success: true };
-      }
-    } catch (e) {
-      // ignore
-    }
-    const c = this.localVfs?.commit(message);
-    return { hash: c?.hash || 'commit', success: true };
+    return DesktopGitBridge.gitCommit(workspacePath, this.currentWorkspacePath, this.localVfs, message);
   }
 
-  // 17. Real Git Clone
   public async gitClone(repoUrl: string, targetDir?: string): Promise<{ success: boolean; targetPath?: string; error?: string }> {
-    try {
-      const res = await fetch('/api/git/clone', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repoUrl, targetDir }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        return { success: true, targetPath: data.targetPath };
-      }
-      return { success: false, error: data.error || 'Clone failed' };
-    } catch (e: any) {
-      return { success: false, error: e?.message || 'Network error' };
-    }
+    return DesktopGitBridge.gitClone(repoUrl, targetDir);
   }
 
-  // 18. Detect Project Tech Stack
   public async detectProjectStack(rootPath: string): Promise<any> {
     try {
       const res = await fetch('/api/project/detect', {
@@ -555,7 +379,7 @@ class DesktopBridgeService implements IDesktopAPI {
       if (res.ok) {
         return await res.json();
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
     return null;
@@ -566,7 +390,6 @@ class DesktopBridgeService implements IDesktopAPI {
     return true;
   }
 
-  // 19. Validate File for Drag-and-Drop and Canonical Open
   public async validateFile(filePath: string): Promise<{ valid: boolean; error?: string; isFile?: boolean }> {
     if (!filePath || filePath.includes('..')) {
       return { valid: false, error: 'Invalid file path or path traversal detected' };
@@ -576,7 +399,6 @@ class DesktopBridgeService implements IDesktopAPI {
       return (window as any).desktopAPI.validateFile(filePath);
     }
 
-    // Check backend endpoint
     try {
       const res = await fetch('/api/fs/validate-file', {
         method: 'POST',
@@ -588,10 +410,9 @@ class DesktopBridgeService implements IDesktopAPI {
         return { valid: data.valid, isFile: data.isFile };
       }
     } catch {
-      // fallback to VFS
+      // fallback
     }
 
-    // Check local VFS
     if (this.localVfs) {
       const node = this.localVfs.findNode(filePath);
       if (node) {
