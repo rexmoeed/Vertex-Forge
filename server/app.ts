@@ -17,12 +17,16 @@ export function createApp(): { app: Express; getAiClient: () => GoogleGenAI | nu
 
   // 1. Core Transport Middleware with Body Limits
   app.use(express.json({ limit: '15mb' }));
-  // 1.1 Structured Request Logging via Pino
+
+  // 1.1 Request ID assignment & Structured Request Logging via Pino
   app.use((req: Request, res: Response, next: NextFunction) => {
-    serverLogger.info({ method: req.method, path: req.path }, 'Incoming HTTP Request');
+    const requestId = (req.headers['x-request-id'] as string) || `req_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    (req as any).requestId = requestId;
+    res.setHeader('x-request-id', requestId);
+
+    serverLogger.info({ requestId, method: req.method, path: req.path }, 'Incoming HTTP Request');
     next();
   });
-
 
   // 2. Global GenAI Client State
   let currentApiKey = process.env.GEMINI_API_KEY || '';
@@ -57,14 +61,23 @@ export function createApp(): { app: Express; getAiClient: () => GoogleGenAI | nu
   const getApiKey = () => currentApiKey;
 
   // 3. Healthcheck Endpoint
-  app.get('/api/health', (req: Request, res: Response) => {
+  app.get('/api/health', (_req: Request, res: Response) => {
     res.json({
       status: 'ok',
       service: 'Vertex Forge Backend API',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       version: '1.0.0',
+      errorTracking: {
+        provider: process.env.SENTRY_DSN ? 'sentry' : 'pino-structured',
+        configured: Boolean(process.env.SENTRY_DSN),
+      },
     });
+  });
+
+  // 3.1 Simulated Error Endpoint for Diagnostics & Integration Testing
+  app.get('/api/simulate-error', () => {
+    throw new Error('Simulated unhandled server exception for error tracking verification');
   });
 
   // 4. Mount Domain Routers (Layered Architecture)

@@ -1,9 +1,9 @@
 import React from 'react';
-import { HardRule, RuleViolation } from '../../types/kos';
+import type { useOperatorConsole } from '../../../hooks/useOperatorConsole';
 
 interface Props {
-  rules: HardRule[];
-  violations: RuleViolation[];
+  rules: ReturnType<typeof useOperatorConsole>['rules'];
+  violations: ReturnType<typeof useOperatorConsole>['violations'];
   onToggleRule: (id: string, enabled: boolean) => void;
 }
 

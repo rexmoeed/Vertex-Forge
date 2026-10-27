@@ -1,10 +1,9 @@
 import React from 'react';
 import { Lock, Trash2 } from 'lucide-react';
-import { CredentialVaultService } from '../../services/credentialVaultService';
-import { SecretMetadata } from '../../types/kos';
+import type { useOperatorConsole } from '../../../hooks/useOperatorConsole';
 
 interface Props {
-  secrets: SecretMetadata[];
+  secrets: ReturnType<typeof useOperatorConsole>['secrets'];
   newSecretName: string;
   setNewSecretName: (val: string) => void;
   newSecretVal: string;

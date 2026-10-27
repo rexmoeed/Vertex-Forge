@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['src/test/setupAiMocks.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}', 'server/**/*.{test,spec}.{ts,tsx}'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'server/**/*.{test,spec}.{ts,tsx}', 'test/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['**/node_modules/**', '**/dist/**', 'sample-projects/**'],
     coverage: {
       provider: 'v8',

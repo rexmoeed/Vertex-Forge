@@ -1,9 +1,8 @@
-import React from 'react';
-import { UnifiedAuditEvent, OpsRealtimeSnapshot } from '../../types/kos';
+import type { useOperatorConsole } from '../../../hooks/useOperatorConsole';
 
 interface Props {
-  opsSnapshot: OpsRealtimeSnapshot;
-  auditTrail: UnifiedAuditEvent[];
+  opsSnapshot: ReturnType<typeof useOperatorConsole>['opsSnapshot'];
+  auditTrail: ReturnType<typeof useOperatorConsole>['auditTrail'];
 }
 
 export const OperatorOpsTab: React.FC<Props> = ({ opsSnapshot, auditTrail }) => {

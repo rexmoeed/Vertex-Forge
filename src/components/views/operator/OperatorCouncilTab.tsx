@@ -1,9 +1,9 @@
 import React from 'react';
 import { Users } from 'lucide-react';
-import { CouncilSession } from '../../types/kos';
+import type { useOperatorConsole } from '../../../hooks/useOperatorConsole';
 
 interface Props {
-  councilSessions: CouncilSession[];
+  councilSessions: ReturnType<typeof useOperatorConsole>['councilSessions'];
   councilTopic: string;
   setCouncilTopic: (val: string) => void;
   isConveningCouncil: boolean;

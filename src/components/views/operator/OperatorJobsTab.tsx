@@ -1,10 +1,9 @@
 import React from 'react';
 import { Play } from 'lucide-react';
-import { BackgroundJobDefinition } from '../../types/kos';
-import { BackgroundJobScheduler } from '../../services/backgroundJobScheduler';
+import type { useOperatorConsole } from '../../../hooks/useOperatorConsole';
 
 interface Props {
-  jobs: BackgroundJobDefinition[];
+  jobs: ReturnType<typeof useOperatorConsole>['jobs'];
   onTriggerJob: (id: string) => void;
   onResetCircuitBreaker: (id: string) => void;
 }

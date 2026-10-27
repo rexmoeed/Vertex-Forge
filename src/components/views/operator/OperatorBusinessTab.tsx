@@ -1,10 +1,11 @@
 import React from 'react';
-import { BusinessTrackerItem, TrackerStatus, BusinessContext } from '../../types/kos';
+import type { useOperatorConsole } from '../../../hooks/useOperatorConsole';
+import { TrackerStatus } from '../../../types/kos';
 
 interface Props {
-  activeBiz: BusinessContext;
-  trackerItems: BusinessTrackerItem[];
-  onMoveTask: (id: string, status: TrackerStatus) => void;
+  activeBiz: ReturnType<typeof useOperatorConsole>['activeBiz'];
+  trackerItems: ReturnType<typeof useOperatorConsole>['trackerItems'];
+  onMoveTask: (id: string, status: any) => void;
 }
 
 export const OperatorBusinessTab: React.FC<Props> = ({ activeBiz, trackerItems, onMoveTask }) => {

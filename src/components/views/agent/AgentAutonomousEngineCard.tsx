@@ -14,8 +14,8 @@ import { AutonomousTask } from '../../../types/autonomousAgent';
 
 interface Props {
   autonomousExecutionState: string;
-  autonomyMode: 'autonomous' | 'supervised' | 'strict';
-  setAutonomyMode: (mode: 'autonomous' | 'supervised' | 'strict') => void;
+  autonomyMode: 'autonomous' | 'supervised' | 'strict' | string;
+  setAutonomyMode: (mode: any) => void;
   autonomousInput: string;
   setAutonomousInput: (val: string) => void;
   isLaunching: boolean;

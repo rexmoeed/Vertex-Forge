@@ -9,6 +9,7 @@ const env = {
   PORT: String(PORT),
   NODE_ENV: 'production',
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || 'test-mock-key-12345',
+  JULES_API_KEY: process.env.JULES_API_KEY || 'test-mock-jules-key-12345',
 };
 
 const serverProc = spawn('npx', ['tsx', 'server.ts'], {

@@ -1,8 +1,7 @@
-import React from 'react';
-import { ApprovalItem } from '../../types/kos';
+import type { useOperatorConsole } from '../../../hooks/useOperatorConsole';
 
 interface Props {
-  approvals: ApprovalItem[];
+  approvals: ReturnType<typeof useOperatorConsole>['approvals'];
   onResolveApproval: (id: string, decision: 'approved' | 'rejected') => void;
 }
 

@@ -255,6 +255,10 @@ npm run dev
 
 Visit `http://localhost:3000` in your browser.
 
+> [!NOTE]
+> **Zero External Service Dependency**: `npm run dev`, `npm test`, and `npm run build` are 100% self-contained and require no external cloud services or network access beyond the initial `npm install`. Probing for local AI runtimes (Ollama on `11434` or LM Studio on `1234`) is strictly optional and automatically skipped when unreachable.
+
+
 ---
 
 ### 🐳 Docker & Containerized Running
@@ -291,6 +295,7 @@ Copy `.env.example` to `.env` to configure runtime options:
 | `GEMINI_API_KEY` | Optional | *(None)* | Google Gemini AI token (offline/local Ollama & DeepSeek models operate without it) |
 | `JULES_API_KEY` | Optional | *(None)* | Google Jules Cloud Agent token for autonomous missions, VM tasks & GitHub PRs |
 | `GITHUB_TOKEN` | Optional | *(None)* | GitHub Personal Access Token for remote repository sync, branch pushing & PR creation |
+| `SENTRY_DSN` | Optional | *(None)* | Remote telemetry endpoint for structured crash and exception tracking |
 
 ---
 

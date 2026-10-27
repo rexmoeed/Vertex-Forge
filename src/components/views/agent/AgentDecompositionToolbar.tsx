@@ -172,16 +172,16 @@ export const AgentDecompositionToolbar: React.FC<Props> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {activeParallelSubAgents.map(sub => (
+            {activeParallelSubAgents.map((sub, idx) => (
               <div
                 key={sub.taskId}
                 className="p-3 bg-slate-950/90 border border-amber-500/30 rounded-xl flex flex-col gap-2 shadow-xs"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white">{sub.leadRole}</span>
+                    <span className="text-xs font-bold text-white">{sub.parentLead || sub.subAgentRole}</span>
                     <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300">
-                      Sub-Agent #{sub.subAgentIndex + 1}
+                      Sub-Agent #{idx + 1}
                     </span>
                   </div>
                   <span className="text-[10px] font-mono font-bold text-amber-400 animate-pulse">
@@ -189,8 +189,8 @@ export const AgentDecompositionToolbar: React.FC<Props> = ({
                   </span>
                 </div>
 
-                <div className="text-[11px] text-slate-300 font-medium truncate">{sub.taskTitle}</div>
-                <div className="text-[10px] text-slate-400 font-mono truncate">{sub.currentStep}</div>
+                <div className="text-[11px] text-slate-300 font-medium truncate">{sub.title}</div>
+                <div className="text-[10px] text-slate-400 font-mono truncate">{sub.stage}</div>
 
                 <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
                   <div

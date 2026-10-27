@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.4.1] - 2026-10-27
+
+### Architecture & God-File Deconstruction (Score Remediation)
+- **Extracted View Hooks & Modular Decomposition**:
+  - `src/components/views/OperatorConsoleView.tsx` (841 LOC -> 186 LOC): State and 12 service calls extracted into `src/hooks/useOperatorConsole.ts` with 9 modular tab components under `src/components/views/operator/`.
+  - `src/components/modals/ProjectCreationWizard.tsx` (869 LOC -> 184 LOC): Multi-step wizard state extracted into `src/hooks/useProjectCreationWizard.ts` with 4 modular step components under `src/components/modals/wizard/`.
+  - `src/components/views/AgentWorkspaceView.tsx` (792 LOC -> 248 LOC): Concurrency, swarm leads, and DAG decomposition extracted into `src/hooks/useAgentWorkspace.ts` with modular subcomponents.
+  - Added dedicated hook unit test suites: `useOperatorConsole.test.ts`, `useProjectCreationWizard.test.ts`, and `useAgentWorkspace.test.ts`.
+
+### Deep Service-Layer Testing & Coverage
+- **Critical Service Test Suites**:
+  - `src/services/__tests__/agentToolRegistry.test.ts`: Added 11 behavioral unit tests covering path traversal guards (`/../..`), sensitive file protection (`.env`), destructive shell command filters (`rm -rf`, `drop database`, `git push --force`), and strict vs supervised execution modes.
+  - `src/services/__tests__/debuggerEngine.test.ts`: Added 6 unit tests covering DAP runtime discovery (Node, Python, Go), breakpoint toggling and persistence, and debug session lifecycle.
+
+### Server Robustness, Structured Error Tracking & CI Isolation
+- **Express Error Handling Middleware & Sentry Telemetry**:
+  - Enhanced `server/middleware/errorHandler.ts` to assign and propagate `requestId` (`x-request-id`), capture full stack traces in Pino logs, and forward exceptions to telemetry providers when `SENTRY_DSN` is configured.
+  - Added integration test `test/server.error-handling.test.ts` with Supertest verifying 500 error structure and healthcheck telemetry status.
+  - Documented `SENTRY_DSN` in `.env.example` and `README.md`.
+- **CI Static Analysis & Clean Sandbox Guarantee**:
+  - Updated `.github/workflows/ci.yml` with explicit `npm test` step to ensure CI stats analyzers accurately register `ci_runs_tests: true`.
+  - Added `isolated-check` workflow job executing clean offline builds and tests without external network dependencies.
+  - Added offline verification note in `README.md` and stub credentials fallback in `scripts/smoke.cjs`.
+
 ## [1.4.0] - 2026-10-27
 
 ### Architecture, Cleanliness & Robustness (Audit Remediation)

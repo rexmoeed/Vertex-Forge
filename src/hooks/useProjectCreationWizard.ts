@@ -17,7 +17,7 @@ import { DesktopBridge } from '../services/desktopBridge';
 
 export function useProjectCreationWizard(
   logAgentAction?: (agent: string, message: string, status?: 'info' | 'success' | 'warning' | 'error') => void,
-  openLocalFolder?: (path: string) => Promise<void>
+  openLocalFolder?: (path?: string) => Promise<any> | any
 ) {
   // Wizard Steps: 1..4
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);

@@ -12,7 +12,7 @@ import { VirtualFileSystem } from '../services/virtualFs';
 import { ProjectProfile } from '../types/project';
 import { logger } from '../services/logger';
 
-export function useAgentWorkspace(vfs?: VirtualFileSystem, activeProject?: ProjectProfile) {
+export function useAgentWorkspace(vfs?: VirtualFileSystem, activeProject?: any) {
   const [autonomousInput, setAutonomousInput] = useState('');
   const [isLaunching, setIsLaunching] = useState(false);
   const [showWorkspaceToolActivity, setShowWorkspaceToolActivity] = useState(false);

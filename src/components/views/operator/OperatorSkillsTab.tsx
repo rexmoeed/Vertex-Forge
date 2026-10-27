@@ -1,9 +1,9 @@
 import React from 'react';
-import { ExecutableSkill, KnowledgeGraphSnapshot } from '../../types/kos';
+import type { useOperatorConsole } from '../../../hooks/useOperatorConsole';
 
 interface Props {
-  graph: KnowledgeGraphSnapshot;
-  skills: ExecutableSkill[];
+  graph: ReturnType<typeof useOperatorConsole>['graph'];
+  skills: ReturnType<typeof useOperatorConsole>['skills'];
   onSyncGraph: () => void;
 }
 

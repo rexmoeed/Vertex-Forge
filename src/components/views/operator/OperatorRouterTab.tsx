@@ -1,10 +1,10 @@
 import React from 'react';
 import { RotateCw } from 'lucide-react';
-import { LocalAiNode, ModelRoutingRule } from '../../types/kos';
+import type { useOperatorConsole } from '../../../hooks/useOperatorConsole';
 
 interface Props {
-  nodes: LocalAiNode[];
-  routes: ModelRoutingRule[];
+  nodes: ReturnType<typeof useOperatorConsole>['nodes'];
+  routes: ReturnType<typeof useOperatorConsole>['routes'];
   onPingNode: (id: string, name: string) => void;
 }
 
