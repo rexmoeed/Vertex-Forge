@@ -7,13 +7,12 @@
 
 import { VirtualFileSystem } from './virtualFs';
 import { ProjectProfile } from '../types/project';
-import { CodebaseIntelligenceEngine, GroundedAIResponse } from './codebaseIntelligence';
-import { DesktopBridge } from './desktopBridge';
-import { AIProviderService } from './aiProviderService';
 import { SkillSetService } from './skillSetService';
-import { ProviderId, ModelInfo } from '../types/aiProvider';
+import { ProviderId } from '../types/aiProvider';
+import { AVAILABLE_TOOLS, ToolDefinition } from './prompt/universalToolsDefinition';
+import { UniversalToolExecutor, ToolCallResult, EvidenceCategory } from './prompt/universalToolExecutor';
 
-export type EvidenceCategory = 'VERIFIED' | 'INFERRED' | 'UNKNOWN';
+export type { EvidenceCategory, ToolDefinition, ToolCallResult };
 
 export interface VerifiedEvidenceItem {
   category: EvidenceCategory;
@@ -52,131 +51,14 @@ export interface PromptContextOptions {
   maxContextTokens?: number;
 }
 
-export interface ToolDefinition {
-  name: string;
-  description: string;
-  parameters: {
-    type: 'object';
-    properties: Record<string, { type: string; description: string; enum?: string[] }>;
-    required: string[];
-  };
-}
-
 export interface ToolCallRequest {
   id: string;
   toolName: string;
   arguments: Record<string, any>;
 }
 
-export interface ToolCallResult {
-  toolCallId: string;
-  toolName: string;
-  success: boolean;
-  result: any;
-  error?: string;
-  evidenceCategory: EvidenceCategory;
-}
-
 export class UniversalSystemPromptBuilder {
-  /**
-   * Universal Tools provided to the model
-   */
-  public static readonly AVAILABLE_TOOLS: ToolDefinition[] = [
-    {
-      name: 'fs_read_file',
-      description: 'Read the actual contents of a file from the workspace project.',
-      parameters: {
-        type: 'object',
-        properties: {
-          filePath: { type: 'string', description: 'Relative path of the file to inspect' },
-        },
-        required: ['filePath'],
-      },
-    },
-    {
-      name: 'fs_write_file',
-      description: 'Write updated or new code to a file in the workspace.',
-      parameters: {
-        type: 'object',
-        properties: {
-          filePath: { type: 'string', description: 'Relative path of the target file' },
-          content: { type: 'string', description: 'Complete content to write' },
-        },
-        required: ['filePath', 'content'],
-      },
-    },
-    {
-      name: 'fs_list_directory',
-      description: 'List directories and files in a workspace folder.',
-      parameters: {
-        type: 'object',
-        properties: {
-          dirPath: { type: 'string', description: 'Directory path relative to workspace root' },
-        },
-        required: ['dirPath'],
-      },
-    },
-    {
-      name: 'terminal_execute',
-      description: 'Execute a real shell command in the project working directory.',
-      parameters: {
-        type: 'object',
-        properties: {
-          command: { type: 'string', description: 'Shell command line to execute' },
-        },
-        required: ['command'],
-      },
-    },
-    {
-      name: 'git_status',
-      description: 'Inspect real Git repository status, branch, and staged/unstaged changes.',
-      parameters: {
-        type: 'object',
-        properties: {},
-        required: [],
-      },
-    },
-    {
-      name: 'git_diff',
-      description: 'Inspect real Git diff for uncommitted workspace modifications.',
-      parameters: {
-        type: 'object',
-        properties: {
-          filePath: { type: 'string', description: 'Optional specific file path' },
-        },
-        required: [],
-      },
-    },
-    {
-      name: 'run_tests',
-      description: 'Execute the project unit test suite using the detected test runner (e.g. vitest, jest).',
-      parameters: {
-        type: 'object',
-        properties: {},
-        required: [],
-      },
-    },
-    {
-      name: 'run_build',
-      description: 'Execute the workspace build command using the detected package manager.',
-      parameters: {
-        type: 'object',
-        properties: {},
-        required: [],
-      },
-    },
-    {
-      name: 'codebase_search',
-      description: 'Search workspace files for symbols, function definitions, routes, or keywords.',
-      parameters: {
-        type: 'object',
-        properties: {
-          query: { type: 'string', description: 'Search term or regex symbol' },
-        },
-        required: ['query'],
-      },
-    },
-  ];
+  public static readonly AVAILABLE_TOOLS: ToolDefinition[] = AVAILABLE_TOOLS;
 
   /**
    * Compile Verified Evidence Items from the current workspace
@@ -354,7 +236,7 @@ ${gc.diffSnippet ? `• Recent Diff:\n\`\`\`diff\n${gc.diffSnippet.slice(0, 1500
       );
     }
 
-    // 7. Project Instructions (e.g. AGENTS.md, CLAUDE.md, .cursor/rules)
+    // 7. Project Instructions
     if (opts.projectInstructions && opts.projectInstructions.length > 0) {
       sections.push(
 `# Project-Specific Instructions & Guidelines
@@ -375,7 +257,7 @@ You MUST adhere strictly to these specialized coding directives.`
       );
     }
 
-    // 8. Tool Calling Protocol
+    // 9. Tool Calling Protocol
     if (opts.includeTools) {
       sections.push(
 `# Available Tools
@@ -397,196 +279,6 @@ Format tool calls clearly. Once tool results are returned to you, integrate the 
     args: Record<string, any>,
     vfs?: VirtualFileSystem
   ): Promise<ToolCallResult> {
-    const callId = `call_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-
-    try {
-      switch (toolName) {
-        case 'fs_read_file': {
-          const filePath = args.filePath;
-          if (!filePath) throw new Error('filePath is required');
-
-          // Read from VFS or DesktopBridge
-          if (vfs) {
-            const content = vfs.readFile(filePath);
-            if (content !== null) {
-              return {
-                toolCallId: callId,
-                toolName,
-                success: true,
-                result: { content, path: filePath },
-                evidenceCategory: 'VERIFIED',
-              };
-            }
-          }
-
-          try {
-            const diskContent = await DesktopBridge.readFile(filePath);
-            return {
-              toolCallId: callId,
-              toolName,
-              success: true,
-              result: diskContent,
-              evidenceCategory: 'VERIFIED',
-            };
-          } catch (err: any) {
-            return {
-              toolCallId: callId,
-              toolName,
-              success: false,
-              result: null,
-              error: err.message,
-              evidenceCategory: 'UNKNOWN',
-            };
-          }
-        }
-
-        case 'fs_write_file': {
-          const { filePath, content } = args;
-          if (!filePath || content === undefined) throw new Error('filePath and content are required');
-
-          if (vfs) {
-            vfs.writeFile(filePath, content);
-          }
-          await DesktopBridge.writeFile(filePath, content);
-
-          return {
-            toolCallId: callId,
-            toolName,
-            success: true,
-            result: { path: filePath, bytesWritten: content.length },
-            evidenceCategory: 'VERIFIED',
-          };
-        }
-
-        case 'fs_list_directory': {
-          const dirPath = args.dirPath || '';
-          if (vfs) {
-            const entries = vfs.listDirectory(dirPath);
-            return {
-              toolCallId: callId,
-              toolName,
-              success: true,
-              result: entries,
-              evidenceCategory: 'VERIFIED',
-            };
-          }
-
-          const tree = await DesktopBridge.getWorkspaceTree(dirPath || DesktopBridge.currentWorkspacePath);
-          return {
-            toolCallId: callId,
-            toolName,
-            success: true,
-            result: tree,
-            evidenceCategory: 'VERIFIED',
-          };
-        }
-
-        case 'terminal_execute': {
-          const cmd = args.command;
-          if (!cmd) throw new Error('command is required');
-          const execRes = await DesktopBridge.executeCommand(cmd);
-
-          return {
-            toolCallId: callId,
-            toolName,
-            success: execRes.exitCode === 0,
-            result: {
-              exitCode: execRes.exitCode,
-              stdout: execRes.stdout,
-              stderr: execRes.stderr,
-            },
-            evidenceCategory: 'VERIFIED',
-          };
-        }
-
-        case 'git_status': {
-          const statusRes = await DesktopBridge.getGitStatus(DesktopBridge.currentWorkspacePath);
-          return {
-            toolCallId: callId,
-            toolName,
-            success: true,
-            result: statusRes,
-            evidenceCategory: 'VERIFIED',
-          };
-        }
-
-        case 'git_diff': {
-          const diffRes = await DesktopBridge.getGitDiff(DesktopBridge.currentWorkspacePath, args.filePath);
-          return {
-            toolCallId: callId,
-            toolName,
-            success: true,
-            result: diffRes,
-            evidenceCategory: 'VERIFIED',
-          };
-        }
-
-        case 'run_tests': {
-          const testRes = await DesktopBridge.executeCommand('npx vitest run --reporter=json || npm test');
-          return {
-            toolCallId: callId,
-            toolName,
-            success: testRes.exitCode === 0,
-            result: testRes.stdout || testRes.stderr,
-            evidenceCategory: 'VERIFIED',
-          };
-        }
-
-        case 'run_build': {
-          const buildRes = await DesktopBridge.executeCommand('npm run build');
-          return {
-            toolCallId: callId,
-            toolName,
-            success: buildRes.exitCode === 0,
-            result: buildRes.stdout || buildRes.stderr,
-            evidenceCategory: 'VERIFIED',
-          };
-        }
-
-        case 'codebase_search': {
-          const query = args.query;
-          if (!query) throw new Error('query is required');
-
-          if (vfs) {
-            const matches = vfs.searchFiles(query);
-            return {
-              toolCallId: callId,
-              toolName,
-              success: true,
-              result: matches.slice(0, 10),
-              evidenceCategory: 'VERIFIED',
-            };
-          }
-
-          const results = await DesktopBridge.searchWorkspace(query);
-          return {
-            toolCallId: callId,
-            toolName,
-            success: true,
-            result: results.slice(0, 10),
-            evidenceCategory: 'VERIFIED',
-          };
-        }
-
-        default:
-          return {
-            toolCallId: callId,
-            toolName,
-            success: false,
-            result: null,
-            error: `Unknown tool: ${toolName}`,
-            evidenceCategory: 'UNKNOWN',
-          };
-      }
-    } catch (err: any) {
-      return {
-        toolCallId: callId,
-        toolName,
-        success: false,
-        result: null,
-        error: err?.message || 'Tool execution failed',
-        evidenceCategory: 'UNKNOWN',
-      };
-    }
+    return UniversalToolExecutor.executeTool(toolName, args, vfs);
   }
 }
