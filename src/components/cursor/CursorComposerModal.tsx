@@ -5,27 +5,18 @@ import {
   Sparkles,
   X,
   Check,
-  SplitSquareVertical,
   Layers,
   ChevronDown,
   Cpu,
   FileCode,
-  FilePlus,
   GitBranch,
   Terminal,
-  BookOpen,
   BrainCircuit,
-  ArrowRight,
-  Play,
-  RotateCcw,
-  CheckCircle2,
-  Trash2,
-  Columns,
-  Maximize2,
-  Minimize2,
 } from 'lucide-react';
 import { ProposedFileChange } from '../../types/desktop';
 import { CursorService, CursorContextItem, CursorGenerationResult } from '../../services/cursorService';
+import { ComposerFilesSidebar } from './ComposerFilesSidebar';
+import { ComposerDiffPreview } from './ComposerDiffPreview';
 
 interface CursorComposerModalProps {
   isOpen: boolean;
@@ -361,126 +352,17 @@ export const CursorComposerModal: React.FC<CursorComposerModalProps> = ({ isOpen
             </div>
           ) : (
             <div className="flex-1 flex overflow-hidden">
-              {/* Left Column: Affected Files List */}
-              <div className="w-80 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
-                <div className="p-3 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
-                  <span className="font-bold uppercase tracking-wider text-[10px]">
-                    Changed Files ({generationResult.changes.length})
-                  </span>
-                  <span className="text-[10px] text-emerald-400 font-mono font-bold">
-                    {generationResult.changes.filter(c => c.accepted).length} accepted
-                  </span>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
-                  {generationResult.changes.map((chg, idx) => {
-                    const isSelected = idx === selectedFileIndex;
-                    return (
-                      <div
-                        key={chg.id}
-                        onClick={() => setSelectedFileIndex(idx)}
-                        className={`p-2.5 rounded-xl border text-xs cursor-pointer flex flex-col gap-1 transition-all ${
-                          isSelected
-                            ? 'bg-indigo-600/20 border-indigo-500/70 text-white shadow-sm'
-                            : 'bg-slate-950/80 border-slate-800 text-slate-300 hover:bg-slate-850'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 truncate">
-                            <input
-                              type="checkbox"
-                              checked={chg.accepted}
-                              onChange={e => {
-                                e.stopPropagation();
-                                handleToggleAcceptFile(idx);
-                              }}
-                              className="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-0 cursor-pointer"
-                            />
-                            <span className="font-mono text-[11px] truncate font-medium">
-                              {chg.filePath}
-                            </span>
-                          </div>
-                          <span
-                            className={`text-[9px] uppercase font-bold px-1.5 py-0.2 rounded ${
-                              chg.action === 'create'
-                                ? 'bg-emerald-500/20 text-emerald-300'
-                                : 'bg-blue-500/20 text-blue-300'
-                            }`}
-                          >
-                            {chg.action}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-[10px] pl-5 text-slate-400 font-mono">
-                          <span className="text-emerald-400">+{chg.additions} -{chg.deletions}</span>
-                          <span className={chg.accepted ? 'text-emerald-400 font-semibold' : 'text-slate-500'}>
-                            {chg.accepted ? 'Accepted' : 'Skipped'}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Right Column: Visual Diff Preview */}
-              <div className="flex-1 flex flex-col min-w-0 bg-slate-950">
-                {currentChange ? (
-                  <>
-                    <div className="h-9 border-b border-slate-800 px-4 flex items-center justify-between bg-slate-900/60 text-xs shrink-0">
-                      <div className="flex items-center gap-2 truncate font-mono text-[11px] text-slate-200">
-                        <FileCode className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                        <span className="font-semibold truncate">{currentChange.filePath}</span>
-                        <span className="text-slate-500">—</span>
-                        <span className="text-slate-400 text-[10px] font-sans truncate">
-                          {currentChange.explanation}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => handleToggleAcceptFile(selectedFileIndex)}
-                          className={`px-2.5 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                            currentChange.accepted
-                              ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/40'
-                              : 'bg-slate-800 text-slate-400 hover:text-slate-200'
-                          }`}
-                        >
-                          {currentChange.accepted ? '✓ Included' : 'Excluded'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Diff Code Area */}
-                    <div className="flex-1 overflow-auto p-4 font-mono text-xs leading-5 select-text">
-                      <div className="space-y-0.5">
-                        {currentChange.newContent.split('\n').map((line, i) => {
-                          const isAdded = !currentChange.originalContent || !currentChange.originalContent.includes(line);
-                          return (
-                            <div
-                              key={i}
-                              className={`flex items-start px-2 py-0.2 rounded-xs ${
-                                isAdded ? 'bg-emerald-950/40 text-emerald-200 font-medium' : 'text-slate-300'
-                              }`}
-                            >
-                              <span className="w-8 text-right text-slate-600 select-none pr-3 text-[10px]">
-                                {i + 1}
-                              </span>
-                              <span className="w-4 select-none text-[11px]">
-                                {isAdded ? '+' : ' '}
-                              </span>
-                              <span className="flex-1 whitespace-pre">{line || ' '}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center text-slate-500 text-xs">
-                    Select a file to inspect diff
-                  </div>
-                )}
-              </div>
+              <ComposerFilesSidebar
+                generationResult={generationResult}
+                selectedFileIndex={selectedFileIndex}
+                onSelectFileIndex={setSelectedFileIndex}
+                onToggleAcceptFile={handleToggleAcceptFile}
+              />
+              <ComposerDiffPreview
+                currentChange={currentChange}
+                selectedFileIndex={selectedFileIndex}
+                onToggleAcceptFile={handleToggleAcceptFile}
+              />
             </div>
           )}
         </div>
