@@ -355,3 +355,5 @@ export const AIOrchestratorPanel: React.FC = () => {
     </aside>
   );
 };
+
+export type { AttachedContextItem } from '../../hooks/orchestrator/useContextAttachments';

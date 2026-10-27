@@ -35,6 +35,7 @@ describe('Security Auditor UI Modular Components', () => {
       title: 'Hardcoded API Token Found',
       filePath: 'src/config.ts',
       lineStart: 10,
+      lineEnd: 10,
       evidence: 'const KEY = "sk_live_123456789";',
       explanation: 'Secret detected in code',
       attackVector: 'Exposed credentials',
@@ -43,8 +44,9 @@ describe('Security Auditor UI Modular Components', () => {
       limitations: 'Static match',
       recommendedFix: 'Use process.env',
       remediation: {
+        type: 'redact_secret',
         title: 'Rotate and extract key to environment',
-        automated: true,
+        description: 'Extract token to environment configuration',
         requiresApproval: true,
         isBreaking: true,
         breakingRiskDetails: 'Token rotation required',
@@ -69,12 +71,15 @@ describe('Security Auditor UI Modular Components', () => {
 
   it('renders capabilities tab with auditor engine list', () => {
     const mockReport: SecurityAuditReport = {
+      id: 'rep-1',
+      timestamp: new Date().toISOString(),
       status: 'clean',
+      statusMessage: 'Clean scan',
       projectPath: '/test',
       scannedFilesCount: 42,
       durationMs: 120,
       securityScore: 98,
-      counts: { critical: 0, high: 0, medium: 0, low: 0, resolved: 0 },
+      counts: { critical: 0, high: 0, medium: 0, low: 0, info: 0, total: 0 },
       categoryCounts: {
         dependency: 0,
         secret: 0,
@@ -85,6 +90,7 @@ describe('Security Auditor UI Modular Components', () => {
         network_cors: 0,
         auth_rbac: 0,
         electron_ipc: 0,
+        insecure_pattern: 0,
       },
       findings: [],
       dependencies: [],

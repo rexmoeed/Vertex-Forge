@@ -294,7 +294,7 @@ export function useAIOrchestrator() {
       ]);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      logger.error({ err }, `Chat generation failed: ${msg}`);
+      logger.error(`Chat generation failed: ${msg}`, { err });
       setChatMessages(prev => [
         ...prev,
         {

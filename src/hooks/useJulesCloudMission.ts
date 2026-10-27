@@ -77,7 +77,7 @@ export function useJulesCloudMission({ isOpen, initialPrompt = '' }: UseJulesClo
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        logger.warn({ err }, `[JulesCloudMission] Initial load warning: ${msg}`);
+        logger.warn(`[JulesCloudMission] Initial load warning: ${msg}`, { err });
       } finally {
         setIsLoading(false);
       }
@@ -180,7 +180,7 @@ export function useJulesCloudMission({ isOpen, initialPrompt = '' }: UseJulesClo
       ]);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      logger.error({ err }, `Jules mission dispatch failed: ${msg}`);
+      logger.error(`Jules mission dispatch failed: ${msg}`, { err });
       setError(msg || 'Failed to dispatch mission to Google Jules.');
     } finally {
       setIsLoading(false);

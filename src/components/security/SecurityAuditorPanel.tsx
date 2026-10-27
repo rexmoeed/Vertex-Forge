@@ -52,7 +52,7 @@ export const SecurityAuditorPanel: React.FC = () => {
       setReport(data);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      logger.error({ err }, `Audit run failed: ${msg}`);
+      logger.error(`Audit run failed: ${msg}`, { err });
       setActionNotice({ message: `Audit failed: ${msg}`, type: 'error' });
     } finally {
       setLoading(false);
@@ -73,7 +73,7 @@ export const SecurityAuditorPanel: React.FC = () => {
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      logger.error({ err }, `Failed to load fixture: ${msg}`);
+      logger.error(`Failed to load fixture: ${msg}`, { err });
       setActionNotice({ message: `Failed to load fixture: ${msg}`, type: 'error' });
       setLoading(false);
     }
@@ -104,7 +104,7 @@ export const SecurityAuditorPanel: React.FC = () => {
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      logger.error({ err, findingId: finding.id }, `Remediation failed: ${msg}`);
+      logger.error(`Remediation failed: ${msg}`, { err, findingId: finding.id });
       setActionNotice({ message: `Remediation failed: ${msg}`, type: 'error' });
     } finally {
       setRemediatingId(null);
@@ -130,7 +130,7 @@ export const SecurityAuditorPanel: React.FC = () => {
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      logger.error({ err, findingId: finding.id }, `Verification failed: ${msg}`);
+      logger.error(`Verification failed: ${msg}`, { err, findingId: finding.id });
       setActionNotice({ message: `Verification failed: ${msg}`, type: 'error' });
     } finally {
       setVerifyingId(null);
