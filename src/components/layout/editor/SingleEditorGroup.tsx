@@ -1,28 +1,16 @@
 import { logger } from '../../../services/logger';
 import React, { useEffect, useRef, useState } from 'react';
 import { useIDE } from '../../../context/IDEContext';
-import { useLayout } from '../../../context/LayoutContext';
 import { EditorTabBar } from '../../editor/EditorTabBar';
 import { FindReplaceOverlay } from '../../editor/FindReplaceOverlay';
 import {
   X,
-  Save,
-  SplitSquareVertical,
-  Check,
   AlertTriangle,
   Sparkles,
   FileCode,
   FileJson,
   FileText,
-  RotateCcw,
   Copy,
-  Columns,
-  Rows,
-  Maximize2,
-  Search,
-  ChevronUp,
-  ChevronDown,
-  ChevronRight,
 } from 'lucide-react';
 import { OpenTab } from '../../../types/ide';
 import { FILE_DRAG_MIME, FileDragPayload } from '../../../types/dragDrop';
@@ -30,8 +18,11 @@ import { DesktopBridge } from '../../../services/desktopBridge';
 import { DebugToolbar } from '../../debug/DebugToolbar';
 import { VisualDiffEditor } from '../../git/VisualDiffEditor';
 import { CursorService } from '../../../services/cursorService';
-import { useEditorCursorTracking } from './EditorCursorTracking';
-import { useEditorFindReplaceController } from './EditorFindReplaceController';
+import { EditorEmptyState } from './EditorEmptyState';
+import { EditorDiffReviewBar } from './EditorDiffReviewBar';
+import { EditorInlineAIBar } from './EditorInlineAIBar';
+import { EditorGutter } from './EditorGutter';
+import { EditorMinimap } from './EditorMinimap';
 
 export interface SingleEditorGroupProps {
   groupId: number;
@@ -68,7 +59,6 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
     modifiedFiles,
     problems,
     triggerSelfHealDebug,
-    debugSession,
     debugBreakpoints,
     debugLocation,
     toggleBreakpoint,
@@ -86,7 +76,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
   // Auto-scroll editor to line when cursorPosition changes programmatically
   useEffect(() => {
     if (!textareaRef.current || !cursorPosition?.line) return;
-    const lineHeight = 20; // 20px leading-5
+    const lineHeight = 20;
     const targetScroll = (cursorPosition.line - 1) * lineHeight;
     textareaRef.current.scrollTop = Math.max(0, targetScroll - 100);
     if (lineColRef.current) {
@@ -119,17 +109,14 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
   const [isFindOpen, setIsFindOpen] = useState(false);
   const [findText, setFindText] = useState('');
   const [replaceText, setReplaceText] = useState('');
-  const [showReplaceRow, setShowReplaceRow] = useState(false);
   const [findMatchIndex, setFindMatchIndex] = useState(0);
 
-  // Close tab context menu on outside click
   useEffect(() => {
     const handleOutside = () => setTabContextMenu(null);
     window.addEventListener('click', handleOutside);
     return () => window.removeEventListener('click', handleOutside);
   }, []);
 
-  // Compute find matches in active file content
   const findMatches = React.useMemo(() => {
     if (!findText || !activeFileContent) return [];
     const results: number[] = [];
@@ -204,7 +191,6 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
           return;
         }
       }
-      // Intelligent fallback
       const synthesized = `// [Cursor Edit] ${inlinePrompt}\n` + activeFileContent;
       updateFileContent(synthesized);
       setIsDiffReviewActive(true);
@@ -232,13 +218,11 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
     setInlinePrompt('');
   };
 
-  // Drag and drop event handlers
   const handleDragEnter = (e: React.DragEvent) => {
     if (e.dataTransfer.types.includes(FILE_DRAG_MIME) || e.dataTransfer.types.includes('Files')) {
       e.preventDefault();
       dragCounterRef.current++;
       setIsDragOver(true);
-      logger.info('[DragDrop] dragenter target: editor');
     }
   };
 
@@ -250,7 +234,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
     }
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = () => {
     dragCounterRef.current--;
     if (dragCounterRef.current <= 0) {
       dragCounterRef.current = 0;
@@ -258,7 +242,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
     }
   };
 
-  const handleDrop = async (e: React.DragEvent, targetTabFilePath?: string) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     dragCounterRef.current = 0;
     setIsDragOver(false);
@@ -277,8 +261,6 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
               source: 'drag-drop',
               targetGroupId: groupId,
             });
-          } else {
-            logger.warn('[DragDrop] Dropped path validation failed:', validation.error);
           }
           return;
         }
@@ -287,7 +269,6 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
       }
     }
 
-    // External OS files dropped from system file manager
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       for (let i = 0; i < e.dataTransfer.files.length; i++) {
         const file = e.dataTransfer.files[i];
@@ -307,24 +288,15 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
     }
   };
 
-  // Active tab object with resilient fallback chain
   const activeTab =
     openTabs.find((t: OpenTab) => t.id === activeTabId) ||
     (activeFile ? openTabs.find((t: OpenTab) => t.filePath === activeFile) : undefined) ||
     (openTabs.length > 0 ? openTabs[0] : undefined);
 
   const currentFile = activeTab?.filePath || activeFile;
-
-  // Current file diff if any
   const currentDiff = currentFile ? modifiedFiles.find((m: any) => m.filePath === currentFile) : null;
-
-  // Split lines for line numbers
   const lines = activeFileContent ? activeFileContent.split('\n') : [];
-
-  // Find diagnostics for current file
-  const fileDiagnostics = currentFile
-    ? problems.filter((p: any) => p.filePath === currentFile)
-    : [];
+  const fileDiagnostics = currentFile ? problems.filter((p: any) => p.filePath === currentFile) : [];
 
   const handleCopyCode = () => {
     if (activeFileContent) {
@@ -368,7 +340,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
         </div>
       )}
 
-      {/* 1. TAB BAR (Modularized) */}
+      {/* Tab Bar */}
       <EditorTabBar
         openTabs={openTabs}
         activeTabId={activeTabId}
@@ -400,7 +372,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
         setIsFindOpen={setIsFindOpen}
       />
 
-      {/* 2. BREADCRUMB BAR (Rendered if file is open) */}
+      {/* Breadcrumb Bar */}
       {currentFile && (
         <div
           style={{
@@ -424,7 +396,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
         </div>
       )}
 
-      {/* Floating Find & Replace Overlay (Modularized) */}
+      {/* Find & Replace Overlay */}
       <FindReplaceOverlay
         isFindOpen={isFindOpen}
         setIsFindOpen={setIsFindOpen}
@@ -494,77 +466,12 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
         </div>
       )}
 
-      {/* Floating Debug Toolbar when session is running */}
+      {/* Debug Toolbar */}
       <DebugToolbar />
 
-      {/* 3. CODE EDITOR VIEWPORT OR EMPTY WATERMARK CANVAS */}
+      {/* Code Editor Viewport or Empty State */}
       {!currentFile ? (
-        <div
-          onClick={onFocus}
-          style={{
-            backgroundColor: 'var(--ide-editor-bg)',
-            color: 'var(--ide-text)',
-          }}
-          className="flex-1 flex flex-col items-center justify-center p-6 text-center select-none relative"
-        >
-          <div
-            style={{
-              backgroundColor: 'var(--ide-surface-elevated)',
-              borderColor: 'var(--ide-border)',
-            }}
-            className="w-14 h-14 rounded-2xl border flex items-center justify-center shadow-xs mb-3"
-          >
-            <Sparkles className="w-7 h-7 animate-pulse" style={{ color: 'var(--ide-accent)' }} />
-          </div>
-          <h2 className="text-sm font-bold tracking-tight" style={{ color: 'var(--ide-text)' }}>
-            Vertex Forge Autonomous Studio
-          </h2>
-          <p className="text-xs mt-1 max-w-sm" style={{ color: 'var(--ide-text-muted)' }}>
-            Select any file from the explorer on the left or use quick shortcuts below
-          </p>
-          <div className="flex flex-wrap gap-2 justify-center mt-5 max-w-md font-mono text-[11px]">
-            <span
-              style={{
-                backgroundColor: 'var(--ide-surface-elevated)',
-                borderColor: 'var(--ide-border)',
-                color: 'var(--ide-text)',
-              }}
-              className="px-2.5 py-1 border rounded-lg shadow-xs"
-            >
-              <span className="font-bold" style={{ color: 'var(--ide-accent)' }}>⌘P</span> Quick Open
-            </span>
-            <span
-              style={{
-                backgroundColor: 'var(--ide-surface-elevated)',
-                borderColor: 'var(--ide-border)',
-                color: 'var(--ide-text)',
-              }}
-              className="px-2.5 py-1 border rounded-lg shadow-xs"
-            >
-              <span className="font-bold" style={{ color: 'var(--ide-accent)' }}>⌘K</span> Inline AI
-            </span>
-            <span
-              style={{
-                backgroundColor: 'var(--ide-surface-elevated)',
-                borderColor: 'var(--ide-border)',
-                color: 'var(--ide-text)',
-              }}
-              className="px-2.5 py-1 border rounded-lg shadow-xs"
-            >
-              <span className="font-bold" style={{ color: 'var(--ide-accent)' }}>⌘B</span> Toggle Sidebar
-            </span>
-            <span
-              style={{
-                backgroundColor: 'var(--ide-surface-elevated)',
-                borderColor: 'var(--ide-border)',
-                color: 'var(--ide-text)',
-              }}
-              className="px-2.5 py-1 border rounded-lg shadow-xs"
-            >
-              <span className="font-bold" style={{ color: 'var(--ide-accent)' }}>⌘`</span> Terminal Dock
-            </span>
-          </div>
-        </div>
+        <EditorEmptyState onFocus={onFocus} />
       ) : diffMode || activeTab?.diffMode ? (
         <div className="flex-1 flex overflow-hidden relative">
           <VisualDiffEditor
@@ -578,46 +485,17 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
           style={{ backgroundColor: 'var(--ide-editor-bg)' }}
           className="flex-1 flex overflow-hidden relative font-mono text-xs"
         >
-          {/* Cursor Live Diff Review Floating Bar */}
+          {/* Live Diff Review Floating Bar */}
           {isDiffReviewActive && (
-            <div className="absolute top-2 left-16 right-4 z-40 max-w-2xl mx-auto bg-slate-900/95 backdrop-blur-xl border border-indigo-500/70 rounded-xl px-4 py-2.5 shadow-2xl flex items-center justify-between animate-fadeIn text-xs">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-                <span className="font-bold text-white">Cursor Inline Diff Review</span>
-                <span className="text-[11px] font-mono text-emerald-400 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
-                  Changes Ready
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setDiffMode(!diffMode)}
-                  className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-750 text-slate-300 font-medium text-[11px] transition-colors"
-                  title="Toggle Split Diff View"
-                >
-                  {diffMode ? 'Editor' : 'Compare'}
-                </button>
-                <button
-                  onClick={handleRejectInlineDiff}
-                  className="px-3 py-1 rounded-lg bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 font-semibold text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
-                  title="Reject and Restore Original (Esc)"
-                >
-                  <X className="w-3.5 h-3.5" />
-                  <span>Reject</span>
-                </button>
-                <button
-                  onClick={handleAcceptInlineDiff}
-                  className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] shadow-md shadow-emerald-600/20 transition-colors flex items-center gap-1 cursor-pointer"
-                  title="Accept and Save (Enter)"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Accept</span>
-                </button>
-              </div>
-            </div>
+            <EditorDiffReviewBar
+              diffMode={diffMode}
+              onToggleDiffMode={() => setDiffMode(!diffMode)}
+              onReject={handleRejectInlineDiff}
+              onAccept={handleAcceptInlineDiff}
+            />
           )}
 
-          {/* Cursor Tab (Copilot++) Ghost Text Autocomplete Banner */}
+          {/* Ghost Text Autocomplete Banner */}
           {ghostText && (
             <div className="absolute bottom-4 left-16 z-30 bg-slate-900/90 backdrop-blur-md border border-indigo-500/40 rounded-lg px-3 py-1.5 shadow-xl flex items-center gap-2 text-xs font-mono animate-fadeIn">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
@@ -632,256 +510,108 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
             </div>
           )}
 
-          {/* Antigravity Inline AI Floating Bar (Cmd+K) */}
+          {/* Inline AI Floating Bar */}
           {isInlineAIOpen && (
-            <div className="absolute top-3 left-16 right-4 z-30 max-w-2xl mx-auto bg-slate-900/95 backdrop-blur-xl border border-indigo-500/50 rounded-xl p-3 shadow-2xl animate-fadeIn">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-                  <span className="font-semibold text-xs text-slate-100 font-sans">
-                    Antigravity Inline Assistant
-                  </span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-950 border border-indigo-500/30 text-indigo-300 font-mono">
-                    Gemini 3.8 Flash
-                  </span>
+            <EditorInlineAIBar
+              inlinePrompt={inlinePrompt}
+              setInlinePrompt={setInlinePrompt}
+              isInlineLoading={isInlineLoading}
+              inlineResultNotice={inlineResultNotice}
+              onSubmit={handleInlineAISubmit}
+              onClose={() => setIsInlineAIOpen(false)}
+            />
+          )}
+
+          {/* Gutter */}
+          <EditorGutter
+            lines={lines}
+            activeFile={activeFile}
+            debugBreakpoints={debugBreakpoints}
+            debugLocation={debugLocation}
+            toggleBreakpoint={toggleBreakpoint}
+            gutterRef={lineColRef}
+          />
+
+          {/* TextArea */}
+          <div
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e)}
+            style={{ backgroundColor: 'var(--ide-editor-bg)' }}
+            className="flex-1 h-full overflow-hidden relative"
+          >
+            <textarea
+              ref={textareaRef}
+              value={activeFileContent}
+              onChange={(e) => {
+                const val = e.target.value;
+                updateFileContent(val);
+                if (isCursorTabEnabled && currentFile) {
+                  const l = val.split('\n');
+                  const lastLine = l[l.length - 1] || '';
+                  const suggestion = CursorService.getGhostTextSuggestion(lastLine, currentFile);
+                  setGhostText(suggestion);
+                } else {
+                  setGhostText(null);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (ghostText && e.key === 'Tab') {
+                  e.preventDefault();
+                  const newText = activeFileContent + ghostText;
+                  updateFileContent(newText);
+                  setGhostText(null);
+                  return;
+                }
+                if (ghostText && e.key === 'Escape') {
+                  setGhostText(null);
+                  return;
+                }
+              }}
+              onClick={(e) => updateCursorTracking(e.currentTarget)}
+              onKeyUp={(e) => updateCursorTracking(e.currentTarget)}
+              onSelect={(e) => updateCursorTracking(e.currentTarget)}
+              onBlur={() => {
+                if (autoSave && activeTab?.isDirty) {
+                  saveCurrentFile();
+                }
+              }}
+              onScroll={(e) => {
+                if (lineColRef.current) {
+                  lineColRef.current.scrollTop = e.currentTarget.scrollTop;
+                }
+              }}
+              spellCheck={false}
+              style={{
+                backgroundColor: 'var(--ide-editor-bg)',
+                color: 'var(--ide-text)',
+              }}
+              className="w-full h-full bg-transparent font-mono text-xs leading-5 resize-none outline-none whitespace-pre overflow-y-auto overflow-x-auto p-3 tab-size-2 scrollbar-slim"
+            />
+          </div>
+
+          {/* Minimap */}
+          <EditorMinimap lines={lines} textareaRef={textareaRef} />
+
+          {/* Diagnostics Floater */}
+          {fileDiagnostics.length > 0 && (
+            <div className="absolute bottom-3 right-4 max-w-md bg-slate-900/95 border border-rose-500/40 rounded-xl p-3 shadow-xl backdrop-blur-sm z-20 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-rose-400 font-bold text-xs">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>Diagnostic Found (Line {fileDiagnostics[0].line})</span>
                 </div>
                 <button
-                  onClick={() => setIsInlineAIOpen(false)}
-                  className="text-slate-500 hover:text-slate-200 transition-colors p-0.5 rounded hover:bg-slate-800"
+                  onClick={() => triggerSelfHealDebug(fileDiagnostics[0].message)}
+                  className="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 shadow cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <Sparkles className="w-2.5 h-2.5" />
+                  <span>Fix with AI</span>
                 </button>
               </div>
-
-              <div className="pt-2 flex flex-col gap-2 font-sans">
-                <div className="flex items-center gap-2 bg-slate-950/90 border border-slate-800 focus-within:border-indigo-500/60 rounded-lg px-2.5 py-1.5 transition-all shadow-inner">
-                  <input
-                    type="text"
-                    value={inlinePrompt}
-                    onChange={(e) => setInlinePrompt(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleInlineAISubmit();
-                      if (e.key === 'Escape') setIsInlineAIOpen(false);
-                    }}
-                    placeholder="Ask AI to edit, refactor, generate code, or fix errors in this file..."
-                    className="w-full bg-transparent text-xs text-slate-100 placeholder-slate-500 outline-none font-mono"
-                    autoFocus
-                  />
-                  <button
-                    disabled={isInlineLoading || !inlinePrompt.trim()}
-                    onClick={handleInlineAISubmit}
-                    className="px-3 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-medium text-[11px] shrink-0 transition-colors shadow-xs flex items-center gap-1 cursor-pointer"
-                  >
-                    {isInlineLoading ? <span>Generating...</span> : <span>Apply</span>}
-                  </button>
-                </div>
-
-                {/* Quick AI Prompt Pills */}
-                <div className="flex flex-wrap gap-1.5 text-[10px]">
-                  {[
-                    'Refactor & Clean Code',
-                    'Add Strict TypeScript Types',
-                    'Optimize Performance',
-                    'Add Unit Tests',
-                    'Add Error Handling',
-                  ].map((chip) => (
-                    <button
-                      key={chip}
-                      onClick={() => {
-                        setInlinePrompt(chip);
-                      }}
-                      className="px-2 py-0.5 rounded-full bg-slate-800/80 hover:bg-indigo-900/50 text-slate-300 hover:text-indigo-200 border border-slate-700/60 transition-colors cursor-pointer"
-                    >
-                      ✦ {chip}
-                    </button>
-                  ))}
-                </div>
-
-                {inlineResultNotice && (
-                  <div className="text-[11px] text-emerald-400 font-medium flex items-center gap-1 font-mono">
-                    <Check className="w-3 h-3" />
-                    <span>{inlineResultNotice}</span>
-                  </div>
-                )}
-              </div>
+              <p className="text-[11px] text-slate-300 font-mono leading-tight">{fileDiagnostics[0].message}</p>
             </div>
           )}
-          {/* Line Numbers & Breakpoint Gutter Column */}
-        <div
-          ref={lineColRef}
-          style={{
-            backgroundColor: 'var(--ide-editor-gutter)',
-            borderColor: 'var(--ide-border)',
-            color: 'var(--ide-text-muted)',
-          }}
-          className="w-14 py-3 select-none pr-1.5 font-mono text-[11px] border-r shrink-0 overflow-hidden"
-        >
-          {lines.map((_: string, i: number) => {
-            const lineNum = i + 1;
-            const bp = debugBreakpoints?.find((b: any) => b.filePath === activeFile && b.line === lineNum);
-            const isExecutionLine = debugLocation?.filePath === activeFile && debugLocation?.line === lineNum;
-
-            return (
-              <div
-                key={i}
-                onClick={() => toggleBreakpoint?.(activeFile, lineNum)}
-                className={`leading-5 h-5 flex items-center justify-between px-1 cursor-pointer group hover:bg-slate-800/60 rounded-sm transition-colors ${
-                  isExecutionLine ? 'bg-amber-500/25 text-amber-300 font-bold' : ''
-                }`}
-                title={
-                  isExecutionLine
-                    ? `Current execution position (Line ${lineNum})`
-                    : bp
-                    ? `Breakpoint at line ${lineNum} (${bp.enabled ? 'Enabled' : 'Disabled'}${bp.condition ? `, condition: ${bp.condition}` : ''}) - Click to toggle`
-                    : `Click to set breakpoint at line ${lineNum}`
-                }
-              >
-                {/* Breakpoint / Execution Indicator */}
-                <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
-                  {isExecutionLine ? (
-                    <span className="text-amber-400 font-bold text-xs select-none">▶</span>
-                  ) : bp ? (
-                    <span
-                      className={`w-2.5 h-2.5 rounded-full inline-block transition-transform hover:scale-125 ${
-                        bp.enabled ? 'bg-rose-500 shadow-sm shadow-rose-500/50' : 'border border-rose-500 bg-transparent'
-                      } ${bp.condition ? 'ring-1 ring-amber-400' : ''}`}
-                    />
-                  ) : (
-                    <span className="w-2 h-2 rounded-full bg-rose-500/0 group-hover:bg-rose-500/40 transition-colors inline-block" />
-                  )}
-                </div>
-
-                {/* Line Number */}
-                <span className={`text-right flex-1 ${isExecutionLine ? 'text-amber-300 font-bold' : ''}`}>
-                  {lineNum}
-                </span>
-              </div>
-            );
-          })}
         </div>
-
-        {/* Code Content TextArea */}
-        <div
-          onDragOver={handleDragOver}
-          onDrop={(e) => handleDrop(e)}
-          style={{ backgroundColor: 'var(--ide-editor-bg)' }}
-          className="flex-1 h-full overflow-hidden relative"
-        >
-          <textarea
-            ref={textareaRef}
-            value={activeFileContent}
-            onChange={(e) => {
-              const val = e.target.value;
-              updateFileContent(val);
-              if (isCursorTabEnabled && currentFile) {
-                const lines = val.split('\n');
-                const lastLine = lines[lines.length - 1] || '';
-                const suggestion = CursorService.getGhostTextSuggestion(lastLine, currentFile);
-                setGhostText(suggestion);
-              } else {
-                setGhostText(null);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (ghostText && e.key === 'Tab') {
-                e.preventDefault();
-                const newText = activeFileContent + ghostText;
-                updateFileContent(newText);
-                setGhostText(null);
-                return;
-              }
-              if (ghostText && e.key === 'Escape') {
-                setGhostText(null);
-                return;
-              }
-            }}
-            onClick={(e) => updateCursorTracking(e.currentTarget)}
-            onKeyUp={(e) => updateCursorTracking(e.currentTarget)}
-            onSelect={(e) => updateCursorTracking(e.currentTarget)}
-            onBlur={() => {
-              // Focus Loss Auto-Save Trigger: Immediate save when editor loses focus
-              if (autoSave && activeTab?.isDirty) {
-                saveCurrentFile();
-              }
-            }}
-            onScroll={(e) => {
-              if (lineColRef.current) {
-                lineColRef.current.scrollTop = e.currentTarget.scrollTop;
-              }
-            }}
-            spellCheck={false}
-            style={{
-              backgroundColor: 'var(--ide-editor-bg)',
-              color: 'var(--ide-text)',
-            }}
-            className="w-full h-full bg-transparent font-mono text-xs leading-5 resize-none outline-none whitespace-pre overflow-y-auto overflow-x-auto p-3 tab-size-2 scrollbar-slim"
-          />
-        </div>
-
-        {/* Right Code Minimap Strip (Matching Screenshot) */}
-        <div
-          onClick={(e) => {
-            if (!textareaRef.current) return;
-            const rect = e.currentTarget.getBoundingClientRect();
-            const clickRatio = (e.clientY - rect.top) / rect.height;
-            textareaRef.current.scrollTop = clickRatio * textareaRef.current.scrollHeight;
-          }}
-          className="w-14 h-full border-l border-slate-850 bg-black/40 select-none overflow-hidden relative cursor-pointer hidden md:flex flex-col py-2 px-1 gap-[2px] opacity-75 hover:opacity-100 transition-opacity shrink-0"
-          title="Code Minimap (Click to navigate)"
-        >
-          {lines.slice(0, 100).map((l: string, idx: number) => {
-            const trimmed = l.trim();
-            const width = Math.min(100, Math.max(15, trimmed.length * 3));
-            const isKeyword = /^(export|import|const|function|interface|type|class|return)\b/.test(trimmed);
-            const isComment = trimmed.startsWith('//') || trimmed.startsWith('/*');
-            return (
-              <div
-                key={idx}
-                className="h-[2px] rounded-xs"
-                style={{
-                  width: `${width}%`,
-                  marginLeft: `${Math.min(20, (l.length - trimmed.length) * 2)}px`,
-                  backgroundColor: isKeyword
-                    ? '#00ff88'
-                    : isComment
-                    ? '#555555'
-                    : '#888888',
-                  opacity: trimmed ? 0.75 : 0,
-                }}
-              />
-            );
-          })}
-
-          {/* Draggable Viewport Box */}
-          <div
-            className="absolute left-0 right-0 border border-white/25 bg-white/5 pointer-events-none rounded-xs"
-            style={{
-              top: `${Math.min(80, textareaRef.current ? (textareaRef.current.scrollTop / (textareaRef.current.scrollHeight || 1)) * 100 : 0)}%`,
-              height: '32px',
-            }}
-          />
-        </div>
-
-        {/* Diagnostics Floater if errors found in file */}
-        {fileDiagnostics.length > 0 && (
-          <div className="absolute bottom-3 right-4 max-w-md bg-slate-900/95 border border-rose-500/40 rounded-xl p-3 shadow-xl backdrop-blur-sm z-20 flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-rose-400 font-bold text-xs">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                <span>Diagnostic Found (Line {fileDiagnostics[0].line})</span>
-              </div>
-              <button
-                onClick={() => triggerSelfHealDebug(fileDiagnostics[0].message)}
-                className="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 shadow"
-              >
-                <Sparkles className="w-2.5 h-2.5" />
-                <span>Fix with AI</span>
-              </button>
-            </div>
-            <p className="text-[11px] text-slate-300 font-mono leading-tight">{fileDiagnostics[0].message}</p>
-          </div>
-        )}
-      </div>
       )}
     </div>
   );

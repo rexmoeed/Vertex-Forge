@@ -59,20 +59,20 @@ describe('SettingsView Component', () => {
   it('renders settings navigation sections and active theme', () => {
     render(<SettingsView />);
     expect(screen.getAllByText(/Appearance & Themes/i)[0]).toBeDefined();
-    expect(screen.getAllByText(/Editor & Auto-Save/i)[0]).toBeDefined();
+    expect(screen.getAllByText(/Editor & Files/i)[0]).toBeDefined();
     expect(screen.getByText('Dark Default')).toBeDefined();
   });
 
   it('switches between settings tabs', () => {
     render(<SettingsView />);
-    const editorTab = screen.getAllByRole('button', { name: /Editor & Auto-Save/i })[0];
+    const editorTab = screen.getAllByRole('button', { name: /Editor & Files/i })[0];
     fireEvent.click(editorTab);
     expect(editorTab).toBeDefined();
   });
 
-  it('switches to Agent Team & Permissions settings section', () => {
+  it('switches to Autonomous Agents settings section', () => {
     render(<SettingsView />);
-    const agentsTab = screen.getAllByRole('button', { name: /Agent Team & Permissions/i })[0];
+    const agentsTab = screen.getAllByRole('button', { name: /Autonomous Agents/i })[0];
     fireEvent.click(agentsTab);
     expect(agentsTab).toBeDefined();
   });
