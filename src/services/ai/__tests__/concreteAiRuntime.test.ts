@@ -19,9 +19,26 @@ describe('ConcreteAiRuntime Subsystem', () => {
     const builder = new ConcreteSystemPromptBuilder();
     const prompt = await builder.build({
       mode: 'agent',
-      context: { intent: 'test' },
-      tools: [{ name: 'vitest_run', description: 'Run test suite', category: 'testing', inputSchema: {} }],
-      autonomy: { allowFileWrite: true, allowTerminal: true, maxIterations: 5, requireApprovalForDestructive: false },
+      model: { providerId: 'google', modelId: 'gemini-3.8-flash' },
+      context: {
+        relevantFiles: [],
+        symbols: [],
+        dependencies: [],
+        instructions: ['Ensure test safety'],
+        evidence: [],
+      },
+      tools: [{ name: 'vitest_run', description: 'Run test suite', permission: 'safe', inputSchema: {} }],
+      autonomy: {
+        allowFileRead: true,
+        allowFileWrite: true,
+        allowTerminal: true,
+        allowProcessControl: false,
+        allowGit: false,
+        allowNetwork: false,
+        requireConfirmationForDestructive: false,
+        maxToolCalls: 5,
+        maxRuntimeMs: 10000,
+      },
     });
 
     expect(prompt).toContain('Vertex Forge');
@@ -34,6 +51,18 @@ describe('ConcreteAiRuntime Subsystem', () => {
     const res = await runtime.execute({
       requestId: 'req-42',
       userMessage: 'Test feature',
+      mode: 'agent',
+      autonomy: {
+        allowFileRead: true,
+        allowFileWrite: true,
+        allowTerminal: true,
+        allowProcessControl: false,
+        allowGit: false,
+        allowNetwork: false,
+        requireConfirmationForDestructive: false,
+        maxToolCalls: 5,
+        maxRuntimeMs: 10000,
+      },
     });
 
     expect(res.requestId).toBe('req-42');

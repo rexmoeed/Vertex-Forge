@@ -252,12 +252,23 @@ export class ConcreteAiRuntime implements AiRuntime {
     const startTime = Date.now();
     const intent = await this.intentEngine.classify({ userMessage: request.userMessage });
     const model = await this.modelRouter.resolve({ intent: intent.intent });
-    await this.contextEngine.buildContext({ userMessage: request.userMessage });
+    const builtContext = await this.contextEngine.buildContext({ userMessage: request.userMessage });
     await this.promptBuilder.build({
       mode: 'agent',
-      context: { intent: intent.intent },
+      model,
+      context: builtContext,
       tools: [],
-      autonomy: { allowFileWrite: true, allowTerminal: true, maxIterations: 5, requireApprovalForDestructive: false },
+      autonomy: request.autonomy || {
+        allowFileRead: true,
+        allowFileWrite: true,
+        allowTerminal: true,
+        allowProcessControl: false,
+        allowGit: false,
+        allowNetwork: false,
+        requireConfirmationForDestructive: true,
+        maxToolCalls: 10,
+        maxRuntimeMs: 30000,
+      },
     });
 
     return {
