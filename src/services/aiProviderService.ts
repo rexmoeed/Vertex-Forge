@@ -17,13 +17,15 @@ import {
   DEFAULT_ROLE_ASSIGNMENTS,
   DEFAULT_PRIVACY_SETTINGS,
 } from './providers/defaultModelCatalog';
+import { ProviderConnectionTester } from './providers/providerConnectionTester';
+import { AIUsageAndPrivacyService } from './providers/aiUsageAndPrivacyService';
 
+export { ProviderConnectionTester } from './providers/providerConnectionTester';
+export { AIUsageAndPrivacyService } from './providers/aiUsageAndPrivacyService';
 
 const STORAGE_KEY_PROVIDERS = 'vertex_ai_providers_v2';
 const STORAGE_KEY_ASSIGNMENTS = 'vertex_ai_role_assignments_v2';
 const STORAGE_KEY_AGENT_OVERRIDES = 'vertex_ai_agent_overrides_v2';
-const STORAGE_KEY_USAGE = 'vertex_ai_usage_history_v2';
-const STORAGE_KEY_PRIVACY = 'vertex_ai_privacy_settings_v2';
 
 const inMemoryStore: Record<string, string> = {};
 
@@ -46,7 +48,6 @@ function safeSetStorage(key: string, value: string): void {
   inMemoryStore[key] = value;
 }
 
-
 export class ProviderValidationError extends Error {
   constructor(message: string, public readonly details?: unknown) {
     super(message);
@@ -54,18 +55,19 @@ export class ProviderValidationError extends Error {
   }
 }
 
-export const ProviderConfigUpdateSchema = z.object({
-  apiKey: z.string().optional(),
-  baseUrl: z.string().url('Invalid baseUrl format: must be a valid URL').optional().or(z.literal('')),
-  enabled: z.boolean().optional(),
-  selectedModel: z.string().optional(),
-  customModels: z.array(z.any()).optional(),
-  temperature: z.number().min(0, 'Temperature cannot be negative').max(2, 'Temperature cannot exceed 2.0').optional(),
-  maxTokens: z.number().positive('maxTokens must be positive').optional(),
-}).passthrough();
+export const ProviderConfigUpdateSchema = z
+  .object({
+    apiKey: z.string().optional(),
+    baseUrl: z.string().url('Invalid baseUrl format: must be a valid URL').optional().or(z.literal('')),
+    enabled: z.boolean().optional(),
+    selectedModel: z.string().optional(),
+    customModels: z.array(z.any()).optional(),
+    temperature: z.number().min(0, 'Temperature cannot be negative').max(2, 'Temperature cannot exceed 2.0').optional(),
+    maxTokens: z.number().positive('maxTokens must be positive').optional(),
+  })
+  .passthrough();
 
 export class AIProviderService {
-  // Built-in verified model catalog
   public static readonly DEFAULT_MODELS = DEFAULT_MODELS;
 
   public static resetToDefaults(): void {
@@ -84,7 +86,6 @@ export class AIProviderService {
     return { ...DEFAULT_PRIVACY_SETTINGS };
   }
 
-  // Provider CRUD
   public static loadProviders(): ProviderConfig[] {
     try {
       const raw = safeGetStorage(STORAGE_KEY_PROVIDERS);
@@ -94,9 +95,7 @@ export class AIProviderService {
           return parsed;
         }
       }
-    } catch (e) {
-      // fallback
-    }
+    } catch (e) {}
     const init = this.getInitialProviders();
     this.saveProviders(init);
     return init;
@@ -141,7 +140,6 @@ export class AIProviderService {
     return updated;
   }
 
-  // Key Masking Helper: never expose raw key in plaintext UI
   public static maskApiKey(key?: string): string {
     if (!key) return 'Not configured';
     const trimmed = key.trim();
@@ -151,208 +149,29 @@ export class AIProviderService {
     return `${prefix}••••••••••••${suffix}`;
   }
 
-  // Dynamically fetch live models catalog from backend/provider
   public static async fetchDynamicModels(providerId: ProviderId, apiKey?: string): Promise<ModelInfo[]> {
-    try {
-      const provider = this.getProvider(providerId);
-      const key = apiKey || provider?.apiKey || '';
-      const res = await fetch(`/api/ai/provider/models?providerId=${providerId}&apiKey=${encodeURIComponent(key)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.models) && data.models.length > 0) {
-          if (provider) {
-            this.updateProvider(providerId, { models: data.models });
-          }
-          return data.models;
-        }
-      }
-    } catch (err) {
-      logger.warn(`[AIProviderService] Could not fetch dynamic models for ${providerId}:`, err);
-    }
-    return this.DEFAULT_MODELS[providerId] || [];
+    const provider = this.getProvider(providerId);
+    const customProv = apiKey && provider ? { ...provider, apiKey } : provider;
+    return ProviderConnectionTester.fetchDynamicModels(
+      providerId,
+      customProv,
+      this.DEFAULT_MODELS[providerId] || [],
+      (id, updates) => this.updateProvider(id, updates)
+    );
   }
 
-  // Test Connection
   public static async testConnection(
     providerId: ProviderId,
     testType: 'auth' | 'generation' | 'streaming' | 'tools' = 'auth'
   ): Promise<ConnectionTestResult> {
     const provider = this.getProvider(providerId);
-    if (!provider) {
-      return {
-        providerId,
-        success: false,
-        testType,
-        latencyMs: 0,
-        message: 'Provider configuration not found',
-        timestamp: Date.now(),
-      };
-    }
-
-    const startTime = Date.now();
-
-    // Check basic prerequisites
-    if (provider.authMethod === 'api_key' && !provider.apiKey && providerId !== 'gemini') {
-      return {
-        providerId,
-        success: false,
-        testType,
-        latencyMs: 0,
-        message: 'Missing API key. Please enter your API key to connect.',
-        timestamp: Date.now(),
-      };
-    }
-
-    try {
-      // 1. Try real backend verification endpoint
-      try {
-        const testRes = await fetch('/api/ai/provider/test', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            providerId,
-            apiKey: provider.apiKey,
-            baseUrl: provider.baseUrl,
-            model: provider.defaultModelId,
-            headers: provider.headers,
-          }),
-        });
-
-        if (testRes.ok) {
-          const testData = await testRes.json();
-          if (testData.success) {
-            this.updateProvider(providerId, {
-              status: 'connected',
-              isVerified: true,
-              enabled: true,
-              lastTested: Date.now(),
-              error: undefined,
-            });
-            return {
-              providerId,
-              success: true,
-              testType,
-              latencyMs: testData.latencyMs || (Date.now() - startTime),
-              message: testData.message || `Connected successfully to ${provider.name}.`,
-              timestamp: Date.now(),
-            };
-          } else {
-            const errMsg = testData.message || 'Verification failed';
-            this.updateProvider(providerId, {
-              status: 'error',
-              error: errMsg,
-              lastTested: Date.now(),
-            });
-            return {
-              providerId,
-              success: false,
-              testType,
-              latencyMs: testData.latencyMs || (Date.now() - startTime),
-              message: errMsg,
-              timestamp: Date.now(),
-            };
-          }
-        } else {
-          const errData = await testRes.json().catch(() => ({}));
-          const errMsg = errData.error || `Connection test failed with HTTP ${testRes.status}`;
-          this.updateProvider(providerId, {
-            status: 'error',
-            error: errMsg,
-            lastTested: Date.now(),
-          });
-          return {
-            providerId,
-            success: false,
-            testType,
-            latencyMs: Date.now() - startTime,
-            message: errMsg,
-            timestamp: Date.now(),
-          };
-        }
-      } catch (fetchErr: any) {
-        // Fallback for offline / direct browser check
-        if (providerId === 'gemini') {
-          const res = await fetch('/api/health');
-          const latencyMs = Date.now() - startTime;
-          if (res.ok) {
-            const data = await res.json();
-            this.updateProvider('gemini', {
-              status: 'connected',
-              isVerified: true,
-              lastTested: Date.now(),
-              error: undefined,
-            });
-            return {
-              providerId: 'gemini',
-              success: true,
-              testType,
-              latencyMs,
-              message: `Connected successfully to Google Gemini. Active model: ${data.defaultModel || 'gemini-3.8-flash'}.`,
-              timestamp: Date.now(),
-            };
-          }
-        }
-
-        // Validate key format if cloud
-        if (providerId === 'openai' && provider.apiKey && !provider.apiKey.startsWith('sk-')) {
-          return {
-            providerId,
-            success: false,
-            testType,
-            latencyMs: Date.now() - startTime,
-            message: 'Invalid OpenAI API key format. Standard keys typically start with "sk-".',
-            timestamp: Date.now(),
-          };
-        }
-
-        if (providerId === 'anthropic' && provider.apiKey && !provider.apiKey.startsWith('sk-ant-')) {
-          return {
-            providerId,
-            success: false,
-            testType,
-            latencyMs: Date.now() - startTime,
-            message: 'Invalid Anthropic API key format. Standard keys typically start with "sk-ant-".',
-            timestamp: Date.now(),
-          };
-        }
-
-        this.updateProvider(providerId, {
-          status: 'connected',
-          isVerified: true,
-          enabled: true,
-          lastTested: Date.now(),
-          error: undefined,
-        });
-
-        return {
-          providerId,
-          success: true,
-          testType,
-          latencyMs: Date.now() - startTime,
-          message: `Successfully verified connection to ${provider.name} (${testType} check passed).`,
-          timestamp: Date.now(),
-        };
-      }
-    } catch (err: any) {
-      const latencyMs = Date.now() - startTime;
-      const errorMsg = err?.message || 'Connection test failed';
-      this.updateProvider(providerId, {
-        status: 'error',
-        error: errorMsg,
-        lastTested: Date.now(),
-      });
-      return {
-        providerId,
-        success: false,
-        testType,
-        latencyMs,
-        message: errorMsg,
-        timestamp: Date.now(),
-      };
-    }
+    return ProviderConnectionTester.testConnection(
+      provider,
+      (id, updates) => this.updateProvider(id, updates),
+      testType
+    );
   }
 
-  // Model Catalog
   public static getAllModels(): ModelInfo[] {
     const providers = this.loadProviders();
     const result: ModelInfo[] = [];
@@ -409,7 +228,6 @@ export class AIProviderService {
     return models;
   }
 
-  // Role Assignments
   public static loadRoleAssignments(): RoleModelAssignments {
     try {
       const raw = safeGetStorage(STORAGE_KEY_ASSIGNMENTS);
@@ -428,49 +246,18 @@ export class AIProviderService {
     }
   }
 
-  // Hierarchical Agent Overrides
   public static loadAgentOverrides(): Record<string, AgentModelOverride> {
     try {
       const raw = safeGetStorage(STORAGE_KEY_AGENT_OVERRIDES);
       if (raw) return JSON.parse(raw);
     } catch (e) {}
     return {
-      Architect: {
-        agentRole: 'Architect',
-        providerId: 'gemini',
-        modelId: 'gemini-2.5-pro',
-        inheritParent: false,
-      },
-      Frontend: {
-        agentRole: 'Frontend',
-        providerId: 'gemini',
-        modelId: 'gemini-3.8-flash',
-        inheritParent: false,
-      },
-      Backend: {
-        agentRole: 'Backend',
-        providerId: 'gemini',
-        modelId: 'gemini-3.8-flash',
-        inheritParent: false,
-      },
-      'Product Designer': {
-        agentRole: 'Product Designer',
-        providerId: 'gemini',
-        modelId: 'gemini-3.8-flash',
-        inheritParent: false,
-      },
-      'QA Lead': {
-        agentRole: 'QA Lead',
-        providerId: 'gemini',
-        modelId: 'gemini-2.5-flash',
-        inheritParent: false,
-      },
-      'Security Lead': {
-        agentRole: 'Security Lead',
-        providerId: 'gemini',
-        modelId: 'gemini-2.5-pro',
-        inheritParent: false,
-      },
+      Architect: { agentRole: 'Architect', providerId: 'gemini', modelId: 'gemini-2.5-pro', inheritParent: false },
+      Frontend: { agentRole: 'Frontend', providerId: 'gemini', modelId: 'gemini-3.8-flash', inheritParent: false },
+      Backend: { agentRole: 'Backend', providerId: 'gemini', modelId: 'gemini-3.8-flash', inheritParent: false },
+      'Product Designer': { agentRole: 'Product Designer', providerId: 'gemini', modelId: 'gemini-3.8-flash', inheritParent: false },
+      'QA Lead': { agentRole: 'QA Lead', providerId: 'gemini', modelId: 'gemini-2.5-flash', inheritParent: false },
+      'Security Lead': { agentRole: 'Security Lead', providerId: 'gemini', modelId: 'gemini-2.5-pro', inheritParent: false },
     };
   }
 
@@ -482,113 +269,30 @@ export class AIProviderService {
     }
   }
 
-  // Usage & Cost Tracking
   public static loadUsageHistory(): UsageRecord[] {
-    try {
-      const raw = safeGetStorage(STORAGE_KEY_USAGE);
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    // Seed initial realistic baseline history for testing dashboard
-    const initialHistory: UsageRecord[] = [
-      {
-        id: 'rec-1',
-        timestamp: new Date(Date.now() - 3600000 * 2).toLocaleTimeString(),
-        providerId: 'gemini',
-        modelId: 'gemini-3.8-flash',
-        agentRole: 'Architect',
-        project: 'Vertex Forge',
-        inputTokens: 1420,
-        outputTokens: 480,
-        estimatedCostUsd: 0.00033,
-        durationMs: 820,
-        success: true,
-        isReported: true,
-      },
-      {
-        id: 'rec-2',
-        timestamp: new Date(Date.now() - 3600000).toLocaleTimeString(),
-        providerId: 'gemini',
-        modelId: 'gemini-3.8-flash',
-        agentRole: 'Frontend',
-        project: 'Vertex Forge',
-        inputTokens: 3100,
-        outputTokens: 1250,
-        estimatedCostUsd: 0.00081,
-        durationMs: 1450,
-        success: true,
-        isReported: true,
-      },
-    ];
-    this.saveUsageHistory(initialHistory);
-    return initialHistory;
+    return AIUsageAndPrivacyService.loadUsageHistory();
   }
 
   public static saveUsageHistory(records: UsageRecord[]): void {
-    try {
-      safeSetStorage(STORAGE_KEY_USAGE, JSON.stringify(records));
-    } catch (e) {
-      logger.warn('Failed to save usage records', e);
-    }
+    AIUsageAndPrivacyService.saveUsageHistory(records);
   }
 
   public static recordUsage(record: Omit<UsageRecord, 'id' | 'timestamp'>): UsageRecord {
-    const history = this.loadUsageHistory();
-    const newRecord: UsageRecord = {
-      ...record,
-      id: `use-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      timestamp: new Date().toLocaleTimeString(),
-    };
-    history.unshift(newRecord);
-    // keep last 500 records
-    if (history.length > 500) history.pop();
-    this.saveUsageHistory(history);
-    return newRecord;
+    return AIUsageAndPrivacyService.recordUsage(record);
   }
 
-  // Privacy Settings
   public static loadPrivacySettings(): PrivacySettings {
-    try {
-      const raw = safeGetStorage(STORAGE_KEY_PRIVACY);
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    const init = this.getInitialPrivacySettings();
-    this.savePrivacySettings(init);
-    return init;
+    return AIUsageAndPrivacyService.loadPrivacySettings();
   }
 
   public static savePrivacySettings(settings: PrivacySettings): void {
-    try {
-      safeSetStorage(STORAGE_KEY_PRIVACY, JSON.stringify(settings));
-    } catch (e) {
-      logger.warn('Failed to save privacy settings', e);
-    }
+    AIUsageAndPrivacyService.savePrivacySettings(settings);
   }
 
-  // Security Check: detect and prevent sending secrets into LLM prompts
   public static sanitizeContentForLLM(filePath: string, content: string): { isSafe: boolean; sanitized: string; reason?: string } {
-    const privacy = this.loadPrivacySettings();
-    const fileName = filePath.split('/').pop()?.toLowerCase() || '';
-
-    if (privacy.excludeEnvSecrets) {
-      if (fileName.startsWith('.env') || fileName.endsWith('.pem') || fileName.endsWith('.key') || fileName === 'id_rsa') {
-        return {
-          isSafe: false,
-          sanitized: `[SECURITY GUARD: ${filePath} contains sensitive environmental secrets and was excluded from model context according to Vertex Forge Privacy Policy]`,
-          reason: 'Protected environment credential file',
-        };
-      }
-    }
-
-    // Mask obvious secrets like private keys or raw tokens
-    let sanitized = content;
-    sanitized = sanitized.replace(/AIza[0-9A-Za-z-_]{20,}/g, 'AIza[REDACTED_API_KEY]');
-    sanitized = sanitized.replace(/sk-[a-zA-Z0-9]{32,}/g, 'sk-[REDACTED_SECRET_KEY]');
-    sanitized = sanitized.replace(/ghp_[a-zA-Z0-9]{36}/g, 'ghp_[REDACTED_TOKEN]');
-
-    return { isSafe: true, sanitized };
+    return AIUsageAndPrivacyService.sanitizeContentForLLM(filePath, content);
   }
 
-  // Unified Multi-Provider Execution
   public static async sendPrompt(opts: {
     prompt: string;
     systemPrompt?: string;
