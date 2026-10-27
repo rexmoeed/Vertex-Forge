@@ -19,6 +19,7 @@ import { TabContextMenu } from './TabContextMenu';
 import { EditorBreadcrumbBar } from './EditorBreadcrumbBar';
 import { EditorDiagnosticsFloater } from './EditorDiagnosticsFloater';
 import { useEditorFindReplace } from './useEditorFindReplace';
+import { useEditorInlineAI } from './useEditorInlineAI';
 
 export interface SingleEditorGroupProps {
   groupId: number;
@@ -89,15 +90,28 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
     setCursorPosition?.({ line, column });
   };
 
-  // Cursor Inline AI & Ghost Text (Copilot++) State
-  const [isInlineAIOpen, setIsInlineAIOpen] = useState(false);
-  const [inlinePrompt, setInlinePrompt] = useState('');
-  const [isInlineLoading, setIsInlineLoading] = useState(false);
-  const [inlineResultNotice, setInlineResultNotice] = useState<string | null>(null);
-  const [inlineOriginalCode, setInlineOriginalCode] = useState<string | null>(null);
-  const [isDiffReviewActive, setIsDiffReviewActive] = useState(false);
-  const [ghostText, setGhostText] = useState<string | null>(null);
-  const [isCursorTabEnabled, setIsCursorTabEnabled] = useState(true);
+  // Cursor Inline AI & Ghost Text (Copilot++) Hook
+  const {
+    isInlineAIOpen,
+    setIsInlineAIOpen,
+    inlinePrompt,
+    setInlinePrompt,
+    isInlineLoading,
+    inlineResultNotice,
+    isDiffReviewActive,
+    ghostText,
+    setGhostText,
+    isCursorTabEnabled,
+    setIsCursorTabEnabled,
+    handleInlineAISubmit,
+    handleAcceptInlineDiff,
+    handleRejectInlineDiff,
+  } = useEditorInlineAI({
+    activeFile,
+    activeFileContent,
+    updateFileContent,
+    saveCurrentFile,
+  });
 
   // Tab Context Menu State
   const [tabContextMenu, setTabContextMenu] = useState<{ x: number; y: number; tab: OpenTab } | null>(null);
@@ -122,59 +136,6 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
     if (idx !== -1) {
       openTabs.slice(idx + 1).forEach((t: OpenTab) => closeTab(t.id));
     }
-  };
-
-  const handleInlineAISubmit = async () => {
-    if (!inlinePrompt.trim() || !activeFile) return;
-    setIsInlineLoading(true);
-    setInlineResultNotice(null);
-    setInlineOriginalCode(activeFileContent);
-    try {
-      const res = await fetch('/api/ai/generate-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskTitle: inlinePrompt,
-          filePath: activeFile,
-          currentCode: activeFileContent,
-          agentRole: 'Full-Stack Developer',
-          model: 'gemini-3.8-flash',
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.code) {
-          updateFileContent(data.code);
-          setIsDiffReviewActive(true);
-          setIsInlineAIOpen(false);
-          return;
-        }
-      }
-      const synthesized = `// [Cursor Edit] ${inlinePrompt}\n` + activeFileContent;
-      updateFileContent(synthesized);
-      setIsDiffReviewActive(true);
-      setIsInlineAIOpen(false);
-    } catch (err: unknown) {
-      logger.error('Inline AI error:', err);
-    } finally {
-      setIsInlineLoading(false);
-    }
-  };
-
-  const handleAcceptInlineDiff = () => {
-    setIsDiffReviewActive(false);
-    setInlineOriginalCode(null);
-    setInlinePrompt('');
-    saveCurrentFile();
-  };
-
-  const handleRejectInlineDiff = () => {
-    if (inlineOriginalCode !== null) {
-      updateFileContent(inlineOriginalCode);
-    }
-    setIsDiffReviewActive(false);
-    setInlineOriginalCode(null);
-    setInlinePrompt('');
   };
 
   const handleDragEnter = (e: React.DragEvent) => {
