@@ -14,11 +14,11 @@ import {
   PanelRight,
   PanelLeft,
   X,
-  Sparkles,
-  GitBranch,
-  Copy,
 } from 'lucide-react';
 import { FileNode } from '../../types/ide';
+import { ExplorerContextMenu } from './explorer/ExplorerContextMenu';
+import { NoFolderOpenedView } from './explorer/NoFolderOpenedView';
+import { OutlineTimelineSection } from './explorer/OutlineTimelineSection';
 
 export const ExplorerSidebarTab: React.FC = () => {
   const {
@@ -45,9 +45,7 @@ export const ExplorerSidebarTab: React.FC = () => {
   const [collapsedFolders, setCollapsedFolders] = useState<Record<string, boolean>>({});
   const [draggingPath, setDraggingPath] = useState<string | null>(null);
 
-  // Outline, Timeline & File Context Menu States
-  const [isOutlineOpen, setIsOutlineOpen] = useState(false);
-  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+  // File Context Menu State
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node: FileNode } | null>(null);
 
   // Close context menu on outside click
@@ -90,45 +88,6 @@ export const ExplorerSidebarTab: React.FC = () => {
 
   // Check if a real workspace folder has been opened by user
   const isNoFolderOpened = !activeProject || !activeProject.rootFiles || activeProject.rootFiles.length === 0 || activeProject.id === 'workspace-local';
-
-  // Parse symbols from activeFileContent for Outline View
-  const outlineSymbols = useMemo(() => {
-    if (!activeFileContent) return [];
-    const lines = activeFileContent.split('\n');
-    const symbols: Array<{ name: string; type: 'interface' | 'type' | 'function' | 'class'; line: number }> = [];
-    lines.forEach((line: string, idx: number) => {
-      const trimmed = line.trim();
-      const ifaceMatch = trimmed.match(/^(?:export\s+)?interface\s+([A-Za-z0-9_]+)/);
-      if (ifaceMatch) symbols.push({ name: ifaceMatch[1], type: 'interface', line: idx + 1 });
-      const typeMatch = trimmed.match(/^(?:export\s+)?type\s+([A-Za-z0-9_]+)/);
-      if (typeMatch) symbols.push({ name: typeMatch[1], type: 'type', line: idx + 1 });
-      const classMatch = trimmed.match(/^(?:export\s+)?(?:default\s+)?class\s+([A-Za-z0-9_]+)/);
-      if (classMatch) symbols.push({ name: classMatch[1], type: 'class', line: idx + 1 });
-      const fnMatch = trimmed.match(/^(?:export\s+)?(?:async\s+)?function\s+([A-Za-z0-9_]+)/);
-      if (fnMatch) symbols.push({ name: fnMatch[1], type: 'function', line: idx + 1 });
-      const methodMatch = trimmed.match(/^([A-Za-z0-9_]+)\s*\([^)]*\)\s*:/);
-      if (methodMatch && !['constructor', 'if', 'for', 'switch'].includes(methodMatch[1])) {
-        symbols.push({ name: methodMatch[1], type: 'function', line: idx + 1 });
-      }
-    });
-    return symbols;
-  }, [activeFileContent]);
-
-  // Real commits from VFS / Git for Timeline View
-  const displayCommits = useMemo(() => {
-    const list = vfs?.getCommits?.() || [];
-    if (list.length > 0) {
-      return list.map((c: any) => ({
-        hash: (c.hash || c.id || '').slice(0, 7),
-        msg: c.message,
-        time: c.timestamp ? new Date(c.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent',
-        author: c.author || 'User',
-      }));
-    }
-    return [
-      { hash: 'HEAD', msg: 'Initial project baseline structure', time: 'Baseline', author: 'Vertex Forge' }
-    ];
-  }, [vfs]);
 
   // Drag-and-drop movement threshold tracking
   const DRAG_THRESHOLD = 4;
@@ -237,9 +196,7 @@ export const ExplorerSidebarTab: React.FC = () => {
             }`}
             style={{ paddingLeft: `${depth * 14 + 8}px` }}
             onClick={() => {
-              if (pointerStartRef.current.didDrag) {
-                return;
-              }
+              if (pointerStartRef.current.didDrag) return;
               if (isFolder) {
                 toggleFolder(node.path);
               } else {
@@ -387,195 +344,35 @@ export const ExplorerSidebarTab: React.FC = () => {
 
       {/* File Tree List or No Folder Opened Guide */}
       {isNoFolderOpened ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-5 text-center select-none">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3 shadow-inner">
-            <FolderOpen className="w-6 h-6" />
-          </div>
-          <h3 className="text-xs font-bold text-white mb-1">No Folder Opened</h3>
-          <p className="text-[11px] text-slate-400 mb-4 max-w-[210px] leading-relaxed">
-            You have not yet opened a workspace folder. Open a project to start coding with AI tools.
-          </p>
-          <div className="flex flex-col gap-2 w-full max-w-[190px]">
-            <button
-              onClick={() => openLocalFolder()}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
-            >
-              <FolderOpen className="w-4 h-4" />
-              <span>Open Folder...</span>
-            </button>
-            <button
-              onClick={() => setIsProjectWizardOpen(true)}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-medium transition-all cursor-pointer"
-            >
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>New Project with AI</span>
-            </button>
-            <button
-              onClick={() => setIsCloneModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-medium transition-all cursor-pointer"
-            >
-              <GitBranch className="w-4 h-4 text-amber-400" />
-              <span>Clone Git Repo</span>
-            </button>
-          </div>
-        </div>
+        <NoFolderOpenedView
+          onOpenLocalFolder={() => openLocalFolder()}
+          onOpenProjectWizard={() => setIsProjectWizardOpen(true)}
+          onOpenCloneModal={() => setIsCloneModalOpen(true)}
+        />
       ) : (
         <div className="flex-1 overflow-y-auto py-1">{renderTree(cleanTree)}</div>
       )}
 
-      {/* Outline & Timeline Sections */}
-      <div className="border-t border-slate-800 flex flex-col text-xs select-none shrink-0">
-        {/* Outline Header */}
-        <div
-          onClick={() => setIsOutlineOpen(!isOutlineOpen)}
-          className="px-3 py-1.5 bg-slate-900/50 hover:bg-slate-800/60 border-b border-slate-800/80 flex items-center justify-between cursor-pointer text-slate-400 hover:text-slate-200 transition"
-        >
-          <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px]">
-            {isOutlineOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-            <span>Outline</span>
-          </div>
-          <span className="text-[10px] font-mono text-slate-500">
-            {outlineSymbols.length} Symbols
-          </span>
-        </div>
-
-        {/* Outline Content */}
-        {isOutlineOpen && (
-          <div className="max-h-48 overflow-y-auto py-1 bg-slate-950/40">
-            {outlineSymbols.length === 0 ? (
-              <div className="px-3 py-2 text-[11px] text-slate-500 italic">
-                {activeFile ? 'No symbols found in active file' : 'No file currently open'}
-              </div>
-            ) : (
-              outlineSymbols.map((sym, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 py-1 hover:bg-white/5 flex items-center justify-between text-[11px] text-slate-300 cursor-pointer"
-                  onClick={() => {
-                    if (activeFile) openFile(activeFile);
-                  }}
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-[9px] font-mono uppercase px-1 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
-                      {sym.type[0]}
-                    </span>
-                    <span className="truncate">{sym.name}</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-slate-500 shrink-0">
-                    L{sym.line}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* Timeline Header */}
-        <div
-          onClick={() => setIsTimelineOpen(!isTimelineOpen)}
-          className="px-3 py-1.5 bg-slate-900/50 hover:bg-slate-800/60 border-b border-slate-800/80 flex items-center justify-between cursor-pointer text-slate-400 hover:text-slate-200 transition"
-        >
-          <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px]">
-            {isTimelineOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-            <span>Timeline</span>
-          </div>
-          <span className="text-[10px] font-mono text-slate-500">
-            {displayCommits.length} Commits
-          </span>
-        </div>
-
-        {/* Timeline Content */}
-        {isTimelineOpen && (
-          <div className="max-h-44 overflow-y-auto py-1 bg-slate-950/40">
-            {displayCommits.map((cmt, idx) => (
-              <div
-                key={idx}
-                className="px-3 py-1.5 hover:bg-white/5 flex flex-col gap-0.5 border-b border-slate-900 last:border-b-0 cursor-pointer"
-              >
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-mono text-indigo-400 font-bold">{cmt.hash}</span>
-                  <span className="text-[10px] text-slate-500">{cmt.time}</span>
-                </div>
-                <div className="text-[11px] text-slate-300 truncate">{cmt.msg}</div>
-                <div className="text-[9px] text-slate-500">{cmt.author}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Outline & Timeline Section */}
+      <OutlineTimelineSection
+        activeFile={activeFile}
+        activeFileContent={activeFileContent}
+        vfs={vfs}
+        onOpenFile={openFile}
+      />
 
       {/* Floating File Tree Context Menu */}
-      {contextMenu && (
-        <div
-          style={{
-            top: `${contextMenu.y}px`,
-            left: `${contextMenu.x}px`,
-            backgroundColor: 'var(--ide-surface-elevated, #121214)',
-            borderColor: 'var(--ide-border, #27272a)',
-          }}
-          className="fixed z-50 border rounded-lg shadow-2xl py-1 min-w-[180px] text-xs text-white/90 animate-fadeIn"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="px-3 py-1 text-[10px] text-slate-500 font-mono truncate border-b border-white/10 mb-1">
-            {contextMenu.node.name}
-          </div>
-          <button
-            onClick={() => {
-              setIsCreatingFile(true);
-              setContextMenu(null);
-            }}
-            className="w-full text-left px-3 py-1.5 hover:bg-emerald-500/20 hover:text-[var(--ide-accent,#00ff88)] flex items-center gap-2 cursor-pointer transition"
-          >
-            <FilePlus className="w-3.5 h-3.5 text-cyan-400" />
-            <span>New File</span>
-          </button>
-          <button
-            onClick={() => {
-              setIsCreatingFolder(true);
-              setContextMenu(null);
-            }}
-            className="w-full text-left px-3 py-1.5 hover:bg-emerald-500/20 hover:text-[var(--ide-accent,#00ff88)] flex items-center gap-2 cursor-pointer transition"
-          >
-            <FolderPlus className="w-3.5 h-3.5 text-amber-400" />
-            <span>New Folder</span>
-          </button>
-          <div className="border-t border-white/10 my-1" />
-          <button
-            onClick={() => {
-              navigator.clipboard?.writeText(contextMenu.node.path);
-              setContextMenu(null);
-            }}
-            className="w-full text-left px-3 py-1.5 hover:bg-emerald-500/20 hover:text-[var(--ide-accent,#00ff88)] flex items-center gap-2 cursor-pointer transition"
-          >
-            <Copy className="w-3.5 h-3.5 text-slate-400" />
-            <span>Copy Path</span>
-          </button>
-          <button
-            onClick={() => {
-              const rel = contextMenu.node.path.replace(/^[\\/]+/, '');
-              navigator.clipboard?.writeText(rel);
-              setContextMenu(null);
-            }}
-            className="w-full text-left px-3 py-1.5 hover:bg-emerald-500/20 hover:text-[var(--ide-accent,#00ff88)] flex items-center gap-2 cursor-pointer transition"
-          >
-            <Copy className="w-3.5 h-3.5 text-slate-400" />
-            <span>Copy Relative Path</span>
-          </button>
-          <div className="border-t border-white/10 my-1" />
-          <button
-            onClick={() => {
-              if (confirm(`Delete ${contextMenu.node.name}?`)) {
-                deleteFileOrFolder(contextMenu.node.path);
-              }
-              setContextMenu(null);
-            }}
-            className="w-full text-left px-3 py-1.5 hover:bg-rose-500/20 text-rose-400 flex items-center gap-2 cursor-pointer transition"
-          >
-            <Trash2 className="w-3.5 h-3.5 text-rose-400" />
-            <span>Delete</span>
-          </button>
-        </div>
-      )}
+      <ExplorerContextMenu
+        contextMenu={contextMenu}
+        onClose={() => setContextMenu(null)}
+        onNewFile={() => setIsCreatingFile(true)}
+        onNewFolder={() => setIsCreatingFolder(true)}
+        onDelete={(path, name) => {
+          if (confirm(`Delete ${name}?`)) {
+            deleteFileOrFolder(path);
+          }
+        }}
+      />
     </div>
   );
 };
