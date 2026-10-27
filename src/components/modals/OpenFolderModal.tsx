@@ -3,20 +3,15 @@ import {
   Folder,
   FolderPlus,
   ArrowUp,
-  HardDrive,
-  Home,
-  Monitor,
-  FileText,
-  Download,
   Search,
   X,
   ChevronRight,
   Check,
   RotateCw,
   Clock,
-  ExternalLink,
-  ShieldCheck,
 } from 'lucide-react';
+import { FolderShortcutsBar } from './folder/FolderShortcutsBar';
+import { FolderDirectoryList } from './folder/FolderDirectoryList';
 
 interface BrowseResponse {
   currentPath: string;
@@ -224,54 +219,11 @@ export const OpenFolderModal: React.FC<OpenFolderModalProps> = ({
         </div>
 
         {/* Shortcuts Bar (Drives & System Folders) */}
-        <div
-          style={{ borderColor: 'var(--ide-border, #27272a)' }}
-          className="px-4 py-2 border-b flex flex-wrap items-center gap-1.5 bg-black/20 shrink-0"
-        >
-          {data?.shortcuts.map(s => {
-            const isDesktop = s.name === 'Desktop';
-            const isHome = s.name === 'Home';
-            const isDocs = s.name === 'Documents';
-            const isDownloads = s.name === 'Downloads';
-            const isCur = s.name === 'Current Project';
-
-            return (
-              <button
-                key={s.path}
-                onClick={() => fetchDirectory(s.path)}
-                className={`px-2 py-1 rounded-md text-[11px] font-medium border flex items-center gap-1.5 transition cursor-pointer ${
-                  currentPath === s.path
-                    ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
-                    : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
-                }`}
-                title={s.path}
-              >
-                {isDesktop && <Monitor className="w-3 h-3 text-cyan-400" />}
-                {isHome && <Home className="w-3 h-3 text-indigo-400" />}
-                {isDocs && <FileText className="w-3 h-3 text-amber-400" />}
-                {isDownloads && <Download className="w-3 h-3 text-emerald-400" />}
-                {isCur && <ShieldCheck className="w-3 h-3 text-violet-400" />}
-                <span>{s.name}</span>
-              </button>
-            );
-          })}
-
-          {/* Drives */}
-          {data?.drives && data.drives.length > 0 && (
-            <div className="flex items-center gap-1 ml-auto">
-              {data.drives.map(d => (
-                <button
-                  key={d}
-                  onClick={() => fetchDirectory(d)}
-                  className="px-2 py-1 rounded-md text-[10px] font-mono font-bold bg-white/5 hover:bg-white/15 border border-white/10 text-slate-300 hover:text-white transition cursor-pointer flex items-center gap-1"
-                >
-                  <HardDrive className="w-2.5 h-2.5 text-slate-400" />
-                  <span>{d}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <FolderShortcutsBar
+          data={data}
+          currentPath={currentPath}
+          onSelectPath={fetchDirectory}
+        />
 
         {/* Path Navigation & Breadcrumb Bar */}
         <div
@@ -404,66 +356,16 @@ export const OpenFolderModal: React.FC<OpenFolderModalProps> = ({
         </div>
 
         {/* Directory Contents List */}
-        <div
-          ref={listRef}
-          className="flex-1 overflow-y-auto p-3 space-y-1 select-none min-h-0"
-        >
-          {error && (
-            <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs my-2">
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex flex-col items-center justify-center h-48 gap-2 text-slate-500">
-              <RotateCw className="w-5 h-5 animate-spin text-indigo-400" />
-              <span>Reading folder structure...</span>
-            </div>
-          ) : filteredFolders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-slate-500 gap-1.5">
-              <Folder className="w-8 h-8 opacity-30" />
-              <span>{searchQuery ? 'No folders match your filter.' : 'No subfolders in this directory.'}</span>
-              <span className="text-[10px] text-slate-600">You can select this directory directly below.</span>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {filteredFolders.map(folder => {
-                const isSelected = selectedFolderInList === folder.path;
-                return (
-                  <div
-                    key={folder.path}
-                    onClick={() => setSelectedFolderInList(folder.path)}
-                    onDoubleClick={() => fetchDirectory(folder.path)}
-                    className={`p-2 rounded-lg border flex items-center justify-between gap-2 cursor-pointer transition ${
-                      isSelected
-                        ? 'bg-indigo-600/20 border-indigo-500/80 text-white shadow-xs'
-                        : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20 text-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Folder className={`w-4 h-4 shrink-0 ${isSelected ? 'text-indigo-400' : 'text-slate-400'}`} />
-                      <span className="truncate font-mono text-[11px]">{folder.name}</span>
-                    </div>
-
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.stopPropagation();
-                          fetchDirectory(folder.path);
-                        }}
-                        className="px-1.5 py-0.5 rounded text-[10px] text-slate-400 hover:text-white hover:bg-white/15 cursor-pointer"
-                        title="Enter folder"
-                      >
-                        Enter →
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        <FolderDirectoryList
+          listRef={listRef}
+          error={error}
+          loading={loading}
+          searchQuery={searchQuery}
+          filteredFolders={filteredFolders}
+          selectedFolderInList={selectedFolderInList}
+          onSelectFolder={setSelectedFolderInList}
+          onEnterFolder={fetchDirectory}
+        />
 
         {/* Recent Workspaces Quick Open Bar */}
         {recentProjects.length > 0 && (
