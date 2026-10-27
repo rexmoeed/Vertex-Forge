@@ -3,15 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useIDE } from '../../../context/IDEContext';
 import { EditorTabBar } from '../../editor/EditorTabBar';
 import { FindReplaceOverlay } from '../../editor/FindReplaceOverlay';
-import {
-  X,
-  AlertTriangle,
-  Sparkles,
-  FileCode,
-  FileJson,
-  FileText,
-  Copy,
-} from 'lucide-react';
+import { X, FileCode, FileJson, FileText } from 'lucide-react';
 import { OpenTab } from '../../../types/ide';
 import { FILE_DRAG_MIME, FileDragPayload } from '../../../types/dragDrop';
 import { DesktopBridge } from '../../../services/desktopBridge';
@@ -23,6 +15,10 @@ import { EditorDiffReviewBar } from './EditorDiffReviewBar';
 import { EditorInlineAIBar } from './EditorInlineAIBar';
 import { EditorGutter } from './EditorGutter';
 import { EditorMinimap } from './EditorMinimap';
+import { TabContextMenu } from './TabContextMenu';
+import { EditorBreadcrumbBar } from './EditorBreadcrumbBar';
+import { EditorDiagnosticsFloater } from './EditorDiagnosticsFloater';
+import { useEditorFindReplace } from './useEditorFindReplace';
 
 export interface SingleEditorGroupProps {
   groupId: number;
@@ -73,7 +69,6 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
   const lineColRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
-  // Auto-scroll editor to line when cursorPosition changes programmatically
   useEffect(() => {
     if (!textareaRef.current || !cursorPosition?.line) return;
     const lineHeight = 20;
@@ -104,53 +99,17 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
   const [ghostText, setGhostText] = useState<string | null>(null);
   const [isCursorTabEnabled, setIsCursorTabEnabled] = useState(true);
 
-  // Tab Context Menu & Find/Replace States
+  // Tab Context Menu State
   const [tabContextMenu, setTabContextMenu] = useState<{ x: number; y: number; tab: OpenTab } | null>(null);
-  const [isFindOpen, setIsFindOpen] = useState(false);
-  const [findText, setFindText] = useState('');
-  const [replaceText, setReplaceText] = useState('');
-  const [findMatchIndex, setFindMatchIndex] = useState(0);
+
+  // Find & Replace Hook
+  const findReplace = useEditorFindReplace(activeFileContent, updateFileContent);
 
   useEffect(() => {
     const handleOutside = () => setTabContextMenu(null);
     window.addEventListener('click', handleOutside);
     return () => window.removeEventListener('click', handleOutside);
   }, []);
-
-  const findMatches = React.useMemo(() => {
-    if (!findText || !activeFileContent) return [];
-    const results: number[] = [];
-    let idx = 0;
-    const lowerContent = activeFileContent.toLowerCase();
-    const lowerFind = findText.toLowerCase();
-    while ((idx = lowerContent.indexOf(lowerFind, idx)) !== -1) {
-      results.push(idx);
-      idx += lowerFind.length;
-    }
-    return results;
-  }, [findText, activeFileContent]);
-
-  const handleNextMatch = () => {
-    if (findMatches.length === 0) return;
-    setFindMatchIndex(prev => (prev + 1) % findMatches.length);
-  };
-
-  const handlePrevMatch = () => {
-    if (findMatches.length === 0) return;
-    setFindMatchIndex(prev => (prev - 1 + findMatches.length) % findMatches.length);
-  };
-
-  const handleReplaceOne = () => {
-    if (!findText || !activeFileContent || findMatches.length === 0) return;
-    const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-    updateFileContent(activeFileContent.replace(regex, replaceText));
-  };
-
-  const handleReplaceAll = () => {
-    if (!findText || !activeFileContent) return;
-    const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    updateFileContent(activeFileContent.replace(regex, replaceText));
-  };
 
   const handleCloseOtherTabs = (currentTabId: string) => {
     openTabs.forEach((t: OpenTab) => {
@@ -195,7 +154,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
       updateFileContent(synthesized);
       setIsDiffReviewActive(true);
       setIsInlineAIOpen(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Inline AI error:', err);
     } finally {
       setIsInlineLoading(false);
@@ -264,7 +223,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
           }
           return;
         }
-      } catch (err) {
+      } catch (err: unknown) {
         logger.error('[DragDrop] Failed to parse drag payload:', err);
       }
     }
@@ -281,7 +240,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
             source: 'external-os',
             targetGroupId: groupId,
           });
-        } catch (err) {
+        } catch (err: unknown) {
           logger.error('[DragDrop] Failed to read external OS file:', err);
         }
       }
@@ -318,7 +277,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
-      onDrop={(e) => handleDrop(e)}
+      onDrop={e => handleDrop(e)}
       style={{
         backgroundColor: 'var(--ide-editor-bg)',
         color: 'var(--ide-text)',
@@ -368,102 +327,40 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
         saveCurrentFile={saveCurrentFile}
         handleCopyCode={handleCopyCode}
         copied={copied}
-        isFindOpen={isFindOpen}
-        setIsFindOpen={setIsFindOpen}
+        isFindOpen={findReplace.isFindOpen}
+        setIsFindOpen={findReplace.setIsFindOpen}
       />
 
       {/* Breadcrumb Bar */}
       {currentFile && (
-        <div
-          style={{
-            backgroundColor: 'var(--ide-surface-elevated)',
-            borderColor: 'var(--ide-border)',
-          }}
-          className="h-6 border-b px-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono select-none shrink-0 overflow-hidden min-w-0"
-        >
-          <div className="flex items-center gap-1 truncate min-w-0 max-w-full">
-            <span className="shrink-0">{currentFile.split('/')[0]}</span>
-            <span className="shrink-0">&gt;</span>
-            <span className="text-slate-800 dark:text-slate-300 font-medium truncate min-w-0">{currentFile}</span>
-          </div>
-
-          {fileDiagnostics.length > 0 && (
-            <div className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-sans text-[10px] shrink-0 ml-2">
-              <AlertTriangle className="w-3 h-3" />
-              <span>{fileDiagnostics.length} issue{fileDiagnostics.length > 1 ? 's' : ''}</span>
-            </div>
-          )}
-        </div>
+        <EditorBreadcrumbBar currentFile={currentFile} fileDiagnostics={fileDiagnostics} />
       )}
 
       {/* Find & Replace Overlay */}
       <FindReplaceOverlay
-        isFindOpen={isFindOpen}
-        setIsFindOpen={setIsFindOpen}
-        findText={findText}
-        setFindText={setFindText}
-        replaceText={replaceText}
-        setReplaceText={setReplaceText}
-        findMatches={findMatches}
-        findMatchIndex={findMatchIndex}
-        handlePrevMatch={handlePrevMatch}
-        handleNextMatch={handleNextMatch}
-        handleReplaceOne={handleReplaceOne}
-        handleReplaceAll={handleReplaceAll}
+        isFindOpen={findReplace.isFindOpen}
+        setIsFindOpen={findReplace.setIsFindOpen}
+        findText={findReplace.findText}
+        setFindText={findReplace.setFindText}
+        replaceText={findReplace.replaceText}
+        setReplaceText={findReplace.setReplaceText}
+        findMatches={findReplace.findMatches}
+        findMatchIndex={findReplace.findMatchIndex}
+        handlePrevMatch={findReplace.handlePrevMatch}
+        handleNextMatch={findReplace.handleNextMatch}
+        handleReplaceOne={findReplace.handleReplaceOne}
+        handleReplaceAll={findReplace.handleReplaceAll}
       />
 
       {/* Floating Tab Context Menu */}
       {tabContextMenu && (
-        <div
-          style={{
-            top: `${tabContextMenu.y}px`,
-            left: `${tabContextMenu.x}px`,
-            backgroundColor: 'var(--ide-surface-elevated, #121214)',
-            borderColor: 'var(--ide-border, #27272a)',
-          }}
-          className="fixed z-50 border rounded-lg shadow-2xl py-1 min-w-[170px] text-xs text-white/90 animate-fadeIn"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={() => {
-              closeTab(tabContextMenu.tab.id);
-              setTabContextMenu(null);
-            }}
-            className="w-full text-left px-3 py-1.5 hover:bg-emerald-500/20 hover:text-[var(--ide-accent,#00ff88)] flex items-center justify-between cursor-pointer transition"
-          >
-            <span>Close</span>
-            <span className="text-[10px] text-slate-500 font-mono">Ctrl+W</span>
-          </button>
-          <button
-            onClick={() => {
-              handleCloseOtherTabs(tabContextMenu.tab.id);
-              setTabContextMenu(null);
-            }}
-            className="w-full text-left px-3 py-1.5 hover:bg-emerald-500/20 hover:text-[var(--ide-accent,#00ff88)] flex items-center justify-between cursor-pointer transition"
-          >
-            <span>Close Others</span>
-          </button>
-          <button
-            onClick={() => {
-              handleCloseTabsToRight(tabContextMenu.tab.id);
-              setTabContextMenu(null);
-            }}
-            className="w-full text-left px-3 py-1.5 hover:bg-emerald-500/20 hover:text-[var(--ide-accent,#00ff88)] flex items-center justify-between cursor-pointer transition"
-          >
-            <span>Close to the Right</span>
-          </button>
-          <div className="border-t border-white/10 my-1" />
-          <button
-            onClick={() => {
-              navigator.clipboard?.writeText(tabContextMenu.tab.filePath);
-              setTabContextMenu(null);
-            }}
-            className="w-full text-left px-3 py-1.5 hover:bg-emerald-500/20 hover:text-[var(--ide-accent,#00ff88)] flex items-center gap-2 cursor-pointer transition"
-          >
-            <Copy className="w-3.5 h-3.5 text-slate-400" />
-            <span>Copy Path</span>
-          </button>
-        </div>
+        <TabContextMenu
+          menu={tabContextMenu}
+          onClose={() => setTabContextMenu(null)}
+          onCloseTab={closeTab}
+          onCloseOthers={handleCloseOtherTabs}
+          onCloseToRight={handleCloseTabsToRight}
+        />
       )}
 
       {/* Debug Toolbar */}
@@ -535,14 +432,14 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
           {/* TextArea */}
           <div
             onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e)}
+            onDrop={e => handleDrop(e)}
             style={{ backgroundColor: 'var(--ide-editor-bg)' }}
             className="flex-1 h-full overflow-hidden relative"
           >
             <textarea
               ref={textareaRef}
               value={activeFileContent}
-              onChange={(e) => {
+              onChange={e => {
                 const val = e.target.value;
                 updateFileContent(val);
                 if (isCursorTabEnabled && currentFile) {
@@ -554,7 +451,7 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
                   setGhostText(null);
                 }
               }}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (ghostText && e.key === 'Tab') {
                   e.preventDefault();
                   const newText = activeFileContent + ghostText;
@@ -567,15 +464,15 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
                   return;
                 }
               }}
-              onClick={(e) => updateCursorTracking(e.currentTarget)}
-              onKeyUp={(e) => updateCursorTracking(e.currentTarget)}
-              onSelect={(e) => updateCursorTracking(e.currentTarget)}
+              onClick={e => updateCursorTracking(e.currentTarget)}
+              onKeyUp={e => updateCursorTracking(e.currentTarget)}
+              onSelect={e => updateCursorTracking(e.currentTarget)}
               onBlur={() => {
                 if (autoSave && activeTab?.isDirty) {
                   saveCurrentFile();
                 }
               }}
-              onScroll={(e) => {
+              onScroll={e => {
                 if (lineColRef.current) {
                   lineColRef.current.scrollTop = e.currentTarget.scrollTop;
                 }
@@ -594,22 +491,10 @@ export const SingleEditorGroup: React.FC<SingleEditorGroupProps> = ({
 
           {/* Diagnostics Floater */}
           {fileDiagnostics.length > 0 && (
-            <div className="absolute bottom-3 right-4 max-w-md bg-slate-900/95 border border-rose-500/40 rounded-xl p-3 shadow-xl backdrop-blur-sm z-20 flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-rose-400 font-bold text-xs">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>Diagnostic Found (Line {fileDiagnostics[0].line})</span>
-                </div>
-                <button
-                  onClick={() => triggerSelfHealDebug(fileDiagnostics[0].message)}
-                  className="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 shadow cursor-pointer"
-                >
-                  <Sparkles className="w-2.5 h-2.5" />
-                  <span>Fix with AI</span>
-                </button>
-              </div>
-              <p className="text-[11px] text-slate-300 font-mono leading-tight">{fileDiagnostics[0].message}</p>
-            </div>
+            <EditorDiagnosticsFloater
+              diagnostic={fileDiagnostics[0]}
+              onFixWithAI={triggerSelfHealDebug}
+            />
           )}
         </div>
       )}
