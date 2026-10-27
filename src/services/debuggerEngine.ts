@@ -421,6 +421,10 @@ export class DebuggerEngine {
     }
   }
 
+  public getCurrentSession(): DebugSession | null {
+    return this.currentSession;
+  }
+
   public restartSession() {
     this.stopSession();
     setTimeout(() => {
