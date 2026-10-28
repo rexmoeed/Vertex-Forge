@@ -19,3 +19,4 @@ describe('Security: Vulnerable Fixture Generator', () => {
     writeFileSpy.mockRestore();
   });
 });
+

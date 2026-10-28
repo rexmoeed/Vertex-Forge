@@ -53,3 +53,4 @@ export const Welcome = () => <h1>Welcome to Vertex Forge</h1>;
     expect(findings.length).toBe(0);
   });
 });
+

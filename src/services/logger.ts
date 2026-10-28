@@ -173,6 +173,23 @@ export class StructuredLogger {
 
   public error(message: string, context?: unknown, cause?: unknown): void {
     this.emit('error', message, context, cause);
+
+    // Remote error tracking forwarder (Sentry / Webhook telemetry)
+    const sentryDsn = typeof process !== 'undefined' ? process.env?.SENTRY_DSN : undefined;
+    if (sentryDsn && typeof fetch === 'function') {
+      try {
+        fetch(sentryDsn, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            context,
+            cause: cause instanceof Error ? { message: cause.message, stack: cause.stack } : cause,
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch(() => {});
+      } catch {}
+    }
   }
 }
 

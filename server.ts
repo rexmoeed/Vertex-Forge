@@ -15,6 +15,16 @@ const validatedEnv = validateServerEnvironment(process.env);
 const PORT = validatedEnv.PORT || 3000;
 const { app } = createApp();
 
+// Primary Healthcheck Endpoint backing electron/main.ts and observability monitors
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    service: 'Vertex Forge Backend Server',
+  });
+});
+
 async function startServer() {
   const server = http.createServer(app);
 

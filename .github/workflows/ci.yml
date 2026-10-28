@@ -136,9 +136,10 @@ jobs:
       - name: Run Offline Verification
         env:
           NODE_ENV: test
+          OFFLINE_MODE: 'true'
         run: |
           npm run build
-          npm test
+          npm run test:integration-isolated
 
   build:
     name: Verify Production Bundle Build

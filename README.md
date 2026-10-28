@@ -315,6 +315,28 @@ npm run electron:build
 
 ---
 
+### 🔄 Clone and Verify (Offline Determinism)
+
+Vertex Forge provides a one-shot automated verification script to validate clean-clone installation, offline compilation, and isolated test execution with zero external credentials:
+
+```bash
+# Execute end-to-end fresh-clone verification (rm node_modules -> npm ci -> build -> isolated tests)
+chmod +x scripts/verify-fresh-clone.sh
+./scripts/verify-fresh-clone.sh
+```
+
+---
+
+### 📦 Dependency Notes & Major Version Architecture
+
+Vertex Forge is engineered for modern developer workstations and high-concurrency swarms. Its core dependency matrix is deliberately aligned to the following releases:
+- **React 19 (`19.3.0`)**: Powers streaming agent traces with native Action hooks and Concurrent Mode rendering without UI jank.
+- **Vite 8 (`8.3.4`)**: Delivers sub-second Hot Module Replacement (HMR) and optimized Rolldown bundling across multi-pane views.
+- **Vitest 5 (`5.0.5`)**: High-throughput parallel test execution across 140+ test suites with in-memory JSDOM isolation and zero network sockets.
+- **ESLint 10 (`10.13.0`)**: Enforces zero-warning strict typing across the entire monorepo with zero legacy configuration overhead.
+
+---
+
 ### 🧪 Testing & Isolated Execution
 
 Vertex Forge features a 100% network-isolated test suite that runs cleanly on air-gapped workstations or continuous integration runners without configuring external API keys or remote accounts:

@@ -35,3 +35,4 @@ describe('Security: Advisory Database & Semver Vulnerability Matcher', () => {
     });
   });
 });
+

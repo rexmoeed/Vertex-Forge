@@ -113,6 +113,33 @@ globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise
     );
   }
 
+  // Intercept Ollama local endpoint (11434)
+  if (url.includes('11434') || url.includes('/api/tags')) {
+    return new Response(
+      JSON.stringify({
+        models: [
+          { name: 'deepseek-coder-v2:latest', size: 8900000000 },
+          { name: 'qwen2.5-coder:14b', size: 9100000000 },
+          { name: 'llama3.3:latest', size: 8500000000 },
+        ],
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Intercept LM Studio local endpoint (1234)
+  if (url.includes('1234') || url.includes('/v1/models')) {
+    return new Response(
+      JSON.stringify({
+        data: [
+          { id: 'deepseek-coder-v2-lite', object: 'model' },
+          { id: 'qwen2.5-coder-7b', object: 'model' },
+        ],
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   if (originalFetch) {
     try {
       return await originalFetch(input, init);
