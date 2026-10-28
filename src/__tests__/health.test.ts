@@ -13,3 +13,4 @@ describe('Healthcheck Endpoint (/api/health)', () => {
     expect(res.body.service).toBeDefined();
   });
 });
+

@@ -67,3 +67,4 @@ export const mockLmStudioModelsResponse = {
     { id: 'qwen2.5-coder-7b', object: 'model', owned_by: 'local' },
   ],
 };
+

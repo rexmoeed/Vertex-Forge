@@ -27,3 +27,4 @@ NODE_ENV=test OFFLINE_MODE=true npm run test:integration-isolated
 echo "=========================================================="
 echo "✅ SUCCESS: All fresh-clone offline verification gates passed!"
 echo "=========================================================="
+
