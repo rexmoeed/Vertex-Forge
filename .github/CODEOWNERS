@@ -1,0 +1,20 @@
+# Global code ownership for Vertex Forge repository
+
+# Default owners for everything
+* @rexmoeed
+
+# Core engine and swarms
+/src/services/agent/ @rexmoeed
+/src/services/agentHierarchyService* @rexmoeed
+/src/services/providers/ @rexmoeed
+
+# Electron desktop runtime
+/electron/ @rexmoeed
+
+# Backend server and security
+/server/ @rexmoeed
+/server/middleware/ @rexmoeed
+
+# CI/CD and security governance
+/.github/ @rexmoeed
+/SECURITY.md @rexmoeed

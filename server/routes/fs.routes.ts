@@ -11,6 +11,11 @@ import { buildDirectoryTree, getAvailableDrives, IGNORED_DIRS } from '../service
 export function createFsRouter(): Router {
   const router = Router();
 
+// 0. Lightweight Drives Discovery
+router.get('/api/fs/drives', (_req: Request, res: Response) => {
+  return res.json(getAvailableDrives().map(d => d.replace(/\\/g, '/')));
+});
+
 router.post('/api/fs/read-dir', async (req: Request, res: Response) => {
   const { dirPath, maxDepth = 6 } = req.body;
   const targetDir = dirPath ? path.resolve(dirPath) : process.cwd();

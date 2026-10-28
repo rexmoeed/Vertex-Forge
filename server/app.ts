@@ -15,8 +15,17 @@ dotenv.config();
 export function createApp(): { app: Express; getAiClient: () => GoogleGenAI | null } {
   const app = express();
 
-  // 1. Core Transport Middleware with Body Limits
+  // 1. Core Transport Middleware with Body Limits & Security Headers
   app.use(express.json({ limit: '15mb' }));
+
+  // 1.0 OWASP Recommended Security Headers
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+  });
 
   // 1.1 Request ID assignment & Structured Request Logging via Pino
   app.use((req: Request, res: Response, next: NextFunction) => {

@@ -4,6 +4,19 @@
   "version": "1.2.0",
   "description": "Vertex Forge - Autonomous AI Software Engineering Studio",
   "author": "Vertex Forge Team",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/rexmoeed/Vertex-Forge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rexmoeed/Vertex-Forge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rexmoeed/Vertex-Forge/issues"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
   "type": "module",
   "main": "dist-electron/main.cjs",
   "scripts": {

@@ -13,6 +13,8 @@ describe('Server Structured Error Tracking & Health Endpoint', () => {
     expect(res.body.uptime).toBeTypeOf('number');
     expect(res.body.errorTracking).toBeDefined();
     expect(res.body.errorTracking.provider).toBeDefined();
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+    expect(res.headers['x-frame-options']).toBe('DENY');
   });
 
   it('captures unhandled server exceptions, logging structured errors and returning 500 JSON with requestId', async () => {

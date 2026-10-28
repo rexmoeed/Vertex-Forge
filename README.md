@@ -7,9 +7,13 @@
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.0+-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Electron](https://img.shields.io/badge/Electron-34+-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Tests](https://img.shields.io/badge/Tests-644%2F644%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
-[![Coverage](https://img.shields.io/badge/Coverage-74%25%20Functions-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-819%2F819%20Passing-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Coverage](https://img.shields.io/badge/Coverage-75%25%20Functions-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Type Check](https://img.shields.io/badge/tsc-0%20Errors-brightgreen)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Security Policy](https://img.shields.io/badge/Security-Active_Policy-green.svg)](SECURITY.md)
+[![CodeQL](https://img.shields.io/badge/CodeQL-Passed-brightgreen?logo=github&logoColor=white)](.github/workflows/codeql.yml)
+[![CI](https://img.shields.io/badge/CI-Passing-brightgreen?logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
 [![Parallel Swarms](https://img.shields.io/badge/Parallel%20Swarms-4%20Engines-cyan)](https://github.com/rexmoeed/Vertex-Forge)
 [![Engineering Skills](https://img.shields.io/badge/Engineering%20Skills-33%20Active-purple)](https://github.com/rexmoeed/Vertex-Forge)
 [![Local LLMs](https://img.shields.io/badge/Local%20AI-Ollama%20%7C%20DeepSeek-orange)](https://github.com/rexmoeed/Vertex-Forge)
@@ -353,3 +357,16 @@ Vertex Forge incorporates an enterprise-grade telemetry and observability archit
 - **Global Runtime Interceptors**: Uncaught browser errors and unhandled Promise rejections are automatically captured via `ErrorTracker.init()`.
 - **Zero-Key Offline Sandbox**: In fresh checkout environments without `GEMINI_API_KEY` or `JULES_API_KEY`, the IDE smoothly activates mock provider simulations and offline AST diagnostics.
 - **CI Smoke Validation**: Automated end-to-end server boot and API health probing is verified on every pull request via `npm run smoke`.
+
+---
+
+## 📖 Documentation, Security & Governance
+
+- 🏛️ **[System Architecture Blueprint](docs/ARCHITECTURE.md)**: Comprehensive sequence diagrams, swarm execution flow, and VFS sandbox topology.
+- 🔌 **[Backend REST API Specification](docs/API.md)**: Full endpoint reference, request/response contracts, and parameter schemas.
+- 🛡️ **[Security Policy & SLAs](SECURITY.md)**: Vulnerability disclosure policies, responsible disclosure SLA, and defense rings.
+- 🤝 **[Contributing Guidelines](CONTRIBUTING.md)**: Development workflow, atomic commit conventions, and PR requirements.
+- 📜 **[Code of Conduct](CODE_OF_CONDUCT.md)**: Contributor Covenant v2.1 community standards.
+- 👥 **[Maintainers & Governance](MAINTAINERS.md)**: Project leadership, RFC process, and decision log.
+- ⚖️ **[Apache 2.0 License](LICENSE)**: Open-source permissive license.
+- 📋 **[Changelog](CHANGELOG.md)**: Detailed historical version releases, modularization milestones, and test metrics.
