@@ -31,3 +31,4 @@ This document outlines the core maintainers and governance policies for the **Ve
 ### C. Release Lifecycle
 - Releases follow Semantic Versioning (`MAJOR.MINOR.PATCH`).
 - New releases are tagged via Git (`vX.Y.Z`) and trigger the automated release pipeline in `.github/workflows/release.yml`.
+

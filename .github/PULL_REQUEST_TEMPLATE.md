@@ -19,3 +19,4 @@ Fixes #(issue_number) / Closes #(issue_number)
 - [ ] **God-File Ceiling**: No modified or newly added files exceed **500 lines of code**.
 - [ ] **No Secrets**: No hardcoded API keys, tokens, or credentials are committed.
 - [ ] **Documentation**: Corresponding docs or CHANGELOG updates have been added.
+

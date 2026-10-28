@@ -27,3 +27,4 @@ If applicable, add screenshots or console stack traces to help explain your prob
 - App Mode: [e.g. Electron Desktop v1.2, Web/Vite SPA on localhost:3000]
 - AI Provider / Model: [e.g. Gemini 2.5 Pro, Claude 3.7, Local Ollama]
 - Node version: [e.g. 20.18.0]
+

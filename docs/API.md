@@ -103,3 +103,4 @@ Executes Vitest/Jest suite on disk and streams real-time test outcomes.
 
 ### `POST /api/process/execute`
 Executes an interactive terminal command via PTY shell with ANSI color translation.
+

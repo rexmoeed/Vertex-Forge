@@ -112,3 +112,4 @@ Each agent role (Architect, Developer, Reviewer, QA) can be bound to different p
 2. **Credential Vault**: Local AES encrypted storage for all API tokens.
 3. **Path Traversal Guards**: Absolute root normalization prevents `../..` directory traversal attacks.
 4. **Command Interceptors**: Shell commands that perform destructive operations (`rm -rf`, force push) require operator approval.
+
