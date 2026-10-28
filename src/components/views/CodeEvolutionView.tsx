@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import {
   GitBranch,
@@ -53,11 +53,19 @@ export const CodeEvolutionView: React.FC = () => {
     }
   };
 
-  const filteredCommits = (evolutionMap?.commits || []).filter(c =>
-    c.message.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    c.author.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    c.shortHash.toLowerCase().includes(searchFilter.toLowerCase())
-  );
+  // ⚡ Bolt: Memoize filtered commits to prevent recalculation on every render.
+  // Move toLowerCase() outside the loop to avoid redundant string allocations.
+  const filteredCommits = useMemo(() => {
+    const commits = evolutionMap?.commits || [];
+    if (!searchFilter.trim()) return commits;
+
+    const lowerFilter = searchFilter.toLowerCase();
+    return commits.filter(c =>
+      c.message.toLowerCase().includes(lowerFilter) ||
+      c.author.toLowerCase().includes(lowerFilter) ||
+      c.shortHash.toLowerCase().includes(lowerFilter)
+    );
+  }, [evolutionMap?.commits, searchFilter]);
 
   return (
     <div className="flex-1 w-full h-full min-h-0 flex flex-col bg-slate-950 text-slate-100 overflow-hidden">

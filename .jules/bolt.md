@@ -1,0 +1,3 @@
+## 2025-01-20 - Memoization and String Allocation in React Views
+**Learning:** In Vertex Forge React components, heavy list transformations (like `.filter` on `evolutionMap.commits`) that occur directly in the render body will recalculate on every state change (e.g., typing in a search filter or switching tabs), leading to significant render lag on large repositories. Furthermore, repeating static operations like `toLowerCase()` inside the filter loop creates redundant string allocations.
+**Action:** Always wrap heavy list transformations in `useMemo` with appropriate dependency arrays. Move loop-invariant operations (like `.toLowerCase()` on the search filter) outside of the loop to minimize redundant object creation.
