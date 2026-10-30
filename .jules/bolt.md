@@ -1,0 +1,3 @@
+## 2024-05-24 - [Optimize CodeEvolutionView.tsx with useMemo and Hoisting]
+**Learning:** In Vertex Forge React components, heavy list transformations (like filtering or mapping) on complex, frequently updated state arrays (such as code evolution commits) should always be wrapped in `useMemo` to prevent significant render lag. Additionally, redundant object creation (like calling `.toLowerCase()` in a loop) should be hoisted out to minimize GC pressure.
+**Action:** When working on components rendering large lists or complex datasets, proactively apply `useMemo` for any derived state calculations, and look for repetitive operations that can be moved outside the loop.
