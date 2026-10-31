@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import {
   GitBranch,
@@ -53,11 +53,21 @@ export const CodeEvolutionView: React.FC = () => {
     }
   };
 
-  const filteredCommits = (evolutionMap?.commits || []).filter(c =>
-    c.message.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    c.author.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    c.shortHash.toLowerCase().includes(searchFilter.toLowerCase())
-  );
+  // ⚡ Bolt: Memoize filtered commits to prevent expensive list transformation on every render
+  // and extract searchFilter.toLowerCase() to avoid redundant string creation in the loop
+  const filteredCommits = useMemo(() => {
+    if (!evolutionMap?.commits) return [];
+
+    if (!searchFilter) return evolutionMap.commits;
+
+    const lowerCaseSearchFilter = searchFilter.toLowerCase();
+
+    return evolutionMap.commits.filter(c =>
+      c.message.toLowerCase().includes(lowerCaseSearchFilter) ||
+      c.author.toLowerCase().includes(lowerCaseSearchFilter) ||
+      c.shortHash.toLowerCase().includes(lowerCaseSearchFilter)
+    );
+  }, [evolutionMap?.commits, searchFilter]);
 
   return (
     <div className="flex-1 w-full h-full min-h-0 flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
