@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useIDE } from '../../context/IDEContext';
 import {
   GitBranch,
@@ -53,11 +53,21 @@ export const CodeEvolutionView: React.FC = () => {
     }
   };
 
-  const filteredCommits = (evolutionMap?.commits || []).filter(c =>
-    c.message.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    c.author.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    c.shortHash.toLowerCase().includes(searchFilter.toLowerCase())
-  );
+  // ⚡ Bolt Optimization: Memoize the filtered commits array to prevent expensive recalculations
+  // on every render, especially when the component updates frequently. Also, compute the lowercased
+  // search term once outside the loop to avoid redundant object creation during the filter process.
+  // Impact: Reduces CPU usage and render time when typing in the search box or when other state changes.
+  const filteredCommits = useMemo(() => {
+    const commits = evolutionMap?.commits || [];
+    if (!searchFilter) return commits;
+
+    const lowerSearch = searchFilter.toLowerCase();
+    return commits.filter(c =>
+      c.message.toLowerCase().includes(lowerSearch) ||
+      c.author.toLowerCase().includes(lowerSearch) ||
+      c.shortHash.toLowerCase().includes(lowerSearch)
+    );
+  }, [evolutionMap?.commits, searchFilter]);
 
   return (
     <div className="flex-1 w-full h-full min-h-0 flex flex-col bg-slate-950 text-slate-100 overflow-hidden">

@@ -1,0 +1,3 @@
+## 2026-11-01 - [Memoizing Heavy List Transformations in Vertex Forge]
+**Learning:** In Vertex Forge React components, heavy list transformations (`filter`, `flatMap`) on complex, frequently updated state arrays (like code evolution commits or provider models) can cause significant render lag if not optimized.
+**Action:** Always wrap these transformations in `useMemo` with appropriate dependencies to prevent unnecessary recalculations. Additionally, move repetitive operations (like `.toLowerCase()`) outside of the filter/map loops to minimize redundant object creation and further improve performance.
