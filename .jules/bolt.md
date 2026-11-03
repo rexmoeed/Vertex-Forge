@@ -1,0 +1,3 @@
+## 2026-11-03 - [Vertex Forge Provider Catalog Optimization]
+**Learning:** In Vertex Forge, AI models are fetched synchronously from a global `AIProviderService` that can cause severe UI lag in React components during renders (e.g. when typing in search bars). The `useMemo` hook is critical here, but `providers` (the React state) shouldn't be added to the dependency array if it's not referenced inside the `useMemo` block (which triggers `react-hooks/exhaustive-deps` warnings).
+**Action:** When memoizing global service calls in React, ensure all dependencies are actually used inside the block or pass the state directly to the service method if re-evaluation is needed based on state changes.
