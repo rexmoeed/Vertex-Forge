@@ -5,7 +5,7 @@ import { DefaultsTab } from './providers/DefaultsTab';
 import { UsageTab } from './providers/UsageTab';
 import { AddProviderWizardTab } from './providers/AddProviderWizardTab';
 import { ModelCatalogTab } from './providers/ModelCatalogTab';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Sparkles,
   Bot,
@@ -213,11 +213,12 @@ export const AIProviderHubView: React.FC<{ onClose?: () => void }> = ({ onClose 
   };
 
   // Filtered Catalog
-  const filteredModels = AIProviderService.filterModels({
+  // ⚡ Bolt: Memoize filterModels to prevent UI lag on renders caused by synchronous localStorage reads
+  const filteredModels = useMemo(() => AIProviderService.filterModels({
     providerId: catalogProviderFilter === 'all' ? undefined : catalogProviderFilter,
     capability: catalogCapabilityFilter === 'all' ? undefined : catalogCapabilityFilter,
     query: catalogQuery,
-  });
+  }), [catalogProviderFilter, catalogCapabilityFilter, catalogQuery]);
 
   // Calculate total costs and tokens
   const totalTokensUsed = usageHistory.reduce((acc, r) => acc + r.inputTokens + r.outputTokens, 0);
