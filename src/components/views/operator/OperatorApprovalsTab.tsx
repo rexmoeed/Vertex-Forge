@@ -27,14 +27,14 @@ export const OperatorApprovalsTab: React.FC<Props> = ({ approvals, onResolveAppr
                 : 'bg-slate-900/60 border-rose-500/30 opacity-60'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-xs text-white">{item.title}</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-indigo-300">
+            <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
+                <span className="font-bold text-xs text-white truncate max-w-[280px]" title={item.title}>{item.title}</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-indigo-300 shrink-0">
                   {item.category}
                 </span>
                 <span
-                  className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-bold ${
+                  className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-bold shrink-0 ${
                     item.risk === 'critical'
                       ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                       : item.risk === 'high'
@@ -47,7 +47,7 @@ export const OperatorApprovalsTab: React.FC<Props> = ({ approvals, onResolveAppr
               </div>
 
               <span
-                className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-bold ${
+                className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-bold shrink-0 ${
                   item.status === 'pending'
                     ? 'bg-amber-500/20 text-amber-300 animate-pulse'
                     : item.status === 'approved'
@@ -59,7 +59,7 @@ export const OperatorApprovalsTab: React.FC<Props> = ({ approvals, onResolveAppr
               </span>
             </div>
 
-            <p className="text-xs text-slate-300">{item.description}</p>
+            <p className="text-xs text-slate-300 break-words">{item.description}</p>
 
             {item.diffSnippet && (
               <pre className="p-2.5 rounded-lg bg-black/50 border border-white/10 font-mono text-[11px] text-emerald-300 overflow-x-auto">

@@ -346,7 +346,7 @@ export const SwarmMissionCockpit: React.FC<SwarmMissionCockpitProps> = ({
 
       {activeTab === 'file_locks' && (
         <div className="w-full bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <div className="p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
             <span className="text-xs font-bold text-white">Active RWLock Reservations (DAG Segregation)</span>
             <span className="text-[11px] text-slate-400">Guarantees 0 write conflicts across parallel sub-agents</span>
           </div>
@@ -358,21 +358,21 @@ export const SwarmMissionCockpit: React.FC<SwarmMissionCockpitProps> = ({
           ) : (
             <div className="divide-y divide-slate-800">
               {activeReservations.map((res, i) => (
-                <div key={i} className="p-3.5 flex items-center justify-between text-xs hover:bg-slate-800/40">
-                  <div className="flex items-center gap-2.5">
-                    <Lock className={`w-3.5 h-3.5 ${res.mode === 'exclusive_write' ? 'text-amber-400' : 'text-cyan-400'}`} />
+                <div key={i} className="p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs hover:bg-slate-800/40 min-w-0">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <Lock className={`w-3.5 h-3.5 shrink-0 ${res.mode === 'exclusive_write' ? 'text-amber-400' : 'text-cyan-400'}`} />
                     <button
                       onClick={() => onNavigateToFile?.(res.filePath)}
-                      className="text-slate-200 hover:text-indigo-400 font-mono transition-colors truncate max-w-[180px] sm:max-w-xs md:max-w-md min-w-0"
+                      className="text-slate-200 hover:text-indigo-400 font-mono transition-colors truncate max-w-full min-w-0 text-left"
                       title={res.filePath}
                     >
                       {res.filePath}
                     </button>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-slate-400">{res.parentLead}</span>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-[10px] text-slate-400 shrink-0">{res.parentLead}</span>
                     <span
-                      className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                      className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shrink-0 ${
                         res.mode === 'exclusive_write'
                           ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                           : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'

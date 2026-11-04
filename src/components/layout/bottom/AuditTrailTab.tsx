@@ -35,7 +35,7 @@ export const AuditTrailTab: React.FC = () => {
                 Score: {codeReviewResult.overallScore ?? 98}/100
               </span>
             </div>
-            <p className="text-xs" style={{ color: 'var(--ide-text-muted)' }}>
+            <p className="text-xs break-words leading-relaxed" style={{ color: 'var(--ide-text-muted)' }}>
               {codeReviewResult.summary || 'Codebase conforms to high security, cleanliness, and maintainability standards.'}
             </p>
           </div>

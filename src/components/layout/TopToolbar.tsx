@@ -35,7 +35,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
         backgroundColor: 'var(--ide-surface)',
         borderColor: 'var(--ide-border)',
       }}
-      className="h-10 border-b px-3 flex items-center justify-between select-none z-40 text-xs relative"
+      className="h-10 border-b px-3 flex items-center justify-between select-none z-40 text-xs relative overflow-x-auto overflow-y-hidden min-w-0"
     >
       {/* Left: Project Badge & Active File */}
       <ToolbarWorkspaceDropdown onOpenNewProject={onOpenNewProject} />

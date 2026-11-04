@@ -68,18 +68,18 @@ export const AgentQATab: React.FC<AgentQATabProps> = ({
       {/* Failing Test Diagnosis Card */}
       {failedTests > 0 ? (
         <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-500/40 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-rose-400 font-bold text-xs">
-              <XCircle className="w-4 h-4" />
-              <span>Failure Diagnosis: {failingTest?.testName || 'Test assertion failure'}</span>
+          <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 text-rose-400 font-bold text-xs min-w-0 flex-1">
+              <XCircle className="w-4 h-4 shrink-0" />
+              <span className="truncate">Failure Diagnosis: {failingTest?.testName || 'Test assertion failure'}</span>
             </div>
-            <span className="text-[10px] font-mono text-rose-300">{failingTest?.filePath || 'Workspace Test'}</span>
+            <span className="text-[10px] font-mono text-rose-300 shrink-0 truncate max-w-[200px]" title={failingTest?.filePath}>{failingTest?.filePath || 'Workspace Test'}</span>
           </div>
 
-          <div className="p-3 bg-slate-950 rounded-lg font-mono text-[11px] text-rose-300 overflow-x-auto">
-            <div>FAIL {failingTest?.testSuite || failingTest?.filePath} &gt; {failingTest?.testName}</div>
+          <div className="p-3 bg-slate-950 rounded-lg font-mono text-[11px] text-rose-300 overflow-x-auto min-w-0">
+            <div className="break-all">FAIL {failingTest?.testSuite || failingTest?.filePath} &gt; {failingTest?.testName}</div>
             {failingTest?.errorStack && (
-              <div className="text-slate-400 mt-1 whitespace-pre-wrap">{failingTest.errorStack}</div>
+              <div className="text-slate-400 mt-1 whitespace-pre-wrap break-all">{failingTest.errorStack}</div>
             )}
           </div>
 
@@ -88,14 +88,14 @@ export const AgentQATab: React.FC<AgentQATabProps> = ({
               <Wrench className="w-3.5 h-3.5" />
               Root Cause Analysis by AI Debugger:
             </span>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Failure detected in <code className="text-indigo-300 font-mono">{failingTest?.filePath}</code> during assertion verification. Self-healing debugger can analyze the stack trace and generate an AST repair patch.
+            <p className="text-[11px] text-slate-400 leading-relaxed break-words">
+              Failure detected in <code className="text-indigo-300 font-mono break-all">{failingTest?.filePath}</code> during assertion verification. Self-healing debugger can analyze the stack trace and generate an AST repair patch.
             </p>
-            <div className="mt-1 flex items-center justify-between">
-              <span className="text-[10px] text-emerald-400 font-mono">Automated Fix Ready: Inspect stack trace and synthesize patch.</span>
+            <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[10px] text-emerald-400 font-mono break-words flex-1 min-w-[200px]">Automated Fix Ready: Inspect stack trace and synthesize patch.</span>
               <button
                 onClick={() => triggerSelfHealDebug(failingTest?.errorStack)}
-                className="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-xs font-bold shadow"
+                className="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-xs font-bold shadow shrink-0"
               >
                 Apply Self-Healing Patch
               </button>

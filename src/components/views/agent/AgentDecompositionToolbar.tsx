@@ -40,15 +40,15 @@ export const AgentDecompositionToolbar: React.FC<Props> = ({
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm font-bold text-white whitespace-nowrap">Dynamic Project Decomposition & Multi-Agent Parallel Tasking</h3>
+              <h3 className="text-sm font-bold text-white break-words">Dynamic Project Decomposition & Multi-Agent Parallel Tasking</h3>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
                 {isParallelRunning ? `${activeParallelSubAgents.length} Active in Parallel` : 'Ready to Decompose'}
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap shrink-0">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 max-w-[200px] truncate shrink-0" title={activeProjectName || 'Current Project'}>
                 Workspace: {activeProjectName || 'Current Project'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-400 mt-0.5 break-words">
               Any project is decomposed into a structured DAG of sub-tasks across 10 specialized Team Leads and executed concurrently with file-lock concurrency control.
             </p>
           </div>
@@ -87,54 +87,56 @@ export const AgentDecompositionToolbar: React.FC<Props> = ({
         }}
         className="flex flex-col gap-2.5"
       >
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={projectGoalInput}
             onChange={e => setProjectGoalInput(e.target.value)}
             placeholder="Enter custom project goal (e.g. 'Build REST API with JWT authentication', 'Harmonize UI Design Tokens & Dark Mode', or leave blank for full project lifecycle)..."
-            className="flex-1 bg-slate-950 border border-slate-750 focus:border-amber-500 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
+            className="flex-1 min-w-0 bg-slate-950 border border-slate-750 focus:border-amber-500 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
           />
-          <button
-            type="submit"
-            disabled={isParallelRunning}
-            className="px-4 py-2 bg-gradient-to-r from-amber-500 via-indigo-600 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-md"
-          >
-            {isParallelRunning ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-white" />}
-            <span>{isParallelRunning ? 'Executing in Parallel...' : 'Decompose & Execute in Parallel'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onDecomposeProject()}
-            disabled={isParallelRunning}
-            className="px-3.5 py-2 bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer"
-            title="Decompose project into sub-tasks and inspect contracts DAG without immediate execution"
-          >
-            Decompose Only
-          </button>
-          {isParallelRunning ? (
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="submit"
+              disabled={isParallelRunning}
+              className="px-4 py-2 bg-gradient-to-r from-amber-500 via-indigo-600 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-md shrink-0"
+            >
+              {isParallelRunning ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-white" />}
+              <span>{isParallelRunning ? 'Executing in Parallel...' : 'Decompose & Execute in Parallel'}</span>
+            </button>
             <button
               type="button"
-              onClick={onCancelParallel}
-              className="px-3 py-2 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-700 rounded-xl text-xs font-bold transition cursor-pointer"
+              onClick={() => onDecomposeProject()}
+              disabled={isParallelRunning}
+              className="px-3.5 py-2 bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer shrink-0"
+              title="Decompose project into sub-tasks and inspect contracts DAG without immediate execution"
             >
-              Stop
+              Decompose Only
             </button>
-          ) : tasks.length > 0 ? (
-            <button
-              type="button"
-              onClick={onResetTasks}
-              className="px-3 py-2 bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 rounded-xl text-xs font-medium transition cursor-pointer"
-              title="Reset all tasks and contracts"
-            >
-              Reset
-            </button>
-          ) : null}
+            {isParallelRunning ? (
+              <button
+                type="button"
+                onClick={onCancelParallel}
+                className="px-3 py-2 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-700 rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
+              >
+                Stop
+              </button>
+            ) : tasks.length > 0 ? (
+              <button
+                type="button"
+                onClick={onResetTasks}
+                className="px-3 py-2 bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 rounded-xl text-xs font-medium transition cursor-pointer shrink-0"
+                title="Reset all tasks and contracts"
+              >
+                Reset
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {/* Quick Presets */}
         <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-          <span className="text-[10px] text-slate-500 uppercase font-semibold">Presets:</span>
+          <span className="text-[10px] text-slate-500 uppercase font-semibold shrink-0">Presets:</span>
           {[
             'Full Workspace Engineering Audit & Quality Gate Verification',
             'API Endpoints, Schema Validation & Data Flow Operations',
@@ -148,7 +150,8 @@ export const AgentDecompositionToolbar: React.FC<Props> = ({
                 setProjectGoalInput(preset);
                 onDecomposeProject(preset);
               }}
-              className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-300 text-[10px] transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-300 text-[10px] transition-colors cursor-pointer max-w-full truncate text-left"
+              title={preset}
             >
               {preset}
             </button>
@@ -177,14 +180,14 @@ export const AgentDecompositionToolbar: React.FC<Props> = ({
                 key={sub.taskId}
                 className="p-3 bg-slate-950/90 border border-amber-500/30 rounded-xl flex flex-col gap-2 shadow-xs"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white">{sub.parentLead || sub.subAgentRole}</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300">
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-xs font-bold text-white truncate">{sub.parentLead || sub.subAgentRole}</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 shrink-0">
                       Sub-Agent #{idx + 1}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-amber-400 animate-pulse">
+                  <span className="text-[10px] font-mono font-bold text-amber-400 animate-pulse shrink-0">
                     {sub.progress}%
                   </span>
                 </div>

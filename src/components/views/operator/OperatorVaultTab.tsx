@@ -35,25 +35,25 @@ export const OperatorVaultTab: React.FC<Props> = ({
       </div>
 
       {/* Add Secret Form */}
-      <form onSubmit={onAddSecret} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl flex items-center gap-2">
+      <form onSubmit={onAddSecret} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <input
           type="text"
           placeholder="Secret name (e.g. github-pat)"
           value={newSecretName}
           onChange={e => setNewSecretName(e.target.value)}
-          className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none flex-1"
+          className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none flex-1 min-w-0"
         />
         <input
           type="password"
           placeholder="Raw Secret Value"
           value={newSecretVal}
           onChange={e => setNewSecretVal(e.target.value)}
-          className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none flex-1"
+          className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none flex-1 min-w-0"
         />
         <select
           value={newSecretType}
           onChange={e => setNewSecretType(e.target.value as any)}
-          className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
+          className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none shrink-0"
         >
           <option value="api_key">API Key</option>
           <option value="token">Token</option>
@@ -61,7 +61,7 @@ export const OperatorVaultTab: React.FC<Props> = ({
         </select>
         <button
           type="submit"
-          className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition cursor-pointer"
+          className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition cursor-pointer shrink-0"
         >
           Save to Vault
         </button>
@@ -70,20 +70,20 @@ export const OperatorVaultTab: React.FC<Props> = ({
       {/* Secrets List */}
       <div className="space-y-2">
         {secrets.map(s => (
-          <div key={s.id} className="p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2.5">
-              <Lock className="w-4 h-4 text-emerald-400" />
-              <div>
-                <div className="font-bold text-white flex items-center gap-1.5">
-                  <span>vault:{s.name}</span>
-                  <span className="text-[10px] font-mono text-slate-400 font-normal">({s.type})</span>
+          <div key={s.id} className="p-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-white flex items-center gap-1.5 truncate">
+                  <span className="truncate">vault:{s.name}</span>
+                  <span className="text-[10px] font-mono text-slate-400 font-normal shrink-0">({s.type})</span>
                 </div>
-                <div className="text-[10px] font-mono text-slate-400">{s.maskedPreview}</div>
+                <div className="text-[10px] font-mono text-slate-400 truncate">{s.maskedPreview}</div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-mono text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded">
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-[10px] font-mono text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded shrink-0">
                 {s.policy}
               </span>
               <button

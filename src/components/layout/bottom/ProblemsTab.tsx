@@ -53,22 +53,22 @@ export const ProblemsTab: React.FC = () => {
             <div
               key={idx}
               onClick={() => p.filePath && openFile(p.filePath)}
-              className="p-3 hover:opacity-90 flex items-start justify-between gap-4 cursor-pointer transition-opacity"
+              className="p-3 hover:opacity-90 flex items-start justify-between gap-4 cursor-pointer transition-opacity min-w-0"
             >
-              <div className="flex items-start gap-2.5">
+              <div className="flex items-start gap-2.5 min-w-0 flex-1">
                 <AlertCircle
                   className={`w-4 h-4 shrink-0 mt-0.5 ${
                     p.severity === 'error' ? 'text-rose-400' : 'text-amber-400'
                   }`}
                 />
-                <div>
-                  <p className="font-mono text-xs text-white">{p.message}</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--ide-text-muted)' }}>
+                <div className="min-w-0 flex-1">
+                  <p className="font-mono text-xs text-white break-words break-all">{p.message}</p>
+                  <p className="text-[11px] mt-0.5 break-all" style={{ color: 'var(--ide-text-muted)' }}>
                     {p.filePath} {p.line ? `:${p.line}` : ''} {p.source ? `[${p.source}]` : ''}
                   </p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 shrink-0 opacity-40" />
+              <ChevronRight className="w-4 h-4 shrink-0 opacity-40 mt-0.5" />
             </div>
           ))
         )}

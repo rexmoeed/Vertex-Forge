@@ -166,17 +166,18 @@ export const ChatStreamView: React.FC<ChatStreamViewProps> = ({
 
                 <div className="space-y-2 pl-2 border-l border-indigo-300 dark:border-indigo-500/30">
                   {msg.dataFlow.steps.map((st, idx) => (
-                    <div key={idx} className="flex flex-col gap-0.5 text-[11px]">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-slate-900 dark:text-white">{st.layer}:</span>
+                    <div key={idx} className="flex flex-col gap-0.5 text-[11px] min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                        <span className="font-bold text-slate-900 dark:text-white shrink-0">{st.layer}:</span>
                         <button
                           onClick={() => openFile(st.filePath)}
-                          className="font-mono text-indigo-600 dark:text-cyan-400 hover:underline cursor-pointer"
+                          className="font-mono text-indigo-600 dark:text-cyan-400 hover:underline cursor-pointer truncate max-w-full text-left"
+                          title={st.filePath}
                         >
                           {st.filePath}
                         </button>
                       </div>
-                      <p className="text-slate-600 dark:text-slate-400 text-[10px]">{st.description}</p>
+                      <p className="text-slate-600 dark:text-slate-400 text-[10px] break-words">{st.description}</p>
                     </div>
                   ))}
                 </div>
@@ -230,11 +231,11 @@ export const ChatStreamView: React.FC<ChatStreamViewProps> = ({
                 <div
                   key={idx}
                   onClick={() => st.file && openFile(st.file)}
-                  className="flex items-center gap-1.5 hover:text-[#00ff88] transition cursor-pointer truncate"
+                  className="flex items-center gap-1.5 hover:text-[#00ff88] transition cursor-pointer min-w-0"
                 >
-                  <span className="opacity-60">{st.action || 'Analyzed'}</span>
-                  <span className="text-slate-300">{st.file || st.detail}</span>
-                  {st.line && <span className="text-slate-500">#L{st.line}</span>}
+                  <span className="opacity-60 shrink-0">{st.action || 'Analyzed'}</span>
+                  <span className="text-slate-300 truncate min-w-0 flex-1">{st.file || st.detail}</span>
+                  {st.line && <span className="text-slate-500 shrink-0">#L{st.line}</span>}
                 </div>
               ))}
             </div>
@@ -309,9 +310,9 @@ export const ChatStreamView: React.FC<ChatStreamViewProps> = ({
 
       {/* Live Investigation Progress Pill */}
       {isChatLoading && (
-        <div className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400 p-2.5 bg-indigo-50 dark:bg-slate-950 border border-indigo-200 dark:border-indigo-500/30 rounded-xl animate-pulse">
+        <div className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400 p-2.5 bg-indigo-50 dark:bg-slate-950 border border-indigo-200 dark:border-indigo-500/30 rounded-xl animate-pulse min-w-0">
           <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-600 dark:text-indigo-400 shrink-0" />
-          <span>{currentInvestigationStep || 'Analyzing workspace context...'}</span>
+          <span className="truncate min-w-0">{currentInvestigationStep || 'Analyzing workspace context...'}</span>
         </div>
       )}
       <div ref={chatBottomRef} />

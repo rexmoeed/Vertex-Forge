@@ -42,26 +42,26 @@ export const AgentWorkspaceView: React.FC = () => {
       className="flex-1 w-full h-full overflow-y-auto p-6 flex flex-col gap-6 select-none min-h-0"
     >
       {/* 1. ORCHESTRATOR COMMAND BAR */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4 shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4 shadow-xl min-w-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shrink-0">
             <Users className="w-5 h-5" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-white">Hierarchical AI Engineering Team</h2>
-              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-bold text-white truncate">Hierarchical AI Engineering Team</h2>
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
                 10 Leads Active
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5 break-words">
               Level 1 Orchestrator coordinates Principal Team Leads who delegate scoped contracts to Sub-Agents with strict quality gates.
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div className="flex items-center gap-5 border-r border-slate-800 pr-5 text-xs whitespace-nowrap shrink-0">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-5 border-slate-800 sm:border-r sm:pr-5 text-xs shrink-0">
             <div>
               <span className="text-slate-500 text-[10px] uppercase font-semibold block whitespace-nowrap">Quality Gates</span>
               <span className="text-emerald-400 font-bold font-mono text-sm whitespace-nowrap">{ws.totalQualityGates} Passed</span>

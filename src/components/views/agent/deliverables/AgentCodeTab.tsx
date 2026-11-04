@@ -29,10 +29,11 @@ export const AgentCodeTab: React.FC<AgentCodeTabProps> = ({ vfs, openFile }) => 
               <button
                 key={filePath}
                 onClick={() => openFile(filePath)}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors max-w-full"
+                title={filePath}
               >
-                <FileCode className="w-3.5 h-3.5 text-blue-400" />
-                <span>{filePath.split('/').pop()}</span>
+                <FileCode className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <span className="truncate max-w-[140px]">{filePath.split('/').pop()}</span>
               </button>
             ))}
         </div>

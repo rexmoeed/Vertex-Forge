@@ -52,12 +52,12 @@ export const AgentContractsTab: React.FC<AgentContractsTabProps> = ({ tasks, rep
                   <span>&rarr;</span>
                   <span className="font-mono text-cyan-300">{task.subAgentRole}</span>
                 </div>
-                <p className="text-[11px] text-slate-300">{task.objective}</p>
-                <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-slate-800/60 text-slate-400">
-                  <span className="font-mono truncate max-w-[170px] text-amber-300/80">
+                <p className="text-[11px] text-slate-300 break-words">{task.objective}</p>
+                <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-slate-800/60 text-slate-400 gap-2 min-w-0">
+                  <span className="font-mono truncate min-w-0 flex-1 text-amber-300/80" title={task.allowedFilePaths.join(', ')}>
                     Files: {task.allowedFilePaths.join(', ')}
                   </span>
-                  <span className="font-mono text-slate-500">
+                  <span className="font-mono text-slate-500 shrink-0">
                     {task.dependencies.length > 0 ? `Deps: ${task.dependencies.length}` : 'Independent (Parallel)'}
                   </span>
                 </div>
@@ -84,8 +84,8 @@ export const AgentContractsTab: React.FC<AgentContractsTabProps> = ({ tasks, rep
                   </span>
                   <span className="text-[10px] font-mono text-slate-500">{rep.timestamp}</span>
                 </div>
-                <p className="text-[11px] text-slate-300 mt-1">{rep.workCompleted}</p>
-                <div className="text-[10px] text-slate-500 font-mono mt-1">
+                <p className="text-[11px] text-slate-300 mt-1 break-words">{rep.workCompleted}</p>
+                <div className="text-[10px] text-slate-500 font-mono mt-1 break-words break-all">
                   Test Assertions: <strong className="text-emerald-400">{rep.testResults}</strong> ({rep.testsRun.join(', ')})
                 </div>
               </div>

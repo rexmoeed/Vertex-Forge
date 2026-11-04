@@ -54,43 +54,45 @@ export const JulesMissionMonitorTab: React.FC<JulesMissionMonitorTabProps> = ({
         style={{ backgroundColor: 'var(--ide-surface-elevated)', borderColor: 'var(--ide-border)' }}
         className="p-4 rounded-xl border space-y-3"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-white">
+        <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
+            <span className="text-xs font-bold text-white truncate max-w-sm" title={currentSession.title || 'Jules Autonomous Mission'}>
               {currentSession.title || 'Jules Autonomous Mission'}
             </span>
-            <span className="text-[10px] font-mono text-slate-500">
+            <span className="text-[10px] font-mono text-slate-500 truncate max-w-[160px]" title={currentSession.id || currentSession.name}>
               {currentSession.id || currentSession.name}
             </span>
           </div>
-          {renderStatusBadge(currentSession.state)}
+          <div className="shrink-0">
+            {renderStatusBadge(currentSession.state)}
+          </div>
         </div>
 
-        <p className="text-xs text-slate-300 font-mono bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/80">
+        <p className="text-xs text-slate-300 font-mono bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/80 break-words whitespace-pre-wrap">
           {currentSession.prompt}
         </p>
 
         {/* PR Output Banner if completed */}
         {currentSession.outputs?.pullRequest && (
-          <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-500/30 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+          <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-3 min-w-0">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
                 <GitPullRequest className="w-5 h-5" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold text-emerald-300 flex items-center gap-2">
                   <span>Pull Request #{currentSession.outputs.pullRequest.number}</span>
-                  <span className="text-[10px] text-emerald-400/80 px-2 py-0.5 rounded-full bg-emerald-500/20">
+                  <span className="text-[10px] text-emerald-400/80 px-2 py-0.5 rounded-full bg-emerald-500/20 shrink-0">
                     Ready for Merge
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-300 truncate max-w-md">
+                <p className="text-[11px] text-slate-300 truncate max-w-full" title={currentSession.outputs.pullRequest.title}>
                   {currentSession.outputs.pullRequest.title}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => onCopyToClipboard(currentSession.outputs!.pullRequest!.url)}
                 className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors text-xs flex items-center gap-1.5 cursor-pointer"

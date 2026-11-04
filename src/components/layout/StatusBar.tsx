@@ -98,10 +98,10 @@ export const StatusBar: React.FC = () => {
       className="h-6 border-t px-2 flex items-center justify-between text-[11px] font-mono select-none z-30 shrink-0 overflow-hidden min-w-0"
     >
       {/* Left: Remote Badge, Diagnostics, Git */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 min-w-0 overflow-hidden shrink-0">
         {/* Antigravity Green Remote Badge '><' */}
         <div
-          className="px-1.5 py-0.5 rounded-xs font-black text-[10px] tracking-tighter flex items-center justify-center cursor-pointer select-none"
+          className="px-1.5 py-0.5 rounded-xs font-black text-[10px] tracking-tighter flex items-center justify-center cursor-pointer select-none shrink-0"
           style={{
             backgroundColor: 'var(--ide-accent, #00ff88)',
             color: '#000000',
@@ -117,7 +117,7 @@ export const StatusBar: React.FC = () => {
             if (!isBottomPanelOpen) toggleBottomPanel();
             setBottomPanelTab('problems');
           }}
-          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer font-mono"
+          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer font-mono shrink-0"
           style={{ color: 'var(--ide-accent, #00ff88)' }}
           title="Problems & Diagnostics"
         >
@@ -138,14 +138,14 @@ export const StatusBar: React.FC = () => {
               setActiveView('editor');
             }
           }}
-          className="hidden sm:flex items-center gap-1 hover:opacity-80 transition-opacity ml-2"
+          className="hidden sm:flex items-center gap-1 hover:opacity-80 transition-opacity ml-2 shrink-0 truncate max-w-[140px]"
           style={{ color: 'var(--ide-accent, #00ff88)' }}
           title="Git Branch & Workspace Status"
         >
-          <GitBranch className="w-3 h-3" />
-          <span>main</span>
+          <GitBranch className="w-3 h-3 shrink-0" />
+          <span className="truncate">main</span>
           {modifiedFiles.length > 0 && (
-            <span className="text-[10px] text-amber-400 font-bold">*{modifiedFiles.length}</span>
+            <span className="text-[10px] text-amber-400 font-bold shrink-0">*{modifiedFiles.length}</span>
           )}
         </button>
       </div>
@@ -174,9 +174,9 @@ export const StatusBar: React.FC = () => {
         <span>Ln {cursorPosition?.line || 1}, Col {cursorPosition?.column || 1}</span>
         <span>Spaces: 2</span>
         <span className="hidden sm:inline">UTF-8</span>
-        <span className="hidden sm:inline">LF</span>
-        <span className="flex items-center gap-1 font-semibold">
-          <span>&#123;&#125;</span> {getLanguageLabel(activeFile)}
+        <span className="hidden sm:inline shrink-0">LF</span>
+        <span className="hidden md:flex items-center gap-1 font-semibold truncate max-w-[130px] shrink-0" title={getLanguageLabel(activeFile)}>
+          <span>&#123;&#125;</span> <span className="truncate">{getLanguageLabel(activeFile)}</span>
         </span>
 
         {/* Antigravity Theme Switcher */}
