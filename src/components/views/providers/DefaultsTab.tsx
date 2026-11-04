@@ -57,8 +57,8 @@ export const DefaultsTab: React.FC<DefaultsTabProps> = ({
               >
                 {providers
                   .flatMap(p => p.models.map(m => ({ providerId: p.id, modelId: m.id, name: `${p.name}: ${m.name}` })))
-                  .map(opt => (
-                    <option key={`${opt.providerId}:${opt.modelId}`} value={`${opt.providerId}:${opt.modelId}`}>
+                  .map((opt, optIdx) => (
+                    <option key={`${opt.providerId}:${opt.modelId}:${optIdx}`} value={`${opt.providerId}:${opt.modelId}`}>
                       {opt.name}
                     </option>
                   ))}

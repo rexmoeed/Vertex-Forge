@@ -162,9 +162,9 @@ export const GitChangesTab: React.FC<GitChangesTabProps> = ({
 
             {stagedOpen && (
               <div className="flex flex-col divide-y divide-slate-800/50">
-                {status.staged.map(file => (
+                {status.staged.map((file, idx) => (
                   <div
-                    key={file.filePath}
+                    key={`staged_${file.filePath || idx}`}
                     className="flex items-center justify-between p-2 hover:bg-slate-800/40 text-xs transition-colors group"
                   >
                     <div
@@ -240,9 +240,9 @@ export const GitChangesTab: React.FC<GitChangesTabProps> = ({
                   Working tree clean.
                 </div>
               ) : (
-                status.unstaged.map(file => (
+                status.unstaged.map((file, idx) => (
                   <div
-                    key={file.filePath}
+                    key={`unstaged_${file.filePath || idx}`}
                     className="flex items-center justify-between p-2 hover:bg-slate-800/40 text-xs transition-colors group"
                   >
                     <div
@@ -308,9 +308,9 @@ export const GitChangesTab: React.FC<GitChangesTabProps> = ({
 
             {untrackedOpen && (
               <div className="flex flex-col divide-y divide-slate-800/50">
-                {status.untracked.map(file => (
+                {status.untracked.map((file, idx) => (
                   <div
-                    key={file.filePath}
+                    key={`untracked_${file.filePath || idx}`}
                     className="flex items-center justify-between p-2 hover:bg-slate-800/40 text-xs transition-colors group"
                   >
                     <div
