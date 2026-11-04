@@ -14,11 +14,9 @@ export interface SanitizedTerminalOutput {
 export class AnsiSanitizer {
   // Matches all ANSI Escape Sequences (SGR colors, cursor movements, OSC commands)
   public static readonly ANSI_REGEX =
-    // eslint-disable-next-line no-control-regex
     /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 
   // Control characters except newline (\n), carriage return (\r), and tab (\t)
-  // eslint-disable-next-line no-control-regex
   public static readonly CONTROL_CHARS_REGEX = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
 
   public static stripAnsi(text: string): string {
