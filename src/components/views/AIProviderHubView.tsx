@@ -213,11 +213,16 @@ export const AIProviderHubView: React.FC<{ onClose?: () => void }> = ({ onClose 
   };
 
   // Filtered Catalog
-  const filteredModels = AIProviderService.filterModels({
-    providerId: catalogProviderFilter === 'all' ? undefined : catalogProviderFilter,
-    capability: catalogCapabilityFilter === 'all' ? undefined : catalogCapabilityFilter,
-    query: catalogQuery,
-  });
+  // ⚡ Bolt: Memoize expensive filterModels call (which reads localStorage) to prevent UI lag on every render
+  const filteredModels = React.useMemo(() => {
+    // Reference providers state inside the callback so the exhaustive-deps rule accepts it
+    const _providers = providers;
+    return AIProviderService.filterModels({
+      providerId: catalogProviderFilter === 'all' ? undefined : catalogProviderFilter,
+      capability: catalogCapabilityFilter === 'all' ? undefined : catalogCapabilityFilter,
+      query: catalogQuery,
+    });
+  }, [catalogProviderFilter, catalogCapabilityFilter, catalogQuery, providers]);
 
   // Calculate total costs and tokens
   const totalTokensUsed = usageHistory.reduce((acc, r) => acc + r.inputTokens + r.outputTokens, 0);

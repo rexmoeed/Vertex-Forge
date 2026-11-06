@@ -1,0 +1,3 @@
+## 2024-11-06 - Memoize synchronous filterModels calls in React components
+**Learning:** In Vertex Forge, methods like `AIProviderService.filterModels` synchronously read from `localStorage`. Calling these directly in the render body of a React component can cause severe UI lag on every render.
+**Action:** Always wrap heavy data transformations and synchronous `localStorage` reads in `React.useMemo` within React components to prevent UI blocking. Be mindful to include state variables like `providers` in the dependency array (and reference them inside the callback) to ensure re-computation when the underlying data updates.
