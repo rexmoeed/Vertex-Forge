@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { GitSidebar } from '../git/GitSidebar';
@@ -66,6 +66,7 @@ describe('GitSidebar Component', () => {
   };
 
   beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.clearAllMocks();
     vi.mocked(GitWorkflowService.getStatus).mockResolvedValue(mockStatus as any);
     vi.mocked(GitWorkflowService.getRemotes).mockResolvedValue([{ name: 'origin', fetchUrl: 'https://github.com/test/repo.git', pushUrl: '' }] as any);
@@ -79,6 +80,10 @@ describe('GitSidebar Component', () => {
     vi.mocked(GitWorkflowService.getStashes).mockResolvedValue([] as any);
     vi.mocked(GitWorkflowService.getTags).mockResolvedValue([{ name: 'v1.0.0', commitHash: 'abc1234' }] as any);
     vi.mocked(GitWorkflowService.getGitHubAuthStatus).mockResolvedValue({ isAuthenticated: false } as any);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('renders repository status and current branch', () => {
