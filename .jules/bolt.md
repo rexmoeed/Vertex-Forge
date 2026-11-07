@@ -1,0 +1,2 @@
+## 2024-03-24 - [Initialization]\n**Learning:** Started tracking performance learnings.\n**Action:** Keep documenting critical codebase-specific performance patterns here.
+## 2024-03-24 - [Memoize AIProviderService.filterModels]\n**Learning:** In Vertex Forge React components, synchronous reads from `localStorage` via `AIProviderService.filterModels` during render cause severe UI lag on every keystroke when typing in the catalog search.\n**Action:** Always wrap heavy data transformations and storage reads in `useMemo` to prevent main thread blocking during renders.
