@@ -1,11 +1,19 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { AIProviderHubView } from '../AIProviderHubView';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.runOnlyPendingTimers();
+  vi.useRealTimers();
+});
 
 describe('AIProviderHubView Component', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
   it('renders hub header and switches between navigation tabs', () => {
     render(<AIProviderHubView />);
 
